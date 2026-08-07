@@ -154,8 +154,24 @@ class DepthwiseConvBlock(nn.Module):
             if layer_scale_init_value > 0
             else None
         )
+        self._export = False
+
+    def export(self) -> None:
+        """Use a standard depthwise convolution in static export graphs."""
+
+        self._export = True
 
     def _depthwise_conv(self, x: Tensor) -> Tensor:
+        if self._export:
+            return F.conv2d(
+                x,
+                self.dwconv.weight,
+                self.dwconv.bias,
+                stride=self.dwconv.stride,
+                padding=self.dwconv.padding,
+                dilation=self.dwconv.dilation,
+                groups=self.dwconv.groups,
+            )
         # Custom autograd Function so cuDNN is disabled in both forward AND
         # backward.  A plain context-manager only covers forward; the backward
         # for nn.Conv2d runs outside that scope and re-enables cuDNN,

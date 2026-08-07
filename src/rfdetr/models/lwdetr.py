@@ -297,6 +297,28 @@ class LWDETR(nn.Module):
             return None
         return [int(num_keypoints) for num_keypoints in active_mask.sum(dim=1).tolist()]
 
+    def _active_num_queries(self) -> int:
+        """Return the controller-selected per-group query count.
+
+        NAS controllers only lower this value.  Keeping ``self.num_queries`` as
+        the native capacity preserves checkpoint shape and the ordinary path.
+        """
+
+        active = int(getattr(self, "_nas_active_num_queries", self.num_queries))
+        if active <= 0 or active > self.num_queries:
+            raise ValueError(f"active num_queries must be in [1, {self.num_queries}], got {active}")
+        return active
+
+    def _active_query_weights(self) -> tuple[Tensor, Tensor]:
+        """Slice query/refpoint embeddings per Group DETR group."""
+
+        active = self._active_num_queries()
+        if self.training:
+            refpoint = self.refpoint_embed.weight.view(self.group_detr, self.num_queries, -1)[:, :active]
+            query = self.query_feat.weight.view(self.group_detr, self.num_queries, -1)[:, :active]
+            return refpoint.reshape(-1, refpoint.shape[-1]), query.reshape(-1, query.shape[-1])
+        return self.refpoint_embed.weight[:active], self.query_feat.weight[:active]
+
     def reinitialize_keypoint_head(self, num_keypoints_per_class: list[int] | None) -> None:
         """Resize schema-dependent GroupPose state to match ``num_keypoints_per_class``."""
         if not self.use_grouppose_keypoints or not num_keypoints_per_class:
@@ -484,13 +506,7 @@ class LWDETR(nn.Module):
             masks.append(mask)
             assert mask is not None
 
-        if self.training:
-            refpoint_embed_weight = self.refpoint_embed.weight
-            query_feat_weight = self.query_feat.weight
-        else:
-            # only use one group in inference
-            refpoint_embed_weight = self.refpoint_embed.weight[: self.num_queries]
-            query_feat_weight = self.query_feat.weight[: self.num_queries]
+        refpoint_embed_weight, query_feat_weight = self._active_query_weights()
 
         if self.segmentation_head is not None:
             seg_head_fwd = self.segmentation_head.sparse_forward if self.training else self.segmentation_head.forward
@@ -617,8 +633,7 @@ class LWDETR(nn.Module):
     def forward_export(self, tensors: Tensor) -> tuple[Tensor, ...]:
         srcs, _, poss, cross_attn_srcs = self.backbone(tensors)
         # only use one group in inference
-        refpoint_embed_weight = self.refpoint_embed.weight[: self.num_queries]
-        query_feat_weight = self.query_feat.weight[: self.num_queries]
+        refpoint_embed_weight, query_feat_weight = self._active_query_weights()
 
         transformer_outputs = self.transformer(
             srcs,

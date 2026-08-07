@@ -1,0 +1,142 @@
+{
+  "gate": {
+    "phase": "Phase -1",
+    "status": "PASS",
+    "checked_at": "2026-08-07T08:45:00+08:00",
+    "notes": [
+      "The writable, version-controlled target checkout is /home/liujiyuan/rf-detr.",
+      "GPU execution uses the train-env-rfdetr-claude:20260806 image with the target checkout mounted read-only.",
+      "The selected MVTec-AD pill dataset is readable but is not COCO/RF-DETR format; a native MVTec adapter is required for training smoke tests.",
+      "No formal full NAS search is enabled or executed."
+    ]
+  },
+  "target_checkout": {
+    "host_path": "/home/liujiyuan/rf-detr",
+    "container_path": "/workspace/rf-detr",
+    "git_works_on_host": true,
+    "git_branch": "develop",
+    "git_commit": "cc538cea510c24d6d7bc64332f0bf29875a5b2d6",
+    "dirty_files": ["docker/"],
+    "container_image_git_binary": false
+  },
+  "post_gate_worktree": {
+    "status": "NAS_PREPARATION_CHANGES_PRESENT",
+    "observed_at": "2026-08-07T18:06:00+08:00",
+    "paths": [
+      "configs/seg_small_nas_full.yaml",
+      "configs/seg_small_nas_smoke.yaml",
+      "src/rfdetr/nas/",
+      "src/rfdetr/models/heads/segmentation.py",
+      "src/rfdetr/models/lwdetr.py",
+      "src/rfdetr/models/transformer.py",
+      "tests/nas/",
+      "tools/",
+      "nas_artifacts/"
+    ],
+    "note": "The Phase -1 dirty_files field is the pre-implementation gate snapshot; this section records the current preparation worktree."
+  },
+  "current_gate_check": {
+    "checked_at": "2026-08-07T18:40:13+08:00",
+    "host_nvidia_smi": {
+      "status": "PASS",
+      "driver": "570.211.01",
+      "gpu_count": 6,
+      "gpu_name": "NVIDIA GeForce RTX 3090",
+      "memory_mib_each": 24576,
+      "method": "controlled_read_only_escalated_check"
+    },
+    "docker_socket": {
+      "status": "PASS",
+      "owner": "nobody:nogroup",
+      "mode": "660",
+      "access_method": "existing docker-group membership refreshed with sg docker"
+    },
+    "current_checkout_gpu_runtime": {
+      "status": "PASS",
+      "image": "train-env-rfdetr-claude:20260806",
+      "python": "3.10.12",
+      "torch": "2.7.1+cu128",
+      "cuda_runtime": "12.8.61",
+      "cuda_available": true,
+      "rfdetr_import": "/workspace/rf-detr/src/rfdetr/__init__.py",
+      "git_commit": "cc538cea510c24d6d7bc64332f0bf29875a5b2d6",
+      "worst_corner": "576/12/1/native-decoder/native-query",
+      "worst_corner_peak_memory_bytes": 1558436864,
+      "worst_corner_hardware_feasible": true,
+      "random_architecture_pool": "WORST_CORNER_PASS_TARGET_GPU_POOL"
+    },
+    "seccomp_ab": "nas_artifacts/seccomp_ab_report.json",
+    "conclusion": "Current checkout GPU gate PASS under the approved image and minimal custom profile; Docker default seccomp reproduces Error 304 while the custom profile passes."
+  },
+  "gpu_verification": {
+    "status": "PASS",
+    "artifact": "nas_artifacts/gpu_gate/",
+    "smoke_artifact": "nas_artifacts/gpu_smoke/",
+    "random_forward_count": 10,
+    "backward_checks": 3,
+    "coverage": {
+      "patch_sizes": [12, 16, 20],
+      "num_windows": [1, 2],
+      "num_queries": [50, 100],
+      "decoder_layers": [0, 1, 2, 3, 4]
+    },
+    "gpu_smoke_steps": 6,
+    "resume_from_step": 6,
+    "resume_to_step": 7,
+    "ema_parameter_count": 544,
+    "optimizer_group_count": 544
+  },
+  "runtime": {
+    "image": "train-env-rfdetr-claude:20260806",
+    "python": "3.10.12",
+    "torch": "2.7.1+cu128",
+    "torch_cuda_build": "12.8",
+    "cuda_runtime": "12.8.61",
+    "cuda_available": true,
+    "rfdetr_import_path": "/workspace/rf-detr/src/rfdetr/__init__.py",
+    "rfdetr_version": "1.10.0.dev0",
+    "pytorch_lightning": "2.6.5",
+    "lightning": null,
+    "transformers": "5.14.1",
+    "torchvision": "0.22.1+cu128",
+    "supervision": "0.30.0",
+    "kornia": null,
+    "pycocotools": "2.0.11",
+    "augmentation_backend": "torchvision-native"
+  },
+  "host_miniforge_context": {
+    "python": "3.13.13",
+    "torch": "2.13.0+cpu",
+    "cuda_available": false,
+    "note": "Host Miniforge is retained for CPU repository work; GPU validation uses the container runtime above."
+  },
+  "hardware": {
+    "driver": "570.211.01",
+    "gpus": [
+      {"name": "NVIDIA GeForce RTX 3090", "memory_mib": 24576},
+      {"name": "NVIDIA GeForce RTX 3090", "memory_mib": 24576},
+      {"name": "NVIDIA GeForce RTX 3090", "memory_mib": 24576},
+      {"name": "NVIDIA GeForce RTX 3090", "memory_mib": 24576},
+      {"name": "NVIDIA GeForce RTX 3090", "memory_mib": 24576},
+      {"name": "NVIDIA GeForce RTX 3090", "memory_mib": 24576}
+    ]
+  },
+  "checkpoint": {
+    "host_path": "/home/liujiyuan/rf-detr-models/rf-detr-seg-small.pt",
+    "container_path": "/workspace/models/rf-detr-seg-small.pt",
+    "sha256": "6de3da31b2572cac214a1c76cce4a92a13966d56390ac2b3a3de9a8dc2b2bca3",
+    "size_bytes": 135042342,
+    "readable": true
+  },
+  "dataset": {
+    "host_path": "/home/inspur1/data/MVTec-AD/pill",
+    "container_path": "/workspace/data/MVTec-AD/pill",
+    "format": "MVTec-AD anomaly segmentation",
+    "readable": true,
+    "sample_image": "/workspace/data/MVTec-AD/pill/test/good/011.png",
+    "sample_size": [800, 800],
+    "sample_mode": "RGB",
+    "rf_detr_annotation_format": false,
+    "adapter_required": true
+  }
+}

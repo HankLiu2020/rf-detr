@@ -1,0 +1,59 @@
+# Formal native-bounded search manifest.  All execution stages remain disabled
+# for this preparation task; this file describes the future search contract.
+experiment:
+  name: rfdetr_seg_small_native_bounded_nas
+  seed: 20260807
+model:
+  name: RFDETRSegSmall
+  variant: RFDETRSegSmall
+  checkpoint: /home/liujiyuan/rf-detr-models/rf-detr-seg-small.pt
+  architecture_source: runtime_checkpoint
+  native_bounded: true
+encoder_search:
+  resolutions: [384, 448, 480, 512, 576, 640]
+  patch_sizes: [12, 16, 20]
+  num_windows: [1, 2]
+  include_native_values: true
+# Compatibility view used by the preparation dry-run tooling.
+search_space:
+  resolutions: [384, 448, 480, 512, 576, 640]
+  patch_sizes: [12, 16, 20]
+  num_windows: [1, 2]
+  query_candidates: [50, 100, 200, 300]
+  decoder_layers: native_range
+decoder_search:
+  max_depth: native
+  candidate_policy: range_0_to_native
+  decoder_zero_policy: verify_then_include
+query_search:
+  max_queries: native
+  preferred_candidates: [50, 100, 200, 300]
+  policy: keep_candidates_le_native_plus_native
+postprocess:
+  num_select: native
+  num_select_policy: audit_before_change
+architecture:
+  invalid_divisibility_policy: reject
+  insufficient_proposal_policy: reject
+  oom_policy: mark_hardware_infeasible
+sampling:
+  policy: balanced_patch
+  alternate_policy: uniform_valid_arch
+  schedule: deterministic_by_optimizer_step
+  seed: 20260807
+supernet:
+  decoder_depth_during_training: native
+  queries_during_training: native
+norm:
+  recalibration: auto_if_running_stats_present
+full_search:
+  enabled: false
+  pareto: false
+  full_subnet_sweep: false
+  approval_marker: NAS_FULL_SEARCH_APPROVED
+safety:
+  require_cli_confirm: true
+  require_approval_file: true
+  approval_filename: NAS_FULL_SEARCH_APPROVED
+smoke:
+  max_optimizer_steps: 30

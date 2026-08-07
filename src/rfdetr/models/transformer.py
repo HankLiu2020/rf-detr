@@ -375,7 +375,13 @@ class Transformer(nn.Module):
                         self.enc_out_bbox_embed[g_idx](output_memory_gidx) + output_proposals
                     )
 
-                topk = min(self.num_queries, enc_outputs_class_unselected_gidx.shape[-2])
+                active_num_queries = int(getattr(self, "_nas_active_num_queries", self.num_queries))
+                topk = min(active_num_queries, enc_outputs_class_unselected_gidx.shape[-2])
+                if topk < active_num_queries:
+                    raise ValueError(
+                        "encoder proposal count per group is smaller than active_num_queries: "
+                        f"{enc_outputs_class_unselected_gidx.shape[-2]} < {active_num_queries}"
+                    )
                 topk_proposals_gidx = torch.topk(enc_outputs_class_unselected_gidx.max(-1)[0], topk, dim=1)[1]  # bs, nq
 
                 refpoint_embed_gidx_undetach = torch.gather(
@@ -421,7 +427,12 @@ class Transformer(nn.Module):
             enc_kp_predictions = torch.cat(kp_pred_chunks, dim=1)
             init_kp_ref_xy = enc_kp_predictions[..., :2].detach()
 
-        if self.dec_layers > 0:
+        active_decoder_layers = int(getattr(self, "_nas_active_decoder_layers", self.dec_layers))
+        if active_decoder_layers < 0 or active_decoder_layers > self.dec_layers:
+            raise ValueError(
+                f"active decoder layers must be in [0, {self.dec_layers}], got {active_decoder_layers}"
+            )
+        if active_decoder_layers > 0:
             # Use memory.shape[0] (symbolic) instead of a Python-int `bs` constant.
             bs = memory.shape[0]
             tgt = query_feat.unsqueeze(0).expand(bs, -1, -1).contiguous()
@@ -693,7 +704,11 @@ class TransformerDecoder(nn.Module):
             else:
                 obj_center, refpoints_input, query_pos, _query_sine_embed = get_reference(refpoints_unsigmoid.sigmoid())
 
-        for layer_id, layer in enumerate(self.layers):
+        active_layers = int(getattr(self, "_nas_active_decoder_layers", self.num_layers))
+        if active_layers < 1 or active_layers > self.num_layers:
+            raise ValueError(f"active decoder layers must be in [1, {self.num_layers}], got {active_layers}")
+
+        for layer_id, layer in enumerate(self.layers[:active_layers]):
             if not self.lite_refpoint_refine:
                 if self.bbox_reparam:
                     obj_center, refpoints_input, query_pos, _query_sine_embed = get_reference(refpoints_unsigmoid)
@@ -741,7 +756,7 @@ class TransformerDecoder(nn.Module):
                 assert self.bbox_embed is not None
                 new_refpoints_delta = self.bbox_embed(output)
                 new_refpoints_unsigmoid = self.refpoints_refine(refpoints_unsigmoid, new_refpoints_delta)
-                if layer_id != self.num_layers - 1:
+                if layer_id != active_layers - 1:
                     hs_refpoints_unsigmoid.append(new_refpoints_unsigmoid)
                 refpoints_unsigmoid = new_refpoints_unsigmoid.detach()
 

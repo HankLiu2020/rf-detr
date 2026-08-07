@@ -1,0 +1,32 @@
+{
+  "active_num_queries_per_group": 50,
+  "eval_query_dimension": 50,
+  "eval_shapes": {
+    "pred_boxes": [
+      1,
+      50,
+      4
+    ],
+    "pred_logits": [
+      1,
+      50,
+      91
+    ],
+    "pred_masks": [
+      1,
+      50,
+      96,
+      96
+    ]
+  },
+  "flat_slice_max_abs_diff": 6.5778350830078125,
+  "group_detr": 13,
+  "native_num_queries_per_group": 100,
+  "num_select": {
+    "active_num_queries": 50,
+    "active_num_select": 50
+  },
+  "per_group_max_abs_diff": 0.0,
+  "status": "PASS",
+  "train_query_dimension": 650
+}

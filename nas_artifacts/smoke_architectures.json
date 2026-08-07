@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "source": "random_architectures.json",
+  "random_architecture_count": 10,
+  "forward_shape_validation": true,
+  "decoder_zero_functional": true,
+  "patch_sizes_covered": [12, 16, 20],
+  "windows_covered": [1, 2],
+  "state_pollution_test": "A-B-C-A PASS",
+  "device": "cpu; target GPU hardware probe remains separate"
+}

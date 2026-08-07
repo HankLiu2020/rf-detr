@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "source": "smoke_training.json",
+  "optimizer": "AdamW",
+  "group_count": 1,
+  "weight_decay": 0.0001,
+  "lr": 0.00001,
+  "patch_master_parameter_name": "backbone.0.encoder.encoder.embeddings.patch_embeddings.projection.weight",
+  "patch_master_kept_as_single_parameter": true,
+  "patch_parameter_identity_checked": true
+}

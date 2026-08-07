@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "image": "train-env-rfdetr-claude:20260806",
+  "python": "3.10.12",
+  "rfdetr_import": "/workspace/rf-detr/src/rfdetr/__init__.py",
+  "torch": "2.7.1+cu128",
+  "cuda_build": "12.8",
+  "cuda_available": true,
+  "cuda_device_count": 1,
+  "device": "NVIDIA GeForce RTX 3090",
+  "nvidia_devices": [
+    "/dev/nvidia-uvm",
+    "/dev/nvidia-uvm-tools",
+    "/dev/nvidia0",
+    "/dev/nvidiactl"
+  ],
+  "libcuda": "libcuda.so.1",
+  "libnvidia_ml": "libnvidia-ml.so.1",
+  "seccomp": "2",
+  "seccomp_filters": "1",
+  "cap_eff": "00000000a80425fb",
+  "cap_bnd": "00000000a80425fb",
+  "project_read_only": true,
+  "data_read_only": true,
+  "rootfs_read_only": true,
+  "privileged": false,
+  "extra_capabilities": [],
+  "network": "none"
+}

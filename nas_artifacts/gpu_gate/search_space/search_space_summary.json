@@ -1,0 +1,21 @@
+{
+  "candidate_count": 360,
+  "decoder_candidates": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "decoder_zero_supported": true,
+  "encoder_tuple_count": 22,
+  "group_detr": [
+    13
+  ],
+  "invalid_divisibility_count": 140,
+  "query_candidates": [
+    50,
+    100
+  ],
+  "syntactically_valid_count": 220
+}

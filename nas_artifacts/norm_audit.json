@@ -1,0 +1,11 @@
+{
+  "batchnorm_module_count": 0,
+  "counts": {
+    "LayerNorm": 65
+  },
+  "norm_types": {
+    "LayerNorm": 65
+  },
+  "requires_norm_recalibration": false,
+  "running_stat_modules": []
+}

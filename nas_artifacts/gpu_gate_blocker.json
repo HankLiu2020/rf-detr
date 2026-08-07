@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "user": "liujiyuan",
+  "docker_socket": {
+    "owner": "nobody:nogroup",
+    "mode": "660",
+    "path": "/var/run/docker.sock"
+  },
+  "observed_error": "historical direct-session denial; resolved for this verification by refreshing the existing docker-group membership with sg docker",
+  "host_nvidia_smi": {
+    "status": "PASS",
+    "driver": "570.211.01",
+    "gpu_count": 6,
+    "gpu": "NVIDIA GeForce RTX 3090 24576 MiB",
+    "method": "controlled_read_only_escalated_check"
+  },
+  "current_checkout_cuda_runtime": {
+    "status": "PASS",
+    "image": "train-env-rfdetr-claude:20260806",
+    "python": "3.10.12",
+    "torch": "2.7.1+cu128",
+    "cuda_runtime": "12.8.61",
+    "current_checkout_import": "/workspace/rf-detr/src/rfdetr/__init__.py",
+    "git_commit": "cc538cea510c24d6d7bc64332f0bf29875a5b2d6",
+    "worst_corner": "PASS; peak_memory_bytes=1558436864"
+  },
+  "safe_action_taken": "no credentials, group changes, privileged container, or formal NAS execution; temporary containers used read-only mounts and were auto-removed",
+  "next_action": "keep formal NAS disabled and preserve the three-lock safety gate"
+}

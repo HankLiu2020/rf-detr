@@ -1,0 +1,36 @@
+[
+  {
+    "boxes": {
+      "dtype": "torch.float32",
+      "max": 795.4813842773438,
+      "min": 5.948805809020996,
+      "shape": [
+        100,
+        4
+      ]
+    },
+    "labels": {
+      "dtype": "torch.int64",
+      "shape": [
+        100
+      ]
+    },
+    "masks": {
+      "dtype": "torch.bool",
+      "shape": [
+        100,
+        1,
+        800,
+        800
+      ]
+    },
+    "scores": {
+      "dtype": "torch.float32",
+      "max": 0.3593144416809082,
+      "min": 0.026836123317480087,
+      "shape": [
+        100
+      ]
+    }
+  }
+]

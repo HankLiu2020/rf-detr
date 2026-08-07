@@ -1,0 +1,72 @@
+{
+  "status": "PASS",
+  "purpose": "A/B comparison of Docker default seccomp versus the minimal RF-DETR profile",
+  "same_parameters": {
+    "image": "train-env-rfdetr-claude:20260806",
+    "gpu_request": "device=0",
+    "project_mount": "read-only",
+    "model_mount": "read-only",
+    "data_mount": "read-only",
+    "rootfs_readonly": true,
+    "network": "none",
+    "privileged": false,
+    "cap_add": [],
+    "cap_drop": [],
+    "shm_size": "8g"
+  },
+  "common_runtime": {
+    "torch": "2.7.1+cu128",
+    "cuda_build": "12.8",
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "nvidia_devices": [
+      "/dev/nvidia-uvm",
+      "/dev/nvidia-uvm-tools",
+      "/dev/nvidia0",
+      "/dev/nvidiactl"
+    ],
+    "libcuda": "libcuda.so.1",
+    "libnvidia_ml": "libnvidia-ml.so.1",
+    "cap_eff": "00000000a80425fb",
+    "cap_bnd": "00000000a80425fb"
+  },
+  "unconfined": {
+    "exit_code": 0,
+    "seccomp": "0",
+    "seccomp_filters": "0",
+    "cuda_available": true,
+    "inference": "PASS",
+    "detections": 2,
+    "peak_memory_mib": 207.1
+  },
+  "default_seccomp": {
+    "exit_code": 1,
+    "seccomp": "2",
+    "seccomp_filters": "1",
+    "cuda_available": false,
+    "error_304": true,
+    "error": "cudaGetDeviceCount: Error 304: OS call failed or operation not supported on this OS"
+  },
+  "minimal_custom_profile": {
+    "profile": "docker/seccomp-rfdetr-clone3.json",
+    "exit_code": 0,
+    "seccomp": "2",
+    "seccomp_filters": "1",
+    "cuda_available": true,
+    "inference": "PASS",
+    "detections": 2,
+    "peak_memory_mib": 207.1
+  },
+  "torch_collect_env": {
+    "custom_cuda_available": true,
+    "custom_driver": "570.211.01",
+    "custom_cuda_runtime": "12.8.61",
+    "default_cuda_available": false,
+    "default_driver": "570.211.01",
+    "default_cuda_runtime": "12.8.61",
+    "raw_logs": [
+      "seccomp_ab/collect_custom.log",
+      "seccomp_ab/collect_default.log"
+    ]
+  },
+  "interpretation": "Under identical GPU, image, mounts, capabilities, libraries, and torch build, default seccomp reproduces Error 304 while the unconfined control and minimal custom profile pass. This attributes the observed A/B failure to the default seccomp policy boundary, not to an RF-DETR/CUDA-required configuration; the exact denied syscall is not claimed by this smoke test."
+}

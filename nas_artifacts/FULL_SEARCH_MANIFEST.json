@@ -1,0 +1,54 @@
+{
+  "action": "no model training/search performed",
+  "approval_marker": "/home/liujiyuan/rf-detr/NAS_FULL_SEARCH_APPROVED",
+  "approval_marker_exists": false,
+  "cli_confirmation_received": false,
+  "cli_confirmation_required": "--confirm-full-nas",
+  "config": "configs/seg_small_nas_full.yaml",
+  "dry_run_status": "PASS",
+  "formal_search_executed": false,
+  "full_search_enabled": false,
+  "full_subnet_sweep_executed": false,
+  "pareto_search_executed": false,
+  "planned_stages": [
+    {
+      "executed": false,
+      "name": "train_elastic_supernet"
+    },
+    {
+      "executed": false,
+      "name": "evaluate_inherited_subnets"
+    },
+    {
+      "executed": false,
+      "name": "proxy_validation"
+    },
+    {
+      "executed": false,
+      "name": "hardware_latency_benchmark"
+    },
+    {
+      "executed": false,
+      "name": "pareto_filtering"
+    },
+    {
+      "executed": false,
+      "name": "full_pareto_validation"
+    },
+    {
+      "executed": false,
+      "name": "select_fast_balanced_accurate"
+    },
+    {
+      "executed": false,
+      "name": "static_export"
+    }
+  ],
+  "repo_root": "/home/liujiyuan/rf-detr",
+  "three_lock_state": {
+    "approval_file_present": false,
+    "cli_confirmed": false,
+    "config_enabled": false,
+    "formal_search_allowed": false
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "source": "smoke_training.json",
+  "checkpoint_format": "rfdetr-nas-smoke-v1",
+  "restored_optimizer_step": 3,
+  "schedule_is_deterministic": true,
+  "model_and_optimizer_state_restored": true
+}

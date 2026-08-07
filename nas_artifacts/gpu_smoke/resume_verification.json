@@ -1,0 +1,46 @@
+{
+  "architecture": {
+    "decoder_layers": 4,
+    "encoder": "dinov2_windowed_small",
+    "group_detr": 13,
+    "hardware_feasible": null,
+    "invalid_reason": null,
+    "metadata": {
+      "effective_num_select": 100,
+      "proposal_count_guard": true,
+      "proposal_count_per_group": 576,
+      "requested_num_select": 100
+    },
+    "native": false,
+    "num_queries": 100,
+    "num_select": 100,
+    "num_windows": 1,
+    "patch_size": 20,
+    "resolution": 480
+  },
+  "base_checkpoint": {
+    "id": "6de3da31b2572cac",
+    "path": "/workspace/models/rf-detr-seg-small.pt",
+    "sha256": "6de3da31b2572cac214a1c76cce4a92a13966d56390ac2b3a3de9a8dc2b2bca3",
+    "size_bytes": 135042342
+  },
+  "base_checkpoint_restored": true,
+  "ema_parameter_count": 544,
+  "ema_restored": true,
+  "git_commit": "cc538cea510c24d6d7bc64332f0bf29875a5b2d6",
+  "git_commit_restored": true,
+  "gradient_parameter_count": 543,
+  "native_architecture_restored": true,
+  "new_optimizer_step": 7,
+  "one_step_after_resume": "PASS",
+  "restored_optimizer_step": 6,
+  "rfdetr_version": "1.10.0.dev0",
+  "rfdetr_version_restored": true,
+  "sampling_policy_restored": true,
+  "schedule_preview_matches": true,
+  "scheduler_restored": true,
+  "search_space_config_restored": true,
+  "seed_restored": true,
+  "status": "PASS",
+  "weighted_loss": 10.522656440734863
+}

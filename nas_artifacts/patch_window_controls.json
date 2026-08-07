@@ -1,0 +1,253 @@
+{
+  "master_parameter_id": 140223765139520,
+  "master_parameter_name": "backbone.0.encoder.encoder.embeddings.patch_embeddings.projection.weight",
+  "native_state_restore": {
+    "pred_boxes": 0.0,
+    "pred_logits": 0.0,
+    "pred_masks": 0.0
+  },
+  "position_master_digest_after": "b20df6d37ec95e969b4ce60185d812cc0c1391720707d0a8e9638ee428e561fe",
+  "position_master_digest_before": "b20df6d37ec95e969b4ce60185d812cc0c1391720707d0a8e9638ee428e561fe",
+  "position_master_unchanged": true,
+  "records": [
+    {
+      "architecture": {
+        "decoder_layers": 4,
+        "encoder": "dinov2_windowed_small",
+        "group_detr": 13,
+        "hardware_feasible": null,
+        "invalid_reason": null,
+        "metadata": {},
+        "native": false,
+        "num_queries": 100,
+        "num_select": 100,
+        "num_windows": 1,
+        "patch_size": 12,
+        "resolution": 480
+      },
+      "patch_master_grad_sum_abs": 1049248.125,
+      "patch_parameter_id": 140223765139520,
+      "patch_parameter_name": "backbone.0.encoder.encoder.embeddings.patch_embeddings.projection.weight",
+      "patch_parameter_occurrences": 1,
+      "shapes": {
+        "pred_boxes": [
+          1,
+          100,
+          4
+        ],
+        "pred_logits": [
+          1,
+          100,
+          91
+        ],
+        "pred_masks": [
+          1,
+          100,
+          120,
+          120
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "architecture": {
+        "decoder_layers": 4,
+        "encoder": "dinov2_windowed_small",
+        "group_detr": 13,
+        "hardware_feasible": null,
+        "invalid_reason": null,
+        "metadata": {},
+        "native": false,
+        "num_queries": 100,
+        "num_select": 100,
+        "num_windows": 2,
+        "patch_size": 12,
+        "resolution": 480
+      },
+      "patch_master_grad_sum_abs": 407718.125,
+      "patch_parameter_id": 140223765139520,
+      "patch_parameter_name": "backbone.0.encoder.encoder.embeddings.patch_embeddings.projection.weight",
+      "patch_parameter_occurrences": 1,
+      "shapes": {
+        "pred_boxes": [
+          1,
+          100,
+          4
+        ],
+        "pred_logits": [
+          1,
+          100,
+          91
+        ],
+        "pred_masks": [
+          1,
+          100,
+          120,
+          120
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "architecture": {
+        "decoder_layers": 4,
+        "encoder": "dinov2_windowed_small",
+        "group_detr": 13,
+        "hardware_feasible": null,
+        "invalid_reason": null,
+        "metadata": {},
+        "native": false,
+        "num_queries": 100,
+        "num_select": 100,
+        "num_windows": 1,
+        "patch_size": 16,
+        "resolution": 480
+      },
+      "patch_master_grad_sum_abs": 382804.28125,
+      "patch_parameter_id": 140223765139520,
+      "patch_parameter_name": "backbone.0.encoder.encoder.embeddings.patch_embeddings.projection.weight",
+      "patch_parameter_occurrences": 1,
+      "shapes": {
+        "pred_boxes": [
+          1,
+          100,
+          4
+        ],
+        "pred_logits": [
+          1,
+          100,
+          91
+        ],
+        "pred_masks": [
+          1,
+          100,
+          120,
+          120
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "architecture": {
+        "decoder_layers": 4,
+        "encoder": "dinov2_windowed_small",
+        "group_detr": 13,
+        "hardware_feasible": null,
+        "invalid_reason": null,
+        "metadata": {},
+        "native": false,
+        "num_queries": 100,
+        "num_select": 100,
+        "num_windows": 2,
+        "patch_size": 16,
+        "resolution": 480
+      },
+      "patch_master_grad_sum_abs": 496738.28125,
+      "patch_parameter_id": 140223765139520,
+      "patch_parameter_name": "backbone.0.encoder.encoder.embeddings.patch_embeddings.projection.weight",
+      "patch_parameter_occurrences": 1,
+      "shapes": {
+        "pred_boxes": [
+          1,
+          100,
+          4
+        ],
+        "pred_logits": [
+          1,
+          100,
+          91
+        ],
+        "pred_masks": [
+          1,
+          100,
+          120,
+          120
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "architecture": {
+        "decoder_layers": 4,
+        "encoder": "dinov2_windowed_small",
+        "group_detr": 13,
+        "hardware_feasible": null,
+        "invalid_reason": null,
+        "metadata": {},
+        "native": false,
+        "num_queries": 100,
+        "num_select": 100,
+        "num_windows": 1,
+        "patch_size": 20,
+        "resolution": 480
+      },
+      "patch_master_grad_sum_abs": 797423.1875,
+      "patch_parameter_id": 140223765139520,
+      "patch_parameter_name": "backbone.0.encoder.encoder.embeddings.patch_embeddings.projection.weight",
+      "patch_parameter_occurrences": 1,
+      "shapes": {
+        "pred_boxes": [
+          1,
+          100,
+          4
+        ],
+        "pred_logits": [
+          1,
+          100,
+          91
+        ],
+        "pred_masks": [
+          1,
+          100,
+          120,
+          120
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "architecture": {
+        "decoder_layers": 4,
+        "encoder": "dinov2_windowed_small",
+        "group_detr": 13,
+        "hardware_feasible": null,
+        "invalid_reason": null,
+        "metadata": {},
+        "native": false,
+        "num_queries": 100,
+        "num_select": 100,
+        "num_windows": 2,
+        "patch_size": 20,
+        "resolution": 480
+      },
+      "patch_master_grad_sum_abs": 408651.15625,
+      "patch_parameter_id": 140223765139520,
+      "patch_parameter_name": "backbone.0.encoder.encoder.embeddings.patch_embeddings.projection.weight",
+      "patch_parameter_occurrences": 1,
+      "shapes": {
+        "pred_boxes": [
+          1,
+          100,
+          4
+        ],
+        "pred_logits": [
+          1,
+          100,
+          91
+        ],
+        "pred_masks": [
+          1,
+          100,
+          120,
+          120
+        ]
+      },
+      "status": "PASS"
+    }
+  ],
+  "state_dict_patch_weight_count": 1,
+  "state_dict_patch_weight_keys": [
+    "backbone.0.encoder.encoder.embeddings.patch_embeddings.projection.weight"
+  ],
+  "status": "PASS"
+}

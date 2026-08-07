@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "subnets": {
+    "native": {
+      "architecture_path": "nas_artifacts/export/native/architecture.json",
+      "onnx_status": "UNSUPPORTED",
+      "torchscript_status": "PASS",
+      "verification_path": "nas_artifacts/export/native/verification.json"
+    },
+    "reduced": {
+      "architecture_path": "nas_artifacts/export/reduced/architecture.json",
+      "onnx_status": "UNSUPPORTED",
+      "torchscript_status": "PASS",
+      "verification_path": "nas_artifacts/export/reduced/verification.json"
+    }
+  }
+}

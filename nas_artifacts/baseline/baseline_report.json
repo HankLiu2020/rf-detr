@@ -1,0 +1,4227 @@
+{
+  "aux_outputs_count": 3,
+  "baseline_path_comparison": "NAS-disabled ordinary path vs controller-enabled native path",
+  "baseline_path_status": "PASS",
+  "device": "cpu",
+  "files": [
+    "input.pt",
+    "targets.pt",
+    "raw_outputs.pt",
+    "matching_indices.pt",
+    "loss_components.json",
+    "postprocessed.json",
+    "postprocessed.pt"
+  ],
+  "native": {
+    "backbone": "dinov2_windowed_small",
+    "batchnorm_module_count": 0,
+    "bbox_reparam": true,
+    "checkpoint_args_missing": [
+      "group_detr",
+      "num_queries"
+    ],
+    "checkpoint_args_present": [],
+    "checkpoint_discrepancies": [
+      "checkpoint args omit num_queries/group_detr; runtime config and embedding shapes are authoritative"
+    ],
+    "dec_pred_bbox_embed_share": false,
+    "decoder_layers": 4,
+    "encoder": "dinov2_windowed_small",
+    "encoder_feature_shapes": [
+      [
+        1,
+        256,
+        32,
+        32
+      ]
+    ],
+    "encoder_proposal_count_at_native_resolution": 1024,
+    "group_detr": 13,
+    "hidden_dim": 256,
+    "layer_decay_policy": {
+      "group_count": 544,
+      "lr_component_decay": 0.7,
+      "lr_encoder": 0.00015,
+      "lr_vit_layer_decay": 0.8,
+      "source": "rfdetr.training.param_groups.get_param_dict",
+      "status": "PASS",
+      "weight_decay": 0.0001
+    },
+    "lite_refpoint_refine": true,
+    "mask_downsample_ratio": 4,
+    "mask_feature_resolution": [
+      96,
+      96
+    ],
+    "mask_head_per_layer": false,
+    "model_variant": "RFDETRSegSmall",
+    "norm_counts": {
+      "LayerNorm": 65
+    },
+    "norm_types": {
+      "LayerNorm": 65
+    },
+    "num_queries": 100,
+    "num_select": 100,
+    "num_windows": 2,
+    "optimizer_param_groups": [
+      {
+        "index": 0,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 1,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 2,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 3,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 4,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 5,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 6,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.3.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 7,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.3.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 8,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.4.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 9,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.4.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 10,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.5.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 11,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.5.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 12,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.6.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 13,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.6.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 14,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.7.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 15,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.7.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 16,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.8.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 17,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.8.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 18,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.9.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 19,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.9.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 20,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.10.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 21,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.10.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 22,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.11.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 23,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.11.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 24,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.12.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 25,
+        "lr": 0.0001,
+        "name": "transformer.enc_output.12.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 26,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 27,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 28,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 29,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 30,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 31,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 32,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.3.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 33,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.3.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 34,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.4.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 35,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.4.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 36,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.5.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 37,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.5.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 38,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.6.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 39,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.6.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 40,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.7.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 41,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.7.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 42,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.8.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 43,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.8.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 44,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.9.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 45,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.9.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 46,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.10.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 47,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.10.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 48,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.11.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 49,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.11.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 50,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.12.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 51,
+        "lr": 0.0001,
+        "name": "transformer.enc_output_norm.12.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 52,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.0.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 53,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.0.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 54,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.0.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 55,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.0.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 56,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.0.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 57,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.0.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 58,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.1.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 59,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.1.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 60,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.1.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 61,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.1.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 62,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.1.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 63,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.1.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 64,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.2.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 65,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.2.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 66,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.2.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 67,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.2.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 68,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.2.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 69,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.2.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 70,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.3.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 71,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.3.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 72,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.3.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 73,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.3.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 74,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.3.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 75,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.3.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 76,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.4.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 77,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.4.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 78,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.4.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 79,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.4.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 80,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.4.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 81,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.4.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 82,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.5.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 83,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.5.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 84,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.5.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 85,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.5.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 86,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.5.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 87,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.5.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 88,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.6.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 89,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.6.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 90,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.6.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 91,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.6.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 92,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.6.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 93,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.6.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 94,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.7.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 95,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.7.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 96,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.7.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 97,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.7.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 98,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.7.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 99,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.7.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 100,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.8.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 101,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.8.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 102,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.8.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 103,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.8.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 104,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.8.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 105,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.8.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 106,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.9.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 107,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.9.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 108,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.9.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 109,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.9.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 110,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.9.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 111,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.9.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 112,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.10.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 113,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.10.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 114,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.10.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 115,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.10.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 116,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.10.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 117,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.10.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 118,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.11.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 119,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.11.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 120,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.11.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 121,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.11.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 122,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.11.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 123,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.11.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 124,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.12.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 125,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.12.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 126,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.12.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 127,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.12.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 128,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.12.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 129,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_bbox_embed.12.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 130,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 131,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 132,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 133,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 134,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 135,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 136,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.3.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 137,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.3.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 138,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.4.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 139,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.4.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 140,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.5.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 141,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.5.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 142,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.6.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 143,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.6.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 144,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.7.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 145,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.7.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 146,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.8.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 147,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.8.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 148,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.9.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 149,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.9.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 150,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.10.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 151,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.10.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 152,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.11.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 153,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.11.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 154,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.12.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 155,
+        "lr": 0.0001,
+        "name": "transformer.enc_out_class_embed.12.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 156,
+        "lr": 0.0001,
+        "name": "class_embed.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 157,
+        "lr": 0.0001,
+        "name": "class_embed.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 158,
+        "lr": 0.0001,
+        "name": "bbox_embed.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 159,
+        "lr": 0.0001,
+        "name": "bbox_embed.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 160,
+        "lr": 0.0001,
+        "name": "bbox_embed.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 161,
+        "lr": 0.0001,
+        "name": "bbox_embed.layers.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 162,
+        "lr": 0.0001,
+        "name": "bbox_embed.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 163,
+        "lr": 0.0001,
+        "name": "bbox_embed.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 164,
+        "lr": 0.0001,
+        "name": "segmentation_head.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 165,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.0.dwconv.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 166,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.0.dwconv.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 167,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.0.norm.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 168,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.0.norm.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 169,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.0.pwconv1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 170,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.0.pwconv1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 171,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.1.dwconv.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 172,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.1.dwconv.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 173,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.1.norm.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 174,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.1.norm.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 175,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.1.pwconv1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 176,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.1.pwconv1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 177,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.2.dwconv.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 178,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.2.dwconv.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 179,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.2.norm.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 180,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.2.norm.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 181,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.2.pwconv1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 182,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.2.pwconv1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 183,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.3.dwconv.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 184,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.3.dwconv.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 185,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.3.norm.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 186,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.3.norm.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 187,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.3.pwconv1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 188,
+        "lr": 0.0001,
+        "name": "segmentation_head.blocks.3.pwconv1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 189,
+        "lr": 0.0001,
+        "name": "segmentation_head.spatial_features_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 190,
+        "lr": 0.0001,
+        "name": "segmentation_head.spatial_features_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 191,
+        "lr": 0.0001,
+        "name": "segmentation_head.query_features_block.norm_in.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 192,
+        "lr": 0.0001,
+        "name": "segmentation_head.query_features_block.norm_in.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 193,
+        "lr": 0.0001,
+        "name": "segmentation_head.query_features_block.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 194,
+        "lr": 0.0001,
+        "name": "segmentation_head.query_features_block.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 195,
+        "lr": 0.0001,
+        "name": "segmentation_head.query_features_block.layers.2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 196,
+        "lr": 0.0001,
+        "name": "segmentation_head.query_features_block.layers.2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 197,
+        "lr": 0.0001,
+        "name": "segmentation_head.query_features_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 198,
+        "lr": 0.0001,
+        "name": "segmentation_head.query_features_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 199,
+        "lr": 0.0001,
+        "name": "refpoint_embed.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 200,
+        "lr": 0.0001,
+        "name": "query_feat.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 201,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.cv1.conv.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 202,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.cv1.bn.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 203,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.cv1.bn.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 204,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.cv2.conv.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 205,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.cv2.bn.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 206,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.cv2.bn.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 207,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.0.cv1.conv.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 208,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.0.cv1.bn.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 209,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.0.cv1.bn.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 210,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.0.cv2.conv.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 211,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.0.cv2.bn.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 212,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.0.cv2.bn.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 213,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.1.cv1.conv.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 214,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.1.cv1.bn.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 215,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.1.cv1.bn.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 216,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.1.cv2.conv.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 217,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.1.cv2.bn.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 218,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.1.cv2.bn.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 219,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.2.cv1.conv.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 220,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.2.cv1.bn.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 221,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.2.cv1.bn.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 222,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.2.cv2.conv.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 223,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.2.cv2.bn.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 224,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.0.m.2.cv2.bn.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 225,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 226,
+        "lr": 0.0001,
+        "name": "backbone.0.projector.stages.0.1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 227,
+        "lr": 3.232564185661442e-06,
+        "name": "backbone.0.encoder.encoder.embeddings.cls_token",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 228,
+        "lr": 3.232564185661442e-06,
+        "name": "backbone.0.encoder.encoder.embeddings.mask_token",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 229,
+        "lr": 3.232564185661442e-06,
+        "name": "backbone.0.encoder.encoder.embeddings.position_embeddings",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 230,
+        "lr": 3.232564185661442e-06,
+        "name": "backbone.0.encoder.encoder.embeddings.patch_embeddings.projection.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 231,
+        "lr": 3.232564185661442e-06,
+        "name": "backbone.0.encoder.encoder.embeddings.patch_embeddings.projection.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 232,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.norm1.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 233,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.norm1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 234,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.attention.attention.query.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 235,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.attention.attention.query.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 236,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.attention.attention.key.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 237,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.attention.attention.key.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 238,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.attention.attention.value.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 239,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.attention.attention.value.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 240,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.attention.output.dense.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 241,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.attention.output.dense.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 242,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.layer_scale1.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 243,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.norm2.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 244,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.norm2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 245,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.mlp.fc1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 246,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.mlp.fc1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 247,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.mlp.fc2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 248,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.mlp.fc2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 249,
+        "lr": 4.040705232076802e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.0.layer_scale2.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 250,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.norm1.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 251,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.norm1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 252,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.attention.attention.query.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 253,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.attention.attention.query.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 254,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.attention.attention.key.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 255,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.attention.attention.key.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 256,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.attention.attention.value.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 257,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.attention.attention.value.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 258,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.attention.output.dense.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 259,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.attention.output.dense.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 260,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.layer_scale1.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 261,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.norm2.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 262,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.norm2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 263,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.mlp.fc1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 264,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.mlp.fc1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 265,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.mlp.fc2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 266,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.mlp.fc2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 267,
+        "lr": 5.050881540096002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.1.layer_scale2.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 268,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.norm1.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 269,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.norm1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 270,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.attention.attention.query.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 271,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.attention.attention.query.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 272,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.attention.attention.key.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 273,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.attention.attention.key.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 274,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.attention.attention.value.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 275,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.attention.attention.value.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 276,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.attention.output.dense.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 277,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.attention.output.dense.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 278,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.layer_scale1.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 279,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.norm2.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 280,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.norm2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 281,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.mlp.fc1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 282,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.mlp.fc1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 283,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.mlp.fc2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 284,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.mlp.fc2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 285,
+        "lr": 6.313601925120002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.2.layer_scale2.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 286,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.norm1.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 287,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.norm1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 288,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.attention.attention.query.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 289,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.attention.attention.query.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 290,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.attention.attention.key.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 291,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.attention.attention.key.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 292,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.attention.attention.value.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 293,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.attention.attention.value.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 294,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.attention.output.dense.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 295,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.attention.output.dense.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 296,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.layer_scale1.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 297,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.norm2.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 298,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.norm2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 299,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.mlp.fc1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 300,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.mlp.fc1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 301,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.mlp.fc2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 302,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.mlp.fc2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 303,
+        "lr": 7.892002406400002e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.3.layer_scale2.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 304,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.norm1.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 305,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.norm1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 306,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.attention.attention.query.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 307,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.attention.attention.query.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 308,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.attention.attention.key.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 309,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.attention.attention.key.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 310,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.attention.attention.value.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 311,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.attention.attention.value.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 312,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.attention.output.dense.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 313,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.attention.output.dense.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 314,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.layer_scale1.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 315,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.norm2.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 316,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.norm2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 317,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.mlp.fc1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 318,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.mlp.fc1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 319,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.mlp.fc2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 320,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.mlp.fc2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 321,
+        "lr": 9.865003008000004e-06,
+        "name": "backbone.0.encoder.encoder.encoder.layer.4.layer_scale2.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 322,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.norm1.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 323,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.norm1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 324,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.attention.attention.query.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 325,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.attention.attention.query.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 326,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.attention.attention.key.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 327,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.attention.attention.key.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 328,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.attention.attention.value.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 329,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.attention.attention.value.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 330,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.attention.output.dense.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 331,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.attention.output.dense.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 332,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.layer_scale1.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 333,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.norm2.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 334,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.norm2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 335,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.mlp.fc1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 336,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.mlp.fc1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 337,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.mlp.fc2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 338,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.mlp.fc2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 339,
+        "lr": 1.2331253760000003e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.5.layer_scale2.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 340,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.norm1.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 341,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.norm1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 342,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.attention.attention.query.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 343,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.attention.attention.query.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 344,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.attention.attention.key.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 345,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.attention.attention.key.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 346,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.attention.attention.value.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 347,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.attention.attention.value.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 348,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.attention.output.dense.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 349,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.attention.output.dense.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 350,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.layer_scale1.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 351,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.norm2.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 352,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.norm2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 353,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.mlp.fc1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 354,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.mlp.fc1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 355,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.mlp.fc2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 356,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.mlp.fc2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 357,
+        "lr": 1.54140672e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.6.layer_scale2.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 358,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.norm1.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 359,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.norm1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 360,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.attention.attention.query.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 361,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.attention.attention.query.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 362,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.attention.attention.key.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 363,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.attention.attention.key.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 364,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.attention.attention.value.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 365,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.attention.attention.value.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 366,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.attention.output.dense.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 367,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.attention.output.dense.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 368,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.layer_scale1.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 369,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.norm2.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 370,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.norm2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 371,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.mlp.fc1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 372,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.mlp.fc1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 373,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.mlp.fc2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 374,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.mlp.fc2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 375,
+        "lr": 1.9267584000000005e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.7.layer_scale2.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 376,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.norm1.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 377,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.norm1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 378,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.attention.attention.query.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 379,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.attention.attention.query.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 380,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.attention.attention.key.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 381,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.attention.attention.key.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 382,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.attention.attention.value.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 383,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.attention.attention.value.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 384,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.attention.output.dense.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 385,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.attention.output.dense.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 386,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.layer_scale1.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 387,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.norm2.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 388,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.norm2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 389,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.mlp.fc1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 390,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.mlp.fc1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 391,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.mlp.fc2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 392,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.mlp.fc2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 393,
+        "lr": 2.408448e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.8.layer_scale2.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 394,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.norm1.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 395,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.norm1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 396,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.attention.attention.query.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 397,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.attention.attention.query.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 398,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.attention.attention.key.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 399,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.attention.attention.key.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 400,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.attention.attention.value.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 401,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.attention.attention.value.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 402,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.attention.output.dense.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 403,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.attention.output.dense.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 404,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.layer_scale1.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 405,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.norm2.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 406,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.norm2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 407,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.mlp.fc1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 408,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.mlp.fc1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 409,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.mlp.fc2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 410,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.mlp.fc2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 411,
+        "lr": 3.01056e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.9.layer_scale2.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 412,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.norm1.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 413,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.norm1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 414,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.attention.attention.query.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 415,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.attention.attention.query.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 416,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.attention.attention.key.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 417,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.attention.attention.key.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 418,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.attention.attention.value.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 419,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.attention.attention.value.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 420,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.attention.output.dense.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 421,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.attention.output.dense.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 422,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.layer_scale1.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 423,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.norm2.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 424,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.norm2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 425,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.mlp.fc1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 426,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.mlp.fc1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 427,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.mlp.fc2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 428,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.mlp.fc2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 429,
+        "lr": 3.7632e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.10.layer_scale2.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 430,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.norm1.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 431,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.norm1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 432,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.attention.attention.query.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 433,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.attention.attention.query.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 434,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.attention.attention.key.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 435,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.attention.attention.key.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 436,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.attention.attention.value.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 437,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.attention.attention.value.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 438,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.attention.output.dense.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 439,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.attention.output.dense.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 440,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.layer_scale1.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 441,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.norm2.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 442,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.norm2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 443,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.mlp.fc1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 444,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.mlp.fc1.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 445,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.mlp.fc2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 446,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.mlp.fc2.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 447,
+        "lr": 4.7040000000000004e-05,
+        "name": "backbone.0.encoder.encoder.encoder.layer.11.layer_scale2.lambda1",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 448,
+        "lr": 7.349999999999998e-05,
+        "name": "backbone.0.encoder.encoder.layernorm.weight",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 449,
+        "lr": 7.349999999999998e-05,
+        "name": "backbone.0.encoder.encoder.layernorm.bias",
+        "weight_decay": 0.0
+      },
+      {
+        "index": 450,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.self_attn.in_proj_weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 451,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.self_attn.in_proj_bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 452,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.self_attn.out_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 453,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.self_attn.out_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 454,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.norm1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 455,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.norm1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 456,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.cross_attn.sampling_offsets.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 457,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.cross_attn.sampling_offsets.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 458,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.cross_attn.attention_weights.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 459,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.cross_attn.attention_weights.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 460,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.cross_attn.value_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 461,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.cross_attn.value_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 462,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.cross_attn.output_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 463,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.cross_attn.output_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 464,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.linear1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 465,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.linear1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 466,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.linear2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 467,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.linear2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 468,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.norm2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 469,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.norm2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 470,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.norm3.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 471,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.0.norm3.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 472,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.self_attn.in_proj_weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 473,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.self_attn.in_proj_bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 474,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.self_attn.out_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 475,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.self_attn.out_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 476,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.norm1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 477,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.norm1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 478,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.cross_attn.sampling_offsets.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 479,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.cross_attn.sampling_offsets.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 480,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.cross_attn.attention_weights.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 481,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.cross_attn.attention_weights.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 482,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.cross_attn.value_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 483,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.cross_attn.value_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 484,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.cross_attn.output_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 485,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.cross_attn.output_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 486,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.linear1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 487,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.linear1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 488,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.linear2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 489,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.linear2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 490,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.norm2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 491,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.norm2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 492,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.norm3.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 493,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.1.norm3.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 494,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.self_attn.in_proj_weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 495,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.self_attn.in_proj_bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 496,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.self_attn.out_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 497,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.self_attn.out_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 498,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.norm1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 499,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.norm1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 500,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.cross_attn.sampling_offsets.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 501,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.cross_attn.sampling_offsets.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 502,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.cross_attn.attention_weights.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 503,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.cross_attn.attention_weights.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 504,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.cross_attn.value_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 505,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.cross_attn.value_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 506,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.cross_attn.output_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 507,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.cross_attn.output_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 508,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.linear1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 509,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.linear1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 510,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.linear2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 511,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.linear2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 512,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.norm2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 513,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.norm2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 514,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.norm3.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 515,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.2.norm3.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 516,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.self_attn.in_proj_weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 517,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.self_attn.in_proj_bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 518,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.self_attn.out_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 519,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.self_attn.out_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 520,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.norm1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 521,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.norm1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 522,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.cross_attn.sampling_offsets.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 523,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.cross_attn.sampling_offsets.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 524,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.cross_attn.attention_weights.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 525,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.cross_attn.attention_weights.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 526,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.cross_attn.value_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 527,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.cross_attn.value_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 528,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.cross_attn.output_proj.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 529,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.cross_attn.output_proj.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 530,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.linear1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 531,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.linear1.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 532,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.linear2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 533,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.linear2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 534,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.norm2.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 535,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.norm2.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 536,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.norm3.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 537,
+        "lr": 7e-05,
+        "name": "transformer.decoder.layers.3.norm3.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 538,
+        "lr": 7e-05,
+        "name": "transformer.decoder.norm.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 539,
+        "lr": 7e-05,
+        "name": "transformer.decoder.norm.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 540,
+        "lr": 7e-05,
+        "name": "transformer.decoder.ref_point_head.layers.0.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 541,
+        "lr": 7e-05,
+        "name": "transformer.decoder.ref_point_head.layers.0.bias",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 542,
+        "lr": 7e-05,
+        "name": "transformer.decoder.ref_point_head.layers.1.weight",
+        "weight_decay": 0.0001
+      },
+      {
+        "index": 543,
+        "lr": 7e-05,
+        "name": "transformer.decoder.ref_point_head.layers.1.bias",
+        "weight_decay": 0.0001
+      }
+    ],
+    "out_feature_indexes": [
+      3,
+      6,
+      9,
+      12
+    ],
+    "paper_expected": {
+      "backbone": "DINOv2-S",
+      "decoder_layers": 4,
+      "num_queries": 100,
+      "num_windows": 2,
+      "patch_size": 12,
+      "resolution": 384
+    },
+    "paper_runtime_discrepancies": [],
+    "patch_embed_module": "backbone.0.encoder.encoder.embeddings.patch_embeddings.projection",
+    "patch_embed_parameter_name": "backbone.0.encoder.encoder.embeddings.patch_embeddings.projection.weight",
+    "patch_embed_weight_shape": [
+      384,
+      3,
+      12,
+      12
+    ],
+    "patch_projection_shape": [
+      384,
+      3,
+      12,
+      12
+    ],
+    "patch_size": 12,
+    "position_embedding_shape": [
+      1,
+      1025,
+      384
+    ],
+    "positional_encoding_size": 32,
+    "projector_scale": [
+      "P4"
+    ],
+    "query_capacity": 1300,
+    "query_embedding_shape": [
+      1300,
+      256
+    ],
+    "query_feat_shape": [
+      1300,
+      256
+    ],
+    "refpoint_embed_shape": [
+      1300,
+      4
+    ],
+    "refpoint_embedding_shape": [
+      1300,
+      4
+    ],
+    "requires_norm_recalibration": false,
+    "resolution": 384,
+    "segmentation_head": true,
+    "segmentation_head_type": "SegmentationHead",
+    "two_stage": true
+  },
+  "native_equivalence": {
+    "level_1_raw_output": {
+      "eval.aux_outputs[0].pred_boxes": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          4
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[0].pred_logits": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          91
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[0].pred_masks": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          96,
+          96
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[1].pred_boxes": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          4
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[1].pred_logits": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          91
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[1].pred_masks": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          96,
+          96
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[2].pred_boxes": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          4
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[2].pred_logits": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          91
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[2].pred_masks": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          96,
+          96
+        ],
+        "status": "PASS"
+      },
+      "eval.enc_outputs.pred_boxes": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          4
+        ],
+        "status": "PASS"
+      },
+      "eval.enc_outputs.pred_logits": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          91
+        ],
+        "status": "PASS"
+      },
+      "eval.enc_outputs.pred_masks": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          96,
+          96
+        ],
+        "status": "PASS"
+      },
+      "eval.pred_boxes": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          4
+        ],
+        "status": "PASS"
+      },
+      "eval.pred_logits": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          91
+        ],
+        "status": "PASS"
+      },
+      "eval.pred_masks": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          96,
+          96
+        ],
+        "status": "PASS"
+      }
+    },
+    "level_2_matching_exact": true,
+    "level_3_loss_components": {
+      "cardinality_error": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 1.0,
+        "right": 1.0
+      },
+      "cardinality_error_0": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 1.0,
+        "right": 1.0
+      },
+      "cardinality_error_1": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.0,
+        "right": 0.0
+      },
+      "cardinality_error_2": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 1.0,
+        "right": 1.0
+      },
+      "cardinality_error_enc": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 1.0,
+        "right": 1.0
+      },
+      "class_error": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 100.0,
+        "right": 100.0
+      },
+      "loss_bbox": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.012933568097651005,
+        "right": 0.012933568097651005
+      },
+      "loss_bbox_0": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.04094932600855827,
+        "right": 0.04094932600855827
+      },
+      "loss_bbox_1": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.022465534508228302,
+        "right": 0.022465534508228302
+      },
+      "loss_bbox_2": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.023432601243257523,
+        "right": 0.023432601243257523
+      },
+      "loss_bbox_enc": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.044046562165021896,
+        "right": 0.044046562165021896
+      },
+      "loss_ce": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 1.0803277492523193,
+        "right": 1.0803277492523193
+      },
+      "loss_ce_0": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.7931998372077942,
+        "right": 0.7931998372077942
+      },
+      "loss_ce_1": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.961259126663208,
+        "right": 0.961259126663208
+      },
+      "loss_ce_2": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.8805845975875854,
+        "right": 0.8805845975875854
+      },
+      "loss_ce_enc": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.8238867521286011,
+        "right": 0.8238867521286011
+      },
+      "loss_giou": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.3067872226238251,
+        "right": 0.3067872226238251
+      },
+      "loss_giou_0": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.5526114106178284,
+        "right": 0.5526114106178284
+      },
+      "loss_giou_1": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.4308018982410431,
+        "right": 0.4308018982410431
+      },
+      "loss_giou_2": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.4293346405029297,
+        "right": 0.4293346405029297
+      },
+      "loss_giou_enc": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.5700854659080505,
+        "right": 0.5700854659080505
+      },
+      "loss_mask_ce": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.013211879879236221,
+        "right": 0.013211879879236221
+      },
+      "loss_mask_ce_0": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.009428746998310089,
+        "right": 0.009428746998310089
+      },
+      "loss_mask_ce_1": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.00873858854174614,
+        "right": 0.00873858854174614
+      },
+      "loss_mask_ce_2": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.01345701515674591,
+        "right": 0.01345701515674591
+      },
+      "loss_mask_ce_enc": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.014360644854605198,
+        "right": 0.014360644854605198
+      },
+      "loss_mask_dice": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.32301026582717896,
+        "right": 0.32301026582717896
+      },
+      "loss_mask_dice_0": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.3552996516227722,
+        "right": 0.3552996516227722
+      },
+      "loss_mask_dice_1": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.23472803831100464,
+        "right": 0.23472803831100464
+      },
+      "loss_mask_dice_2": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.3341817855834961,
+        "right": 0.3341817855834961
+      },
+      "loss_mask_dice_enc": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.42073848843574524,
+        "right": 0.42073848843574524
+      }
+    },
+    "postprocess": {
+      "postprocess[0].boxes": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          100,
+          4
+        ],
+        "status": "PASS"
+      },
+      "postprocess[0].labels": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          100
+        ],
+        "status": "PASS"
+      },
+      "postprocess[0].masks": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          100,
+          1,
+          800,
+          800
+        ],
+        "status": "PASS"
+      },
+      "postprocess[0].scores": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          100
+        ],
+        "status": "PASS"
+      }
+    },
+    "status": "PASS"
+  },
+  "peak_memory_bytes": 0,
+  "sample_index": 0,
+  "sample_path": "/home/inspur1/data/MVTec-AD/pill/test/color/000.png",
+  "shapes": {
+    "eval": {
+      "aux_outputs": [
+        {
+          "pred_boxes": {
+            "dtype": "torch.float32",
+            "max": 0.9331150650978088,
+            "min": 0.03737598657608032,
+            "shape": [
+              1,
+              100,
+              4
+            ]
+          },
+          "pred_logits": {
+            "dtype": "torch.float32",
+            "max": -0.32758235931396484,
+            "min": -9.045650482177734,
+            "shape": [
+              1,
+              100,
+              91
+            ]
+          },
+          "pred_masks": {
+            "dtype": "torch.float32",
+            "max": 22.937841415405273,
+            "min": -48.80461120605469,
+            "shape": [
+              1,
+              100,
+              96,
+              96
+            ]
+          }
+        },
+        {
+          "pred_boxes": {
+            "dtype": "torch.float32",
+            "max": 0.9924286603927612,
+            "min": 0.03200026974081993,
+            "shape": [
+              1,
+              100,
+              4
+            ]
+          },
+          "pred_logits": {
+            "dtype": "torch.float32",
+            "max": -0.49370813369750977,
+            "min": -10.333610534667969,
+            "shape": [
+              1,
+              100,
+              91
+            ]
+          },
+          "pred_masks": {
+            "dtype": "torch.float32",
+            "max": 23.029489517211914,
+            "min": -51.29526901245117,
+            "shape": [
+              1,
+              100,
+              96,
+              96
+            ]
+          }
+        },
+        {
+          "pred_boxes": {
+            "dtype": "torch.float32",
+            "max": 1.0236358642578125,
+            "min": 0.029138170182704926,
+            "shape": [
+              1,
+              100,
+              4
+            ]
+          },
+          "pred_logits": {
+            "dtype": "torch.float32",
+            "max": -0.7953741550445557,
+            "min": -10.865293502807617,
+            "shape": [
+              1,
+              100,
+              91
+            ]
+          },
+          "pred_masks": {
+            "dtype": "torch.float32",
+            "max": 18.270471572875977,
+            "min": -64.37432098388672,
+            "shape": [
+              1,
+              100,
+              96,
+              96
+            ]
+          }
+        }
+      ],
+      "enc_outputs": {
+        "pred_boxes": {
+          "dtype": "torch.float32",
+          "max": 0.969279944896698,
+          "min": 0.036028023809194565,
+          "shape": [
+            1,
+            100,
+            4
+          ]
+        },
+        "pred_logits": {
+          "dtype": "torch.float32",
+          "max": -0.4279627799987793,
+          "min": -9.211427688598633,
+          "shape": [
+            1,
+            100,
+            91
+          ]
+        },
+        "pred_masks": {
+          "dtype": "torch.float32",
+          "max": 16.18197250366211,
+          "min": -57.997276306152344,
+          "shape": [
+            1,
+            100,
+            96,
+            96
+          ]
+        }
+      },
+      "pred_boxes": {
+        "dtype": "torch.float32",
+        "max": 1.0378549098968506,
+        "min": -0.013868510723114014,
+        "shape": [
+          1,
+          100,
+          4
+        ]
+      },
+      "pred_logits": {
+        "dtype": "torch.float32",
+        "max": -0.578341007232666,
+        "min": -10.450763702392578,
+        "shape": [
+          1,
+          100,
+          91
+        ]
+      },
+      "pred_masks": {
+        "dtype": "torch.float32",
+        "max": 17.803325653076172,
+        "min": -75.1403579711914,
+        "shape": [
+          1,
+          100,
+          96,
+          96
+        ]
+      }
+    },
+    "train": {
+      "aux_outputs": [
+        {
+          "pred_boxes": {
+            "dtype": "torch.float32",
+            "max": 0.9881502389907837,
+            "min": 0.031086355447769165,
+            "shape": [
+              1,
+              1300,
+              4
+            ]
+          },
+          "pred_logits": {
+            "dtype": "torch.float32",
+            "max": -0.13198423385620117,
+            "min": -9.045650482177734,
+            "shape": [
+              1,
+              1300,
+              91
+            ]
+          },
+          "pred_masks": {
+            "bias": {
+              "dtype": "torch.float32",
+              "max": -0.4660739004611969,
+              "min": -0.4660739004611969,
+              "shape": [
+                1
+              ]
+            },
+            "query_features": {
+              "dtype": "torch.float32",
+              "max": 5.541275978088379,
+              "min": -5.535628795623779,
+              "shape": [
+                1,
+                1300,
+                256
+              ]
+            },
+            "spatial_features": {
+              "dtype": "torch.float32",
+              "max": 2.41393780708313,
+              "min": -2.67270565032959,
+              "shape": [
+                1,
+                256,
+                96,
+                96
+              ]
+            }
+          }
+        },
+        {
+          "pred_boxes": {
+            "dtype": "torch.float32",
+            "max": 1.0852148532867432,
+            "min": -0.20476114749908447,
+            "shape": [
+              1,
+              1300,
+              4
+            ]
+          },
+          "pred_logits": {
+            "dtype": "torch.float32",
+            "max": 0.06282520294189453,
+            "min": -11.534400939941406,
+            "shape": [
+              1,
+              1300,
+              91
+            ]
+          },
+          "pred_masks": {
+            "bias": {
+              "dtype": "torch.float32",
+              "max": -0.4660739004611969,
+              "min": -0.4660739004611969,
+              "shape": [
+                1
+              ]
+            },
+            "query_features": {
+              "dtype": "torch.float32",
+              "max": 7.790910243988037,
+              "min": -13.077362060546875,
+              "shape": [
+                1,
+                1300,
+                256
+              ]
+            },
+            "spatial_features": {
+              "dtype": "torch.float32",
+              "max": 2.740520715713501,
+              "min": -2.7628283500671387,
+              "shape": [
+                1,
+                256,
+                96,
+                96
+              ]
+            }
+          }
+        },
+        {
+          "pred_boxes": {
+            "dtype": "torch.float32",
+            "max": 1.0619934797286987,
+            "min": -0.040246427059173584,
+            "shape": [
+              1,
+              1300,
+              4
+            ]
+          },
+          "pred_logits": {
+            "dtype": "torch.float32",
+            "max": -0.02837085723876953,
+            "min": -11.5009126663208,
+            "shape": [
+              1,
+              1300,
+              91
+            ]
+          },
+          "pred_masks": {
+            "bias": {
+              "dtype": "torch.float32",
+              "max": -0.4660739004611969,
+              "min": -0.4660739004611969,
+              "shape": [
+                1
+              ]
+            },
+            "query_features": {
+              "dtype": "torch.float32",
+              "max": 6.822474002838135,
+              "min": -10.006776809692383,
+              "shape": [
+                1,
+                1300,
+                256
+              ]
+            },
+            "spatial_features": {
+              "dtype": "torch.float32",
+              "max": 3.2817330360412598,
+              "min": -3.5842878818511963,
+              "shape": [
+                1,
+                256,
+                96,
+                96
+              ]
+            }
+          }
+        }
+      ],
+      "enc_outputs": {
+        "pred_boxes": {
+          "dtype": "torch.float32",
+          "max": 1.0049641132354736,
+          "min": 0.03263523057103157,
+          "shape": [
+            1,
+            1300,
+            4
+          ]
+        },
+        "pred_logits": {
+          "dtype": "torch.float32",
+          "max": -0.3271045684814453,
+          "min": -9.27258586883545,
+          "shape": [
+            1,
+            1300,
+            91
+          ]
+        },
+        "pred_masks": {
+          "bias": {
+            "dtype": "torch.float32",
+            "max": -0.4660739004611969,
+            "min": -0.4660739004611969,
+            "shape": [
+              1
+            ]
+          },
+          "query_features": {
+            "dtype": "torch.float32",
+            "max": 24.197616577148438,
+            "min": -38.301025390625,
+            "shape": [
+              1,
+              1300,
+              256
+            ]
+          },
+          "spatial_features": {
+            "dtype": "torch.float32",
+            "max": 1.5946491956710815,
+            "min": -0.5290707349777222,
+            "shape": [
+              1,
+              256,
+              96,
+              96
+            ]
+          }
+        }
+      },
+      "pred_boxes": {
+        "dtype": "torch.float32",
+        "max": 1.0637997388839722,
+        "min": -0.05681607127189636,
+        "shape": [
+          1,
+          1300,
+          4
+        ]
+      },
+      "pred_logits": {
+        "dtype": "torch.float32",
+        "max": -0.2096405029296875,
+        "min": -11.461193084716797,
+        "shape": [
+          1,
+          1300,
+          91
+        ]
+      },
+      "pred_masks": {
+        "bias": {
+          "dtype": "torch.float32",
+          "max": -0.4660739004611969,
+          "min": -0.4660739004611969,
+          "shape": [
+            1
+          ]
+        },
+        "query_features": {
+          "dtype": "torch.float32",
+          "max": 7.848418235778809,
+          "min": -8.816277503967285,
+          "shape": [
+            1,
+            1300,
+            256
+          ]
+        },
+        "spatial_features": {
+          "dtype": "torch.float32",
+          "max": 3.5724003314971924,
+          "min": -3.9853124618530273,
+          "shape": [
+            1,
+            256,
+            96,
+            96
+          ]
+        }
+      }
+    }
+  },
+  "status": "PASS",
+  "timing_seconds": {
+    "backward_disabled": 0.5675198420067318,
+    "eval_disabled": 0.13918153700069524,
+    "train_disabled": 0.4424807789910119
+  }
+}

@@ -1,0 +1,36 @@
+# RF-DETR-Seg-Small native-bounded NAS preparation smoke configuration.
+model:
+  name: RFDETRSegSmall
+  variant: RFDETRSegSmall
+  checkpoint: /home/liujiyuan/rf-detr-models/rf-detr-seg-small.pt
+  architecture_source: runtime_checkpoint
+  segmentation_head: true
+  native_bounded: true
+  max_steps: 6
+  batch_size: 1
+  seed: 20260807
+  sampling_policy: balanced_patch
+  canonical_resolution: 640
+dataset:
+  type: mvtec_adapter
+  root: /home/inspur1/data/MVTec-AD
+  category: pill
+  split: test
+sampling:
+  policy: balanced_patch
+  alternate_policy: uniform_valid_arch
+  schedule: deterministic_by_optimizer_step
+supernet:
+  decoder_depth_during_training: native
+  queries_during_training: native
+norm:
+  recalibration: auto_if_running_stats_present
+smoke:
+  max_optimizer_steps: 6
+  batch_size: 1
+  checkpoint_resume: required
+full_search:
+  enabled: false
+  pareto: false
+  full_subnet_sweep: false
+  approval_marker: NAS_FULL_SEARCH_APPROVED

@@ -1,0 +1,16 @@
+{
+  "decoder_layers": 2,
+  "encoder": "dinov2_windowed_small",
+  "group_detr": 13,
+  "hardware_feasible": null,
+  "invalid_reason": null,
+  "metadata": {
+    "export_variant": "reduced_decoder_query"
+  },
+  "native": false,
+  "num_queries": 50,
+  "num_select": 50,
+  "num_windows": 2,
+  "patch_size": 12,
+  "resolution": 384
+}

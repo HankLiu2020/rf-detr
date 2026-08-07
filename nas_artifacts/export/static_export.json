@@ -1,0 +1,61 @@
+{
+  "native": {
+    "architecture": {
+      "decoder_layers": 4,
+      "encoder": "dinov2_windowed_small",
+      "group_detr": 13,
+      "hardware_feasible": null,
+      "invalid_reason": null,
+      "metadata": {
+        "native_identity": true
+      },
+      "native": true,
+      "num_queries": 100,
+      "num_select": 100,
+      "num_windows": 2,
+      "patch_size": 12,
+      "resolution": 384
+    },
+    "onnx": {
+      "reason": "Module onnx is not installed!",
+      "status": "UNSUPPORTED"
+    },
+    "torchscript": {
+      "architecture_path": "nas_artifacts/export/native/architecture.json",
+      "output_count": 3,
+      "path": "nas_artifacts/export/native/subnet.pt",
+      "status": "PASS",
+      "verification_path": "nas_artifacts/export/native/verification.json"
+    }
+  },
+  "reduced": {
+    "architecture": {
+      "decoder_layers": 2,
+      "encoder": "dinov2_windowed_small",
+      "group_detr": 13,
+      "hardware_feasible": null,
+      "invalid_reason": null,
+      "metadata": {
+        "export_variant": "reduced_decoder_query"
+      },
+      "native": false,
+      "num_queries": 50,
+      "num_select": 50,
+      "num_windows": 2,
+      "patch_size": 12,
+      "resolution": 384
+    },
+    "onnx": {
+      "reason": "Module onnx is not installed!",
+      "status": "UNSUPPORTED"
+    },
+    "torchscript": {
+      "architecture_path": "nas_artifacts/export/reduced/architecture.json",
+      "output_count": 3,
+      "path": "nas_artifacts/export/reduced/subnet.pt",
+      "status": "PASS",
+      "verification_path": "nas_artifacts/export/reduced/verification.json"
+    }
+  },
+  "status": "PASS"
+}

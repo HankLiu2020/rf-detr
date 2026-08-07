@@ -1,0 +1,463 @@
+{
+  "backward_success": true,
+  "equivalence": {
+    "level_1_raw_output": {
+      "eval.aux_outputs[0].pred_boxes": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          4
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[0].pred_logits": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          91
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[0].pred_masks": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          96,
+          96
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[1].pred_boxes": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          4
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[1].pred_logits": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          91
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[1].pred_masks": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          96,
+          96
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[2].pred_boxes": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          4
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[2].pred_logits": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          91
+        ],
+        "status": "PASS"
+      },
+      "eval.aux_outputs[2].pred_masks": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          96,
+          96
+        ],
+        "status": "PASS"
+      },
+      "eval.enc_outputs.pred_boxes": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          4
+        ],
+        "status": "PASS"
+      },
+      "eval.enc_outputs.pred_logits": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          91
+        ],
+        "status": "PASS"
+      },
+      "eval.enc_outputs.pred_masks": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          96,
+          96
+        ],
+        "status": "PASS"
+      },
+      "eval.pred_boxes": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          4
+        ],
+        "status": "PASS"
+      },
+      "eval.pred_logits": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          91
+        ],
+        "status": "PASS"
+      },
+      "eval.pred_masks": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          1,
+          100,
+          96,
+          96
+        ],
+        "status": "PASS"
+      }
+    },
+    "level_2_matching_exact": true,
+    "level_3_loss_components": {
+      "cardinality_error": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 1.0,
+        "right": 1.0
+      },
+      "cardinality_error_0": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 1.0,
+        "right": 1.0
+      },
+      "cardinality_error_1": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.0,
+        "right": 0.0
+      },
+      "cardinality_error_2": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 1.0,
+        "right": 1.0
+      },
+      "cardinality_error_enc": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 1.0,
+        "right": 1.0
+      },
+      "class_error": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 100.0,
+        "right": 100.0
+      },
+      "loss_bbox": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.012933568097651005,
+        "right": 0.012933568097651005
+      },
+      "loss_bbox_0": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.04094932600855827,
+        "right": 0.04094932600855827
+      },
+      "loss_bbox_1": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.022465534508228302,
+        "right": 0.022465534508228302
+      },
+      "loss_bbox_2": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.023432601243257523,
+        "right": 0.023432601243257523
+      },
+      "loss_bbox_enc": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.044046562165021896,
+        "right": 0.044046562165021896
+      },
+      "loss_ce": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 1.0803277492523193,
+        "right": 1.0803277492523193
+      },
+      "loss_ce_0": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.7931998372077942,
+        "right": 0.7931998372077942
+      },
+      "loss_ce_1": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.961259126663208,
+        "right": 0.961259126663208
+      },
+      "loss_ce_2": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.8805845975875854,
+        "right": 0.8805845975875854
+      },
+      "loss_ce_enc": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.8238867521286011,
+        "right": 0.8238867521286011
+      },
+      "loss_giou": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.3067872226238251,
+        "right": 0.3067872226238251
+      },
+      "loss_giou_0": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.5526114106178284,
+        "right": 0.5526114106178284
+      },
+      "loss_giou_1": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.4308018982410431,
+        "right": 0.4308018982410431
+      },
+      "loss_giou_2": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.4293346405029297,
+        "right": 0.4293346405029297
+      },
+      "loss_giou_enc": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.5700854659080505,
+        "right": 0.5700854659080505
+      },
+      "loss_mask_ce": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.013211879879236221,
+        "right": 0.013211879879236221
+      },
+      "loss_mask_ce_0": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.009428746998310089,
+        "right": 0.009428746998310089
+      },
+      "loss_mask_ce_1": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.00873858854174614,
+        "right": 0.00873858854174614
+      },
+      "loss_mask_ce_2": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.01345701515674591,
+        "right": 0.01345701515674591
+      },
+      "loss_mask_ce_enc": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.014360644854605198,
+        "right": 0.014360644854605198
+      },
+      "loss_mask_dice": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.32301026582717896,
+        "right": 0.32301026582717896
+      },
+      "loss_mask_dice_0": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.3552996516227722,
+        "right": 0.3552996516227722
+      },
+      "loss_mask_dice_1": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.23472803831100464,
+        "right": 0.23472803831100464
+      },
+      "loss_mask_dice_2": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.3341817855834961,
+        "right": 0.3341817855834961
+      },
+      "loss_mask_dice_enc": {
+        "abs_diff": 0.0,
+        "allclose": true,
+        "left": 0.42073848843574524,
+        "right": 0.42073848843574524
+      }
+    },
+    "postprocess": {
+      "postprocess[0].boxes": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          100,
+          4
+        ],
+        "status": "PASS"
+      },
+      "postprocess[0].labels": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          100
+        ],
+        "status": "PASS"
+      },
+      "postprocess[0].masks": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          100,
+          1,
+          800,
+          800
+        ],
+        "status": "PASS"
+      },
+      "postprocess[0].scores": {
+        "allclose": true,
+        "max_abs_diff": 0.0,
+        "shape": [
+          100
+        ],
+        "status": "PASS"
+      }
+    },
+    "status": "PASS"
+  },
+  "gradient_parameter_count": 543,
+  "losses": {
+    "cardinality_error": 1.0,
+    "cardinality_error_0": 1.0,
+    "cardinality_error_1": 0.0,
+    "cardinality_error_2": 1.0,
+    "cardinality_error_enc": 1.0,
+    "class_error": 100.0,
+    "loss_bbox": 0.012933568097651005,
+    "loss_bbox_0": 0.04094932600855827,
+    "loss_bbox_1": 0.022465534508228302,
+    "loss_bbox_2": 0.023432601243257523,
+    "loss_bbox_enc": 0.044046562165021896,
+    "loss_ce": 1.0803277492523193,
+    "loss_ce_0": 0.7931998372077942,
+    "loss_ce_1": 0.961259126663208,
+    "loss_ce_2": 0.8805845975875854,
+    "loss_ce_enc": 0.8238867521286011,
+    "loss_giou": 0.3067872226238251,
+    "loss_giou_0": 0.5526114106178284,
+    "loss_giou_1": 0.4308018982410431,
+    "loss_giou_2": 0.4293346405029297,
+    "loss_giou_enc": 0.5700854659080505,
+    "loss_mask_ce": 0.013211879879236221,
+    "loss_mask_ce_0": 0.009428746998310089,
+    "loss_mask_ce_1": 0.00873858854174614,
+    "loss_mask_ce_2": 0.01345701515674591,
+    "loss_mask_ce_enc": 0.014360644854605198,
+    "loss_mask_dice": 0.32301026582717896,
+    "loss_mask_dice_0": 0.3552996516227722,
+    "loss_mask_dice_1": 0.23472803831100464,
+    "loss_mask_dice_2": 0.3341817855834961,
+    "loss_mask_dice_enc": 0.42073848843574524
+  },
+  "matching_lengths": [
+    13
+  ],
+  "native_losses": {
+    "cardinality_error": 1.0,
+    "cardinality_error_0": 1.0,
+    "cardinality_error_1": 0.0,
+    "cardinality_error_2": 1.0,
+    "cardinality_error_enc": 1.0,
+    "class_error": 100.0,
+    "loss_bbox": 0.012933568097651005,
+    "loss_bbox_0": 0.04094932600855827,
+    "loss_bbox_1": 0.022465534508228302,
+    "loss_bbox_2": 0.023432601243257523,
+    "loss_bbox_enc": 0.044046562165021896,
+    "loss_ce": 1.0803277492523193,
+    "loss_ce_0": 0.7931998372077942,
+    "loss_ce_1": 0.961259126663208,
+    "loss_ce_2": 0.8805845975875854,
+    "loss_ce_enc": 0.8238867521286011,
+    "loss_giou": 0.3067872226238251,
+    "loss_giou_0": 0.5526114106178284,
+    "loss_giou_1": 0.4308018982410431,
+    "loss_giou_2": 0.4293346405029297,
+    "loss_giou_enc": 0.5700854659080505,
+    "loss_mask_ce": 0.013211879879236221,
+    "loss_mask_ce_0": 0.009428746998310089,
+    "loss_mask_ce_1": 0.00873858854174614,
+    "loss_mask_ce_2": 0.01345701515674591,
+    "loss_mask_ce_enc": 0.014360644854605198,
+    "loss_mask_dice": 0.32301026582717896,
+    "loss_mask_dice_0": 0.3552996516227722,
+    "loss_mask_dice_1": 0.23472803831100464,
+    "loss_mask_dice_2": 0.3341817855834961,
+    "loss_mask_dice_enc": 0.42073848843574524
+  },
+  "normalization_denominator": 13.0,
+  "status": "PASS",
+  "weighted_loss": 18.473413467407227
+}

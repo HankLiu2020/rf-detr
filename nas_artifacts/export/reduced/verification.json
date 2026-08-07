@@ -1,0 +1,35 @@
+{
+  "controller_free_loaded_torchscript": true,
+  "output_count": 3,
+  "outputs": [
+    {
+      "allclose": true,
+      "max_abs_diff": 0.0,
+      "shape": [
+        1,
+        50,
+        4
+      ]
+    },
+    {
+      "allclose": true,
+      "max_abs_diff": 0.0,
+      "shape": [
+        1,
+        50,
+        91
+      ]
+    },
+    {
+      "allclose": true,
+      "max_abs_diff": 0.0,
+      "shape": [
+        1,
+        50,
+        96,
+        96
+      ]
+    }
+  ],
+  "status": "PASS"
+}
