@@ -44,17 +44,18 @@ class SearchSpace:
         }
 
 
-def estimate_proposal_count_per_group(
+def estimate_encoder_proposal_pool_size(
     resolution: int,
     patch_size: int,
     projector_scale: Iterable[str] = ("P4",),
 ) -> int:
-    """Estimate P-level proposal tokens for the current single-projector model.
+    """Estimate the encoder proposal-pool width for the current model.
 
     RF-DETR's DINOv2 backbone emits a patch grid and ``MultiScaleProjector``
     changes its spatial size by a fixed P-level factor.  The native Small-Seg
-    checkpoint uses only P4, whose factor is one.  Keeping the calculation
-    explicit lets the controller reject ``topk`` requests before a forward.
+    checkpoint uses only P4, whose factor is one.  Keeping this calculation
+    explicit lets the controller perform an early guard while the transformer
+    keeps the measured tensor width as the final runtime boundary.
     """
 
     factors = {"P3": 2.0, "P4": 1.0, "P5": 0.5, "P6": 0.25}
@@ -79,24 +80,22 @@ def _candidate(
 ) -> ArchitectureSpec:
     valid_geometry = resolution % (patch_size * num_windows) == 0
     reason = None if valid_geometry else "resolution_not_divisible_by_patch_size_times_num_windows"
-    effective_select = min(native.num_select, num_queries)
     return ArchitectureSpec(
         resolution=resolution,
         patch_size=patch_size,
         num_windows=num_windows,
         decoder_layers=decoder_layers,
         num_queries=num_queries,
-        num_select=effective_select,
         group_detr=native.group_detr,
         encoder=native.encoder,
         native=native_flag,
         hardware_feasible=None,
         invalid_reason=reason,
         metadata={
-            "requested_num_select": native.num_select,
-            "effective_num_select": effective_select,
-            "proposal_count_per_group": proposal_count,
-            "proposal_count_guard": proposal_count >= num_queries,
+            "native_num_select_policy": native.num_select,
+            "postprocess_num_select_policy": "native_fixed",
+            "encoder_proposal_pool_size": proposal_count,
+            "encoder_proposal_pool_guard": proposal_count >= num_queries,
         },
     )
 
@@ -121,7 +120,7 @@ def generate_search_space(
     resolutions_set = sorted({int(v) for v in resolutions} | {native.resolution})
     patches_set = sorted({int(v) for v in patch_sizes} | {native.patch_size})
     windows_set = sorted({int(v) for v in num_windows} | {native.num_windows})
-    queries_set = sorted({int(v) for v in query_candidates if int(v) <= native.num_queries} | {native.num_queries})
+    queries_set = sorted({int(v) for v in query_candidates if 0 < int(v) <= native.num_queries} | {native.num_queries})
     decoder_set = set(range(native.decoder_layers + 1))
     if not include_decoder_zero or not decoder_zero_supported:
         decoder_set.discard(0)
@@ -131,7 +130,7 @@ def generate_search_space(
     for resolution in resolutions_set:
         for patch_size in patches_set:
             for window_count in windows_set:
-                proposal_count = estimate_proposal_count_per_group(
+                proposal_count = estimate_encoder_proposal_pool_size(
                     resolution,
                     patch_size,
                     native.projector_scale or ("P4",),

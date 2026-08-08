@@ -30,8 +30,40 @@ def assert_finite(value: Any, prefix: str = "value") -> None:
             assert_finite(child, f"{prefix}[{index}]")
 
 
-def expected_query_count(architecture: ArchitectureSpec, training: bool) -> int:
+def expected_query_total(architecture: ArchitectureSpec, training: bool) -> int:
+    """Return the runtime query width, including Group-DETR replicas in training."""
+
     return architecture.num_queries * architecture.group_detr if training else architecture.num_queries
+
+
+def expected_query_count(architecture: ArchitectureSpec, training: bool) -> int:
+    """Backward-compatible alias for :func:`expected_query_total`."""
+
+    return expected_query_total(architecture, training)
+
+
+def assert_query_width_invariant(observed_width: int, architecture: ArchitectureSpec, *, training: bool) -> int:
+    """Validate the Group-DETR train/eval query-width invariant.
+
+    ``ArchitectureSpec.num_queries`` is the per-group query count.  Training
+    materializes ``active_q * group_detr`` queries, while evaluation uses one
+    group and therefore materializes ``active_q`` queries.  The per-group
+    count itself does not need to be divisible by ``group_detr``.
+    """
+
+    expected = expected_query_total(architecture, training)
+    if observed_width != expected:
+        mode = "training" if training else "evaluation"
+        raise AssertionError(
+            f"{mode} query width {observed_width} != expected Q_total {expected} "
+            f"for active_q={architecture.num_queries}, group_detr={architecture.group_detr}"
+        )
+    if training and observed_width % architecture.group_detr != 0:
+        raise AssertionError(
+            "training query width must be divisible by group_detr: "
+            f"Q_total={observed_width}, group_detr={architecture.group_detr}"
+        )
+    return expected
 
 
 def assert_distributed_architecture(architecture: ArchitectureSpec) -> None:
@@ -55,14 +87,12 @@ def validate_output_shapes(
 ) -> dict[str, list[int]]:
     """Validate query dimensions for detection and segmentation outputs."""
 
-    expected = expected_query_count(architecture, training)
     observed: dict[str, list[int]] = {}
     for key in ("pred_logits", "pred_boxes", "pred_masks", "pred_keypoints"):
         value = outputs.get(key)
         if not isinstance(value, Tensor):
             continue
-        if value.shape[1] != expected:
-            raise AssertionError(f"{key} query dimension {value.shape[1]} != expected {expected}")
+        assert_query_width_invariant(value.shape[1], architecture, training=training)
         observed[key] = list(value.shape)
     assert_finite(outputs, "outputs")
     return observed

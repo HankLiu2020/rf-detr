@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "preparation_status": "NAS_PREPARATION_HARDENED=PASS",
+  "commit_reviewed": "58000e73",
+  "checks": {
+    "nas_pytest": {
+      "status": "PASS",
+      "test_count": 11,
+      "scope": [
+        "tests/nas/test_search_space.py",
+        "tests/nas/test_group_detr.py",
+        "tests/nas/test_controller_lifecycle.py",
+        "tests/nas/test_elastic_controls.py"
+      ]
+    },
+    "postprocess_and_nas_suite": {
+      "status": "PASS",
+      "passed": 31,
+      "skipped": 1,
+      "scope": [
+        "tests/models/test_postprocess.py",
+        "tests/nas"
+      ]
+    },
+    "real_small_seg_bounded_cpu": {
+      "status": "PASS",
+      "random_architecture_count": 10,
+      "backward_checks": 3,
+      "coverage": {
+        "patch_sizes": [12, 16, 20],
+        "num_windows": [1, 2],
+        "num_queries": [50, 100],
+        "decoder_layers": [0, 1, 2, 3, 4]
+      },
+      "native_equivalence": "PASS",
+      "state_pollution": "A-B-C-A PASS",
+      "decoder_zero_postprocess": "PASS",
+      "postprocess_policy": "native_fixed_num_select_100",
+      "target_gpu_pool": "UNVERIFIED_IN_THIS_SESSION"
+    },
+    "formal_search_safety": {
+      "status": "PASS",
+      "full_search_executed": false,
+      "pareto_search_executed": false,
+      "full_subnet_sweep_executed": false,
+      "full_search_enabled": false
+    }
+  },
+  "policy": {
+    "num_queries": "NAS knob",
+    "num_select": "native PostProcess policy",
+    "group_detr_train_query_total": "active_q * group_detr",
+    "group_detr_eval_query_total": "active_q",
+    "active_query_group_divisibility_filter": false,
+    "runtime_proposal_guard": true
+  }
+}

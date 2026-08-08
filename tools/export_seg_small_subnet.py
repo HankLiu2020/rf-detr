@@ -35,7 +35,6 @@ def _export_one(checkpoint: Path, output: Path, device: str, reduced: bool) -> d
             num_windows=native.num_windows,
             decoder_layers=max(1, native.decoder_layers - 2),
             num_queries=max(1, native.num_queries // 2),
-            num_select=max(1, native.num_select // 2),
             group_detr=native.group_detr,
             encoder=native.encoder,
             metadata={"export_variant": "reduced_decoder_query"},

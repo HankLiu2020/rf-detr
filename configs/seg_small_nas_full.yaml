@@ -31,7 +31,7 @@ query_search:
   policy: keep_candidates_le_native_plus_native
 postprocess:
   num_select: native
-  num_select_policy: audit_before_change
+  num_select_policy: native_fixed
 architecture:
   invalid_divisibility_policy: reject
   insufficient_proposal_policy: reject

@@ -76,7 +76,6 @@ def _architecture_from_dict(value: dict[str, object]) -> ArchitectureSpec:
         "num_windows",
         "decoder_layers",
         "num_queries",
-        "num_select",
         "group_detr",
         "encoder",
         "native",

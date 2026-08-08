@@ -1,10 +1,11 @@
 # RF-DETR-Seg-Small Native-Bounded NAS Preparation Report
 
-Date: 2026-08-07 (Asia/Shanghai)
+Date: 2026-08-08 (Asia/Shanghai)
 
 ## Status
 
 `NAS_PREPARATION_STATUS=PASS`
+`NAS_PREPARATION_HARDENED=PASS`
 
 This report covers the implementation and bounded CPU/GPU verification for the
 native-bounded RF-DETR-Seg-Small NAS preparation. The current checkout was
@@ -14,6 +15,29 @@ capabilities.
 
 Formal supernet training, full subnet sweep, Pareto search, and TensorRT
 benchmarking were not executed.
+
+The 2026-08-08 review hardening is recorded in
+`nas_artifacts/hardening_regression.json`. It removes dynamic `num_select`
+from `ArchitectureSpec`, keeps the native PostProcess policy fixed, adds the
+Controller native-state snapshot/reset lifecycle, validates the Group-DETR
+train/eval width invariant, and retains the transformer runtime proposal
+tensor guard. The bounded CPU regression passed; no new target-GPU run was
+possible in this session because the Docker socket is not accessible.
+
+## Hardening addendum
+
+| Area | Result | Evidence |
+|---|---|---|
+| Native PostProcess policy | PASS | `ArchitectureSpec` has no dynamic `num_select`; SearchSpace metadata records `native_fixed` and Controller never rewrites PostProcess top-k. |
+| Controller lifecycle | PASS | Immutable `NativeStateSnapshot`, `reset_to_native()`, value/type restoration test, and real-model A-B-C-A allclose. |
+| Group-DETR invariant | PASS | Training `Q_total=active_q*group_detr`, evaluation `Q_total=active_q`; `active_q=50`, `group_detr=13` is accepted. |
+| Proposal estimator | PASS | Renamed `estimate_encoder_proposal_pool_size()` and checked against a real encoder tensor width; transformer runtime guard retained. |
+| Decoder 0 evaluator path | PASS | Encoder-only output shape plus real `PostProcess` regression. |
+| Formal search safety | PASS | `full_search.enabled=false`; no formal search, Pareto search, or full subnet sweep executed. |
+
+The final focused pytest command passed 31 tests with 1 expected environment-
+dependent skip; the skip is the existing CUDA-only PostProcess check on this
+CPU-visible session.
 
 ## Native architecture
 

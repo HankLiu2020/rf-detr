@@ -22,9 +22,9 @@
   "flat_slice_max_abs_diff": 6.5778350830078125,
   "group_detr": 13,
   "native_num_queries_per_group": 100,
-  "num_select": {
-    "active_num_queries": 50,
-    "active_num_select": 50
+  "postprocess_num_select": {
+    "native_num_select": 100,
+    "policy": "native_fixed"
   },
   "per_group_max_abs_diff": 0.0,
   "status": "PASS",

@@ -88,7 +88,6 @@ class ArchitectureSpec:
     num_windows: int
     decoder_layers: int
     num_queries: int
-    num_select: int
     group_detr: int
     encoder: str
     native: bool = False
@@ -123,8 +122,6 @@ class ArchitectureSpec:
             raise ValueError(f"decoder_layers {self.decoder_layers} exceeds native [0, {native.decoder_layers}]")
         if self.num_queries <= 0 or self.num_queries > native.num_queries:
             raise ValueError(f"num_queries {self.num_queries} exceeds native [1, {native.num_queries}]")
-        if self.num_select <= 0 or self.num_select > self.num_queries:
-            raise ValueError(f"num_select {self.num_select} must be in [1, num_queries={self.num_queries}]")
         if self.group_detr != native.group_detr:
             raise ValueError("group_detr is immutable for native-bounded search")
 

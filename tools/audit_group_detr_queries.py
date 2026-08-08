@@ -64,7 +64,6 @@ def main() -> int:
         num_windows=native.num_windows,
         decoder_layers=native.decoder_layers,
         num_queries=active_queries,
-        num_select=active_queries,
         group_detr=native.group_detr,
         encoder=native.encoder,
     )
@@ -85,7 +84,10 @@ def main() -> int:
         "eval_query_dimension": active_queries,
         "per_group_max_abs_diff": grouped_diff,
         "flat_slice_max_abs_diff": flat_diff,
-        "num_select": {"active_num_queries": active_queries, "active_num_select": architecture.num_select},
+        "postprocess_num_select": {
+            "policy": "native_fixed",
+            "native_num_select": native.num_select,
+        },
         "eval_shapes": shapes,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)

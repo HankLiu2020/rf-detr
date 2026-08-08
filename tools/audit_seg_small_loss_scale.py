@@ -64,7 +64,6 @@ def main() -> int:
             num_windows=2,
             decoder_layers=native.decoder_layers,
             num_queries=native.num_queries,
-            num_select=native.num_select,
             group_detr=native.group_detr,
             encoder=native.encoder,
         )
