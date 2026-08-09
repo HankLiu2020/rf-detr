@@ -42,6 +42,7 @@ from rfdetr.datasets._torchvision import (
 )
 from rfdetr.datasets.aug_configs import AUG_CONFIG
 from rfdetr.datasets.kornia_transforms import is_gpu_postprocess, resolve_backend_for_build
+from rfdetr.datasets.sample_id import make_sample_id
 from rfdetr.datasets.transforms import AlbumentationsWrapper, Normalize
 from rfdetr.utilities.logger import get_logger
 
@@ -258,9 +259,11 @@ class CocoDetection(torchvision.datasets.CocoDetection):
         include_keypoints: bool = False,
         num_keypoints_per_class: list[int] | None = None,
         remap_category_ids: bool = False,
+        split: str = "train",
     ) -> None:
         super().__init__(img_folder, ann_file)
         self._transforms = transforms
+        self._split = split
         self.include_masks = include_masks
         self.include_keypoints = include_keypoints
         if remap_category_ids:
@@ -286,7 +289,9 @@ class CocoDetection(torchvision.datasets.CocoDetection):
     def __getitem__(self, idx: int) -> tuple[Any, Any]:
         img, target = super().__getitem__(idx)
         image_id = self.ids[idx]
-        target = {"image_id": image_id, "annotations": target}
+        image_info = self.coco.imgs[image_id]
+        sample_id = make_sample_id(self._split, image_id, str(image_info["file_name"]))
+        target = {"image_id": image_id, "sample_id": sample_id, "annotations": target}
         img, target = self.prepare(img, target)
         if self._transforms is not None:
             # boxes are absolute [x_min, y_min, x_max, y_max]; conversion to
@@ -342,6 +347,7 @@ class ConvertCoco:
 
         image_id = target["image_id"]
         image_id = torch.as_tensor([image_id])
+        sample_id = target.get("sample_id")
 
         anno = target["annotations"]
 
@@ -376,6 +382,8 @@ class ConvertCoco:
         target["boxes"] = boxes
         target["labels"] = classes
         target["image_id"] = image_id
+        if sample_id is not None:
+            target["sample_id"] = sample_id
 
         # for conversion to coco api
         area = torch.as_tensor([obj["area"] for obj in anno])
@@ -1019,6 +1027,7 @@ def build_coco(image_set: str, args: Any, resolution: int) -> CocoDetection:
             # Active-first [17] maps keypoint categories to slot 0; changing either without
             # the other silently misaligns training supervision.
             remap_category_ids=include_keypoints,
+            split=image_set,
         )
     else:
         logger.info(f"Building COCO {image_set} dataset at resolution {resolution}")
@@ -1045,6 +1054,7 @@ def build_coco(image_set: str, args: Any, resolution: int) -> CocoDetection:
             # Active-first [17] maps keypoint categories to slot 0; changing either without
             # the other silently misaligns training supervision.
             remap_category_ids=include_keypoints,
+            split=image_set,
         )
     return dataset
 
@@ -1104,6 +1114,7 @@ def build_roboflow_from_coco(image_set: str, args: Any, resolution: int) -> Coco
             include_keypoints=include_keypoints,
             num_keypoints_per_class=num_keypoints_per_class,
             remap_category_ids=True,
+            split=image_set,
         )
     else:
         logger.info(f"Building Roboflow {image_set} dataset at resolution {resolution}")
@@ -1127,5 +1138,6 @@ def build_roboflow_from_coco(image_set: str, args: Any, resolution: int) -> Coco
             include_keypoints=include_keypoints,
             num_keypoints_per_class=num_keypoints_per_class,
             remap_category_ids=True,
+            split=image_set,
         )
     return dataset

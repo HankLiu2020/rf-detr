@@ -34,6 +34,7 @@ from rfdetr.datasets.coco import (
     make_coco_transforms_square_div_64,
 )
 from rfdetr.datasets.kornia_transforms import is_gpu_postprocess, resolve_backend_for_build
+from rfdetr.datasets.sample_id import make_sample_id
 from rfdetr.utilities.logger import get_logger
 
 logger = get_logger()
@@ -811,7 +812,7 @@ class ConvertYolo:
         self.include_keypoints = include_keypoints
         self.num_keypoints = num_keypoints
 
-    def __call__(self, image: Image.Image, target: dict[str, Any]) -> tuple[Image.Image, dict[str, torch.Tensor]]:
+    def __call__(self, image: Image.Image, target: dict[str, Any]) -> tuple[Image.Image, dict[str, Any]]:
         """Convert image and YOLO detections to RF-DETR format.
 
         Args:
@@ -843,10 +844,12 @@ class ConvertYolo:
         boxes = boxes[keep]
         classes = classes[keep]
 
-        target_out: dict[str, torch.Tensor] = {}
+        target_out: dict[str, Any] = {}
         target_out["boxes"] = boxes
         target_out["labels"] = classes
         target_out["image_id"] = image_id
+        if "sample_id" in target:
+            target_out["sample_id"] = target["sample_id"]
 
         # compute area after clamp
         area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
@@ -912,11 +915,14 @@ class YoloDetection(VisionDataset):  # type: ignore[misc]  # torchvision ships n
         include_masks: bool = False,
         include_keypoints: bool = False,
         num_keypoints_per_class: list[int] | None = None,
+        split: str = "train",
     ):
         if include_masks and include_keypoints:
             raise ValueError("YOLO segmentation masks and keypoints cannot be loaded at the same time.")
         super().__init__(img_folder)
         self._transforms = transforms
+        self._img_folder = Path(img_folder)
+        self._split = split
         self.include_masks = include_masks
         self.include_keypoints = include_keypoints
         self.keypoint_schema: YoloKeypointSchema | None
@@ -964,7 +970,12 @@ class YoloDetection(VisionDataset):  # type: ignore[misc]  # torchvision ships n
 
         img = Image.fromarray(rgb_image)
 
-        target: dict[str, Any] = {"image_id": image_id, "detections": detections}
+        relative_path = Path(image_path).relative_to(self._img_folder).as_posix()
+        target: dict[str, Any] = {
+            "image_id": image_id,
+            "sample_id": make_sample_id(self._split, image_id, relative_path),
+            "detections": detections,
+        }
         if self.include_keypoints:
             target["keypoints"] = self.sv_dataset.get_image_info(idx).keypoints
         prepared_image, prepared_target = self.prepare(img, target)
@@ -1048,6 +1059,7 @@ def build_roboflow_from_yolo(image_set: str, args: Any, resolution: int) -> Yolo
             include_masks=include_masks,
             include_keypoints=include_keypoints,
             num_keypoints_per_class=num_keypoints_per_class,
+            split=image_set,
         )
     else:
         dataset = YoloDetection(
@@ -1070,5 +1082,6 @@ def build_roboflow_from_yolo(image_set: str, args: Any, resolution: int) -> Yolo
             include_masks=include_masks,
             include_keypoints=include_keypoints,
             num_keypoints_per_class=num_keypoints_per_class,
+            split=image_set,
         )
     return dataset

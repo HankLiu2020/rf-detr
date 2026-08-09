@@ -744,5 +744,8 @@ class RFDETRDataModule(LightningDataModule):
         samples, targets = batch
         non_blocking = device.type == "cuda"
         samples = samples.to(device, non_blocking=non_blocking)
-        targets = [{k: v.to(device, non_blocking=non_blocking) for k, v in t.items()} for t in targets]
+        targets = [
+            {k: v.to(device, non_blocking=non_blocking) if torch.is_tensor(v) else v for k, v in t.items()}
+            for t in targets
+        ]
         return samples, targets

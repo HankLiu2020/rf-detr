@@ -22,7 +22,7 @@ CONTAINER_TRANSFORM_NAMES: frozenset[str] = frozenset({"OneOf", "SomeOf", "Seque
 # when boxes are dropped. Shared here so the two pipelines stay in sync on this image-level
 # subset while each keeps its own, deliberately different, per-instance-field policy (notably
 # how each handles ``labels`` — see the per-instance filter helpers in both modules).
-IMAGE_LEVEL_TARGET_FIELDS: frozenset[str] = frozenset({"orig_size", "size", "image_id"})
+IMAGE_LEVEL_TARGET_FIELDS: frozenset[str] = frozenset({"orig_size", "size", "image_id", "sample_id"})
 
 
 def resolve_keypoint_flip_pairs(args: Any, *, include_keypoints: bool) -> list[int] | None:
