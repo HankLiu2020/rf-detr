@@ -3,7 +3,7 @@
 # Copyright (c) 2025 Roboflow. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 [see LICENSE for details]
 # ------------------------------------------------------------------------
-"""Safety-locked formal-search runner dry-run and four-lock data gate."""
+"""Safety-locked formal-search runner dry-run and canonical data gate."""
 
 from __future__ import annotations
 
@@ -11,17 +11,11 @@ import json
 from pathlib import Path
 from typing import Any
 
+from rfdetr.nas.data_gate import validate_target_split_manifest
+from rfdetr.nas.orchestration import EXECUTION_STAGES, build_formal_execution_plan
 
-PLANNED_STAGES = (
-    "train_elastic_supernet",
-    "evaluate_inherited_subnets",
-    "proxy_validation",
-    "hardware_latency_benchmark",
-    "pareto_filtering",
-    "full_pareto_validation",
-    "select_fast_balanced_accurate",
-    "static_export",
-)
+
+PLANNED_STAGES = EXECUTION_STAGES
 
 
 def _resolve_marker(repo_root: Path, filename: Any) -> Path:
@@ -67,15 +61,42 @@ def dry_run_manifest(
     gpu_approval_marker = _resolve_marker(resolved_repo_root, gpu_approval_filename)
     target_data_ready_marker = _resolve_marker(resolved_repo_root, target_data_ready_filename)
     split_manifest = _target_data_manifest_path(resolved_repo_root, target_data.get("split_manifest"))
+    manifest_root = target_data.get("manifest_root")
+    if manifest_root not in (None, ""):
+        manifest_root_path = _resolve_marker(resolved_repo_root, manifest_root)
+        manifest_root = str(manifest_root_path)
     target_data_fields_present = all(
         target_data.get(field) not in (None, "")
         for field in ("dataset_id", "split_manifest", "domain", "adapter")
     )
+    if target_data.get("enabled", False) and split_manifest is not None:
+        split_validation = validate_target_split_manifest(
+            split_manifest,
+            expected_dataset_id=target_data.get("dataset_id"),
+            expected_dataset_version=target_data.get("dataset_version"),
+            expected_dataset_hash=target_data.get("dataset_hash"),
+            expected_domain=target_data.get("domain"),
+            expected_adapter=target_data.get("adapter"),
+            expected_adapter_version=target_data.get("adapter_version"),
+            sample_root=manifest_root,
+            require_sample_paths=bool(target_data.get("require_sample_paths", True)),
+        )
+        split_validation_manifest = split_validation.to_dict()
+    else:
+        split_validation = None
+        split_validation_manifest = {
+            "status": "NOT_READY",
+            "ready": False,
+            "schema_valid": False,
+            "leakage_free": False,
+            "paths_valid": False,
+            "errors": ["target_data.enabled and split_manifest are required"],
+        }
     target_data_ready = bool(
         target_data.get("enabled", False)
         and target_data_fields_present
-        and split_manifest is not None
-        and split_manifest.exists()
+        and split_validation is not None
+        and split_validation.ready
         and target_data_ready_marker.exists()
     )
     require_gpu_approval = bool(safety.get("require_gpu_approval", True))
@@ -83,15 +104,21 @@ def dry_run_manifest(
     gpu_approval_present = gpu_approval_marker.exists()
     gpu_lock_satisfied = gpu_approval_present if require_gpu_approval else True
     target_data_lock_satisfied = target_data_ready if require_target_data else True
-    legacy_three_lock_satisfied = bool(enabled and cli_confirmed and approval_marker.exists())
-    formal_search_allowed = bool(legacy_three_lock_satisfied and gpu_lock_satisfied and target_data_lock_satisfied)
+    project_approved = approval_marker.exists()
+    formal_search_allowed = bool(
+        enabled
+        and cli_confirmed
+        and project_approved
+        and gpu_lock_satisfied
+        and target_data_lock_satisfied
+    )
     blocked_reasons = []
     if not enabled:
         blocked_reasons.append("full_search_disabled")
     if enabled and not cli_confirmed:
         blocked_reasons.append("cli_confirmation_missing")
-    if enabled and not approval_marker.exists():
-        blocked_reasons.append("approval_file_missing")
+    if enabled and not project_approved:
+        blocked_reasons.append("project_approval_missing")
     if enabled and require_gpu_approval and not gpu_approval_present:
         blocked_reasons.append("gpu_approval_missing")
     if enabled and require_target_data and not target_data_ready:
@@ -109,25 +136,25 @@ def dry_run_manifest(
         "target_data": {
             "enabled": bool(target_data.get("enabled", False)),
             "dataset_id": target_data.get("dataset_id"),
+            "dataset_version": target_data.get("dataset_version"),
+            "dataset_hash": target_data.get("dataset_hash"),
             "split_manifest": target_data.get("split_manifest"),
             "split_manifest_resolved": str(split_manifest) if split_manifest is not None else None,
             "split_manifest_exists": bool(split_manifest is not None and split_manifest.exists()),
             "domain": target_data.get("domain"),
             "adapter": target_data.get("adapter", "external"),
+            "adapter_version": target_data.get("adapter_version"),
+            "manifest_root": manifest_root,
+            "require_sample_paths": bool(target_data.get("require_sample_paths", True)),
             "ready_marker": str(target_data_ready_marker),
             "ready_marker_exists": target_data_ready_marker.exists(),
             "ready": target_data_ready,
+            "split_validation": split_validation_manifest,
         },
-        "three_lock_state": {
+        "formal_search_gate": {
             "config_enabled": enabled,
             "cli_confirmed": bool(cli_confirmed),
-            "approval_file_present": approval_marker.exists(),
-            "formal_search_allowed": legacy_three_lock_satisfied,
-        },
-        "four_lock_state": {
-            "config_enabled": enabled,
-            "cli_confirmed": bool(cli_confirmed),
-            "approval_file_present": approval_marker.exists(),
+            "project_approved": project_approved,
             "gpu_approval_present": gpu_approval_present,
             "target_dataset_ready": target_data_ready,
             "require_gpu_approval": require_gpu_approval,
@@ -143,6 +170,7 @@ def dry_run_manifest(
         "dry_run_status": "PASS" if not enabled and not approval_marker.exists() else "LOCKED",
         "action": "no model training/search performed",
     }
+    manifest["formal_execution_plan"] = build_formal_execution_plan(manifest).to_dict()
     return manifest
 
 

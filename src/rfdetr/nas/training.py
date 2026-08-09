@@ -20,6 +20,7 @@ from typing import Any, Callable, Iterable, Mapping
 
 import torch
 from torch import Tensor, nn
+from torch.nn.parallel import DistributedDataParallel
 
 from rfdetr.nas.architecture import ArchitectureSpec, NativeArchitecture
 from rfdetr.nas.checkpoint import load_nas_checkpoint, save_nas_checkpoint
@@ -36,7 +37,8 @@ class SupernetTrainConfig:
     seed: int = 0
     sampling_policy: str = "balanced_patch"
     gradient_accumulation_steps: int = 1
-    checkpoint_interval: int = 1
+    checkpoint_interval_steps: int = 1000
+    debug_gradient_snapshot_interval: int = 0
     ema_decay: float | None = 0.999
     ddp: bool = False
 
@@ -52,6 +54,8 @@ class SupernetTrainConfig:
         }
         if isinstance(value, Mapping):
             fields.update({key: value[key] for key in fields if key in value})
+            if "checkpoint_interval" in value and "checkpoint_interval_steps" not in value:
+                fields["checkpoint_interval_steps"] = value["checkpoint_interval"]
         else:
             fields.update({key: getattr(value, key) for key in fields if hasattr(value, key)})
         return cls(**fields)
@@ -192,16 +196,69 @@ def _metric_value(value: Any) -> Any:
     return str(value)
 
 
+def _move_ema_to_model_device(model: nn.Module, ema_state: dict[str, Tensor]) -> None:
+    """Move a resumed EMA shadow to the parameter device once, not every step."""
+
+    parameters = dict(model.named_parameters())
+    for name, value in list(ema_state.items()):
+        parameter = parameters.get(name)
+        if parameter is not None and value.device != parameter.device:
+            ema_state[name] = value.to(parameter.device)
+
+
 def _update_ema(model: nn.Module, ema_state: dict[str, Tensor], decay: float) -> None:
+    """Update EMA shadows on the same device as the live model parameters."""
+
     with torch.no_grad():
         for name, parameter in model.named_parameters():
             if not parameter.requires_grad:
                 continue
-            value = parameter.detach().cpu()
+            value = parameter.detach()
             if name not in ema_state:
                 ema_state[name] = value.clone()
             else:
                 ema_state[name].mul_(decay).add_(value, alpha=1.0 - decay)
+
+
+def _ema_cpu_state(ema_state: Mapping[str, Tensor]) -> dict[str, Tensor]:
+    """Make the only CPU EMA copy at checkpoint serialization time."""
+
+    return {name: value.detach().cpu() for name, value in ema_state.items()}
+
+
+def _gradient_parameter_count(model: nn.Module) -> int:
+    """Count gradient-bearing parameters without synchronizing gradient values."""
+
+    return sum(parameter.grad is not None for parameter in model.parameters())
+
+
+def _distributed_status(model: nn.Module, controller: Any, requested: bool) -> dict[str, Any]:
+    """Validate DDP/controller ownership and return rank metadata."""
+
+    distributed = torch.distributed
+    initialized = bool(distributed.is_available() and distributed.is_initialized())
+    rank = int(distributed.get_rank()) if initialized else 0
+    world_size = int(distributed.get_world_size()) if initialized else 1
+    if requested and not initialized:
+        raise RuntimeError("ddp=True requires an initialized torch.distributed process group")
+    if initialized and requested:
+        if not isinstance(model, DistributedDataParallel):
+            raise TypeError("ddp=True requires the forward model to be DistributedDataParallel")
+        if getattr(controller, "model", None) is not model.module:
+            raise ValueError("Controller.model must be ddp_model.module; forward must use the DDP wrapper")
+        ownership = "ddp.module"
+    elif isinstance(model, DistributedDataParallel):
+        raise ValueError("a DistributedDataParallel model requires ddp=True")
+    else:
+        ownership = "direct"
+    return {
+        "requested": requested,
+        "initialized": initialized,
+        "rank": rank,
+        "world_size": world_size,
+        "rank0_artifacts_only": initialized,
+        "controller_owner": ownership,
+    }
 
 
 def _next_batch(iterator: Any, loader: Iterable[Any]) -> tuple[Any, Any]:
@@ -254,12 +311,15 @@ def train_elastic_supernet(
         raise ValueError("max_optimizer_steps must be positive")
     if config.gradient_accumulation_steps <= 0:
         raise ValueError("gradient_accumulation_steps must be positive")
-    if config.checkpoint_interval <= 0:
-        raise ValueError("checkpoint_interval must be positive")
+    if config.checkpoint_interval_steps <= 0:
+        raise ValueError("checkpoint_interval_steps must be positive")
+    if config.debug_gradient_snapshot_interval < 0:
+        raise ValueError("debug_gradient_snapshot_interval must be non-negative")
     if loss_fn is None and criterion is None:
         raise ValueError("criterion is required when loss_fn is not supplied")
     if controller is None:
         raise ValueError("NativeBoundedElasticController is required for elastic training")
+    ddp_status = _distributed_status(model, controller, config.ddp)
 
     candidates = _supernet_candidates(native, search_space)
     destination = Path(output_dir)
@@ -283,6 +343,7 @@ def train_elastic_supernet(
             f"checkpoint optimizer_step={start_step} exceeds max_optimizer_steps={config.max_optimizer_steps}"
         )
     model_device = next(model.parameters()).device
+    _move_ema_to_model_device(model, ema_state)
     data_iterator = iter(train_loader)
     model.train()
 
@@ -293,12 +354,12 @@ def train_elastic_supernet(
             optimizer_step=optimizer_step,
             policy=config.sampling_policy,
         )
-        controller.activate(architecture)
-        controller.validate_active_architecture()
-        optimizer.zero_grad(set_to_none=True)
         metric_accumulator: dict[str, list[float]] = {}
         weighted_loss = 0.0
         try:
+            controller.activate(architecture)
+            controller.validate_active_architecture()
+            optimizer.zero_grad(set_to_none=True)
             for _ in range(config.gradient_accumulation_steps):
                 batch, data_iterator = _next_batch(data_iterator, train_loader)
                 callback_batch = batch_adapter(batch, model_device) if loss_fn is not None and batch_adapter else batch
@@ -323,9 +384,17 @@ def train_elastic_supernet(
                         metric_accumulator.setdefault(str(key), []).append(float(numeric))
                 (loss / config.gradient_accumulation_steps).backward()
 
-            gradients = gradient_snapshot(model)
-            if not gradients:
+            gradient_parameter_count = _gradient_parameter_count(model)
+            if gradient_parameter_count == 0:
                 raise RuntimeError("supernet step produced no gradients")
+            debug_snapshot = None
+            if (
+                config.debug_gradient_snapshot_interval > 0
+                and (optimizer_step + 1) % config.debug_gradient_snapshot_interval == 0
+            ):
+                debug_snapshot = gradient_snapshot(model)
+                if not debug_snapshot:
+                    raise RuntimeError("supernet debug gradient snapshot found no gradients")
             optimizer.step()
             if scheduler is not None:
                 scheduler.step()
@@ -338,9 +407,12 @@ def train_elastic_supernet(
             "optimizer_step": optimizer_step,
             "architecture": architecture.to_dict(),
             "weighted_loss": weighted_loss / config.gradient_accumulation_steps,
-            "gradient_parameter_count": len(gradients),
+            "gradient_parameter_count": gradient_parameter_count,
+            "gradient_debug_snapshot": debug_snapshot is not None,
             "lr": [float(group["lr"]) for group in optimizer.param_groups],
         }
+        if debug_snapshot is not None:
+            record["gradient_debug_parameter_count"] = len(debug_snapshot)
         record.update(
             {
                 key: sum(values) / len(values)
@@ -351,10 +423,10 @@ def train_elastic_supernet(
         history.append(record)
 
         should_save = (
-            (optimizer_step + 1) % config.checkpoint_interval == 0
+            (optimizer_step + 1) % config.checkpoint_interval_steps == 0
             or optimizer_step + 1 == config.max_optimizer_steps
         )
-        if should_save:
+        if should_save and ddp_status["rank"] == 0:
             future_preview = [
                 architecture_for_step(
                     candidates,
@@ -372,28 +444,23 @@ def train_elastic_supernet(
                 architecture=architecture,
                 history=history,
                 scheduler=scheduler,
-                ema_state=ema_state,
+                ema_state=_ema_cpu_state(ema_state),
                 search_space_config=_space_summary(search_space),
                 sampling_policy=config.sampling_policy,
                 seed=config.seed,
                 schedule_preview=future_preview,
                 native_architecture=native.to_dict(),
             )
+        if should_save and ddp_status["initialized"]:
+            torch.distributed.barrier()
 
-    (destination / "supernet_metrics.jsonl").write_text(
-        "".join(json.dumps(record, sort_keys=True) + "\n" for record in history),
-        encoding="utf-8",
-    )
-    distributed = torch.distributed
-    ddp_status = {
-        "requested": config.ddp,
-        "initialized": bool(distributed.is_available() and distributed.is_initialized()),
-        "world_size": (
-            int(distributed.get_world_size())
-            if distributed.is_available() and distributed.is_initialized()
-            else 1
-        ),
-    }
+    if ddp_status["rank"] == 0:
+        (destination / "supernet_metrics.jsonl").write_text(
+            "".join(json.dumps(record, sort_keys=True) + "\n" for record in history),
+            encoding="utf-8",
+        )
+    if ddp_status["initialized"]:
+        torch.distributed.barrier()
     return SupernetTrainResult(
         status="PASS",
         optimizer_step=config.max_optimizer_steps,

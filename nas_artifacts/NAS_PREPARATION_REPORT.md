@@ -16,6 +16,11 @@ from this session.
 Formal supernet training, full subnet sweep, Pareto search, and TensorRT
 benchmarking were not executed.
 
+`FORMAL_API_PREPARATION=PASS` is now supported by lifecycle-based dataset
+aggregation, active-subnet latency timing, equal-budget short-finetune code,
+target split-manifest validation, and a gated preparation-only orchestration
+plan. `FORMAL_SEARCH_ENGINE_READY=NO` remains intentional.
+
 The 2026-08-09 review hardening is recorded in
 `nas_artifacts/hardening_regression.json`. It removes dynamic `num_select`
 from `ArchitectureSpec`, keeps the native PostProcess policy fixed, adds the
@@ -35,11 +40,16 @@ unready.
 | Proposal estimator | PASS | Renamed `estimate_encoder_proposal_pool_size()` and checked against a real encoder tensor width; transformer runtime guard retained. |
 | Decoder 0 evaluator path | PASS | Encoder-only output shape plus real `PostProcess` regression. |
 | Target GPU hardening regression | PASS | Fixed native, 480/p20/w2, 576/p12/w1, decoder=0/q50 cases; 3 backward checks and A-B-C-A all passed on RTX 3090. |
+| Formal evaluator aggregation | PASS | `SubnetEvaluator.reset/update/compute`; legacy per-batch callbacks are rejected for multi-batch evaluation. |
+| Active-subnet latency path | PASS | Warmup plus CUDA synchronize/timed runs occur before controller reset; CPU/mock active-state regression passed. |
+| Formal training hardening | PASS | Device-local EMA, configurable debug gradient snapshot, checkpoint interval default 1000, rank0-only artifacts, explicit DDP ownership. |
+| Ranking/short-finetune hardening | PASS | Zero rank variance blocks; default minimum pairs 8; structural representative coverage and same-checkpoint short fine-tune are implemented. |
+| Target split-manifest validator | PASS | Required non-empty splits, metadata, unique IDs, leakage, and readable sample/annotation paths are checked. |
 | Formal search safety | PASS | `full_search.enabled=false`; no formal search, Pareto search, or full subnet sweep executed. |
 
-The final focused pytest command passed 35 tests with 1 expected environment-
-dependent skip; the skip is the existing CUDA-only PostProcess check on this
-CPU-visible session.
+The final focused regression command passed 40 tests with one warning in the
+target environment, including the two-process Gloo CPU DDP check. No formal
+search stage was executed.
 
 ## Native architecture
 
@@ -102,28 +112,40 @@ valid records, 22 encoder tuples, decoder depth 0..4, and query candidates
 
 ```text
 HARDENING_TARGET_GPU_REGRESSION=PASS
+NAS_CORE_IMPLEMENTATION=PASS
+NAS_PREPARATION_HARDENED=PASS
+FORMAL_API_PREPARATION=PASS
+EVALUATOR_DATASET_AGGREGATION_READY=PASS_BOUNDED
+SUBNET_LATENCY_PATH_READY=PASS_CPU_MOCK
+FORMAL_DDP_READY=PASS_2PROC_GLOO_CPU
+RANKING_SHORT_FINETUNE_READY=PASS_TINY_MOCK
+TARGET_SPLIT_MANIFEST_VALIDATOR_READY=PASS_TINY_MANIFEST
+FORMAL_SEARCH_ENGINE_READY=NO
+TARGET_DATASET_READY=NO
 FULL_SEARCH_EXECUTED=NO
 PARETO_SEARCH_EXECUTED=NO
 FULL_SUBNET_SWEEP_EXECUTED=NO
 NAS_FULL_SEARCH_APPROVED=ABSENT
-TARGET_DATASET_READY=NO
-FORMAL_SEARCH_ENGINE_READY=NO
 ```
 
 Both formal configurations keep `full_search.enabled: false`.
-The dry-run manifest records all eight future search stages as
-`executed: false` and reports the four-lock state as
-`formal_search_allowed: false`; the additional target-data lock requires a
-dataset id, split manifest, domain adapter, and explicit ready marker.
+The dry-run manifest records the ordered preparation-only execution plan with
+all stages unexecuted and reports the canonical `formal_search_gate` as
+`formal_search_allowed: false`; it requires config, CLI confirmation, project
+approval, GPU approval, and a schema/leakage/path-valid target split manifest
+plus explicit ready marker.
 
 The seccomp A/B report shows that the same GPU/image/mount/capability setup
 passes with `seccomp=unconfined` and the minimal custom profile, while Docker
 default seccomp reproduces CUDA Error 304. It does not claim that RF-DETR or
 CUDA requires disabling seccomp.
 
-## Required next action
+## Current bounded closure
 
-Commit the execution-preparation code and bounded regression artifacts that are
-in scope, retain the four-lock safety state, and stop. No formal search, Pareto
-search, full subnet sweep, or TensorRT batch benchmark is authorized in this
-phase.
+The execution-preparation hardening is complete and remains preparation-only.
+No formal supernet training, full subnet sweep, Pareto search, or TensorRT
+benchmark is authorized in this phase. The next phase must provide a validated
+target-data manifest and satisfy every field in the canonical
+`formal_search_gate` (`config_enabled`, `cli_confirmed`, `project_approved`,
+`gpu_approval_present`, and `target_dataset_ready`) before any formal stage can
+be enabled.

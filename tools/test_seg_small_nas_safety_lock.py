@@ -28,7 +28,7 @@ def main() -> int:
         and manifest["approval_marker_exists"] is False
         and manifest["formal_search_allowed"] is False
         and manifest["target_data"]["ready"] is False
-        and manifest["four_lock_state"]["formal_search_allowed"] is False
+        and manifest["formal_search_gate"]["formal_search_allowed"] is False
         and manifest["formal_search_executed"] is False
         and manifest["pareto_search_executed"] is False
         and manifest["full_subnet_sweep_executed"] is False

@@ -31,7 +31,7 @@ def main() -> int:
     )
     print(json.dumps(manifest, indent=2, sort_keys=True))
     if args.confirm_full_nas:
-        print("FULL SEARCH NOT EXECUTED: explicit approval marker is still required")
+        print("FULL SEARCH NOT EXECUTED: formal_search_gate and preparation-only plan are still enforced")
     return 0 if manifest["dry_run_status"] == "PASS" else 2
 
 

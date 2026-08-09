@@ -7,16 +7,89 @@
   ],
   "cli_confirmation_received": false,
   "cli_confirmation_required": "--confirm-full-nas",
-  "config": "configs/seg_small_nas_full.yaml",
+  "config": "/home/liujiyuan/rf-detr/configs/seg_small_nas_full.yaml",
   "dry_run_status": "PASS",
+  "formal_execution_plan": {
+    "blocked_reasons": [
+      "full_search_disabled"
+    ],
+    "formal_search_allowed": false,
+    "formal_search_executed": false,
+    "full_subnet_sweep_executed": false,
+    "limits": {
+      "max_architectures": 3,
+      "max_batches": 2,
+      "max_optimizer_steps": 2
+    },
+    "pareto_search_executed": false,
+    "preparation_only": true,
+    "stages": [
+      {
+        "allowed": false,
+        "executed": false,
+        "name": "data_gate"
+      },
+      {
+        "allowed": false,
+        "executed": false,
+        "name": "gpu_approval_gate"
+      },
+      {
+        "allowed": false,
+        "executed": false,
+        "name": "train_elastic_supernet"
+      },
+      {
+        "allowed": false,
+        "executed": false,
+        "name": "evaluate_representative_subnets"
+      },
+      {
+        "allowed": false,
+        "executed": false,
+        "name": "ranking_gate"
+      },
+      {
+        "allowed": false,
+        "executed": false,
+        "name": "proxy_validation"
+      },
+      {
+        "allowed": false,
+        "executed": false,
+        "name": "hardware_latency_benchmark"
+      },
+      {
+        "allowed": false,
+        "executed": false,
+        "name": "pareto_filtering"
+      },
+      {
+        "allowed": false,
+        "executed": false,
+        "name": "topk_full_validation"
+      },
+      {
+        "allowed": false,
+        "executed": false,
+        "name": "select_fast_balanced_accurate"
+      },
+      {
+        "allowed": false,
+        "executed": false,
+        "name": "static_export"
+      }
+    ],
+    "status": "BLOCKED"
+  },
   "formal_search_allowed": false,
   "formal_search_executed": false,
-  "four_lock_state": {
-    "approval_file_present": false,
+  "formal_search_gate": {
     "cli_confirmed": false,
     "config_enabled": false,
     "formal_search_allowed": false,
     "gpu_approval_present": false,
+    "project_approved": false,
     "require_gpu_approval": true,
     "require_target_dataset_ready": true,
     "target_dataset_ready": false
@@ -29,11 +102,23 @@
   "planned_stages": [
     {
       "executed": false,
+      "name": "data_gate"
+    },
+    {
+      "executed": false,
+      "name": "gpu_approval_gate"
+    },
+    {
+      "executed": false,
       "name": "train_elastic_supernet"
     },
     {
       "executed": false,
-      "name": "evaluate_inherited_subnets"
+      "name": "evaluate_representative_subnets"
+    },
+    {
+      "executed": false,
+      "name": "ranking_gate"
     },
     {
       "executed": false,
@@ -49,7 +134,7 @@
     },
     {
       "executed": false,
-      "name": "full_pareto_validation"
+      "name": "topk_full_validation"
     },
     {
       "executed": false,
@@ -63,20 +148,29 @@
   "repo_root": "/home/liujiyuan/rf-detr",
   "target_data": {
     "adapter": "external",
+    "adapter_version": null,
+    "dataset_hash": null,
     "dataset_id": null,
+    "dataset_version": null,
     "domain": null,
     "enabled": false,
+    "manifest_root": null,
     "ready": false,
     "ready_marker": "/home/liujiyuan/rf-detr/TARGET_DATASET_READY",
     "ready_marker_exists": false,
+    "require_sample_paths": true,
     "split_manifest": null,
     "split_manifest_exists": false,
-    "split_manifest_resolved": null
-  },
-  "three_lock_state": {
-    "approval_file_present": false,
-    "cli_confirmed": false,
-    "config_enabled": false,
-    "formal_search_allowed": false
+    "split_manifest_resolved": null,
+    "split_validation": {
+      "errors": [
+        "target_data.enabled and split_manifest are required"
+      ],
+      "leakage_free": false,
+      "paths_valid": false,
+      "ready": false,
+      "schema_valid": false,
+      "status": "NOT_READY"
+    }
   }
 }

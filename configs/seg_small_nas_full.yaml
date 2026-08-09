@@ -44,6 +44,8 @@ sampling:
 supernet:
   decoder_depth_during_training: native
   queries_during_training: native
+  checkpoint_interval_steps: 1000
+  debug_gradient_snapshot_interval: 0
 norm:
   recalibration: auto_if_running_stats_present
 full_search:
@@ -57,6 +59,11 @@ target_data:
   split_manifest: null
   domain: null
   adapter: external
+  adapter_version: null
+  dataset_version: null
+  dataset_hash: null
+  manifest_root: null
+  require_sample_paths: true
   ready_marker: TARGET_DATASET_READY
 safety:
   require_cli_confirm: true

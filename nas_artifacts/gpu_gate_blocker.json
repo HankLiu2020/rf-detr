@@ -25,5 +25,5 @@
     "worst_corner": "PASS; peak_memory_bytes=1558436864"
   },
   "safe_action_taken": "no credentials, group changes, privileged container, or formal NAS execution; temporary containers used read-only mounts and were auto-removed",
-  "next_action": "keep formal NAS disabled and preserve the three-lock safety gate"
+  "next_action": "keep formal NAS disabled and require the canonical formal_search_gate before enabling it"
 }

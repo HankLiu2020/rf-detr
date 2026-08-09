@@ -4,14 +4,18 @@
   "formal_search_engine_ready": "NO",
   "apis": {
     "train_elastic_supernet": "implemented",
-    "evaluate_subnet": "implemented",
+    "evaluate_subnet": "implemented_with_reset_update_compute_and_active_latency",
     "evaluate_subnet_pool": "implemented_with_tiny_pool_cap",
-    "ranking_gate_and_proxy_search": "implemented_with_spearman_gate",
+    "ranking_gate_and_proxy_search": "implemented_with_variance_and_coverage_gate",
+    "short_finetune_ranking": "implemented_same_checkpoint_per_architecture",
+    "target_split_manifest_validator": "implemented_schema_leakage_and_path_checks",
+    "formal_execution_orchestration": "implemented_preparation_plan_only",
     "compute_pareto_front": "implemented_cpu_only"
   },
   "tiny_mock_pytest": {
     "status": "PASS",
-    "passed": 15,
+    "passed": 20,
+    "ddp_gloo_processes": 2,
     "formal_search_executed": false,
     "full_subnet_sweep_executed": false,
     "pareto_search_executed": false
@@ -19,11 +23,20 @@
   "target_data_gate": {
     "enabled": false,
     "target_dataset_ready": false,
-    "required_before_formal_search": true
+    "required_before_formal_search": true,
+    "validator_ready": true
+  },
+  "bounded_readiness": {
+    "evaluator_dataset_aggregation": "PASS",
+    "subnet_latency_path": "PASS_CPU_MOCK",
+    "ddp": "PASS_2PROC_GLOO_CPU",
+    "ranking_short_finetune": "PASS_TINY_MOCK",
+    "target_split_manifest_validator": "PASS_TINY_MANIFEST"
   },
   "runner": {
     "full_search_enabled": false,
     "cli_confirmed": false,
+    "project_approved": false,
     "gpu_approval_present": false,
     "formal_search_allowed": false
   }
