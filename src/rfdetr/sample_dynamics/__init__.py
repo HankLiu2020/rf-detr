@@ -18,6 +18,7 @@ from rfdetr.sample_dynamics.probe import (
     match_predictions_to_target,
     run_deterministic_probe,
 )
+from rfdetr.sample_dynamics.review import ReviewExporter
 from rfdetr.sample_dynamics.sampler import BucketQuotaSampler
 from rfdetr.sample_dynamics.state import (
     SampleState,
@@ -37,6 +38,7 @@ __all__ = [
     "PerSampleLossPacket",
     "ProbeReport",
     "ProbeSampleResult",
+    "ReviewExporter",
     "SampleObservationBuffer",
     "SampleState",
     "SampleStateRecord",
