@@ -2,13 +2,29 @@
   "action": "no model training/search performed",
   "approval_marker": "/home/liujiyuan/rf-detr/NAS_FULL_SEARCH_APPROVED",
   "approval_marker_exists": false,
+  "blocked_reasons": [
+    "full_search_disabled"
+  ],
   "cli_confirmation_received": false,
   "cli_confirmation_required": "--confirm-full-nas",
   "config": "configs/seg_small_nas_full.yaml",
   "dry_run_status": "PASS",
+  "formal_search_allowed": false,
   "formal_search_executed": false,
+  "four_lock_state": {
+    "approval_file_present": false,
+    "cli_confirmed": false,
+    "config_enabled": false,
+    "formal_search_allowed": false,
+    "gpu_approval_present": false,
+    "require_gpu_approval": true,
+    "require_target_dataset_ready": true,
+    "target_dataset_ready": false
+  },
   "full_search_enabled": false,
   "full_subnet_sweep_executed": false,
+  "gpu_approval_marker": "/home/liujiyuan/rf-detr/GPU_FULL_SEARCH_APPROVED",
+  "gpu_approval_marker_exists": false,
   "pareto_search_executed": false,
   "planned_stages": [
     {
@@ -45,6 +61,18 @@
     }
   ],
   "repo_root": "/home/liujiyuan/rf-detr",
+  "target_data": {
+    "adapter": "external",
+    "dataset_id": null,
+    "domain": null,
+    "enabled": false,
+    "ready": false,
+    "ready_marker": "/home/liujiyuan/rf-detr/TARGET_DATASET_READY",
+    "ready_marker_exists": false,
+    "split_manifest": null,
+    "split_manifest_exists": false,
+    "split_manifest_resolved": null
+  },
   "three_lock_state": {
     "approval_file_present": false,
     "cli_confirmed": false,

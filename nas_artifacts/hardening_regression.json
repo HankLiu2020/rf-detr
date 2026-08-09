@@ -1,7 +1,7 @@
 {
   "status": "PASS",
   "preparation_status": "NAS_PREPARATION_HARDENED=PASS",
-  "commit_reviewed": "58000e73",
+  "commit_reviewed": "b37831d9",
   "checks": {
     "nas_pytest": {
       "status": "PASS",
@@ -15,7 +15,7 @@
     },
     "postprocess_and_nas_suite": {
       "status": "PASS",
-      "passed": 31,
+      "passed": 35,
       "skipped": 1,
       "scope": [
         "tests/models/test_postprocess.py",
@@ -36,7 +36,25 @@
       "state_pollution": "A-B-C-A PASS",
       "decoder_zero_postprocess": "PASS",
       "postprocess_policy": "native_fixed_num_select_100",
-      "target_gpu_pool": "UNVERIFIED_IN_THIS_SESSION"
+      "target_gpu_pool": "PASS",
+      "target_gpu_regression": {
+        "status": "PASS",
+        "device": "cuda:0",
+        "gpu": "NVIDIA GeForce RTX 3090",
+        "visible_gpu_count": 6,
+        "cases": [
+          "native",
+          "480/p20/w2/d4/q100",
+          "576/p12/w1/d4/q100",
+          "native encoder/d0/q50"
+        ],
+        "backward_cases": 3,
+        "decoder_zero_postprocess": "PASS",
+        "a_b_c_a": "PASS",
+        "formal_search_executed": false,
+        "full_subnet_sweep_executed": false,
+        "pareto_search_executed": false
+      }
     },
     "formal_search_safety": {
       "status": "PASS",
@@ -52,6 +70,7 @@
     "group_detr_train_query_total": "active_q * group_detr",
     "group_detr_eval_query_total": "active_q",
     "active_query_group_divisibility_filter": false,
-    "runtime_proposal_guard": true
+    "runtime_proposal_guard": true,
+    "target_data_gate": "required_before_formal_search"
   }
 }

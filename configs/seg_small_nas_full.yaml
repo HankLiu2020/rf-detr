@@ -51,9 +51,20 @@ full_search:
   pareto: false
   full_subnet_sweep: false
   approval_marker: NAS_FULL_SEARCH_APPROVED
+target_data:
+  enabled: false
+  dataset_id: null
+  split_manifest: null
+  domain: null
+  adapter: external
+  ready_marker: TARGET_DATASET_READY
 safety:
   require_cli_confirm: true
   require_approval_file: true
   approval_filename: NAS_FULL_SEARCH_APPROVED
+  require_gpu_approval: true
+  gpu_approval_filename: GPU_FULL_SEARCH_APPROVED
+  require_target_dataset_ready: true
+  target_data_ready_filename: TARGET_DATASET_READY
 smoke:
   max_optimizer_steps: 30

@@ -1,6 +1,6 @@
 # RF-DETR-Seg-Small Native-Bounded NAS Preparation Report
 
-Date: 2026-08-08 (Asia/Shanghai)
+Date: 2026-08-09 (Asia/Shanghai)
 
 ## Status
 
@@ -8,21 +8,22 @@ Date: 2026-08-08 (Asia/Shanghai)
 `NAS_PREPARATION_HARDENED=PASS`
 
 This report covers the implementation and bounded CPU/GPU verification for the
-native-bounded RF-DETR-Seg-Small NAS preparation. The current checkout was
-verified in `train-env-rfdetr-claude:20260806` with project/model/data mounts
-read-only, rootfs read-only, network disabled, no privileged flag, and no extra
-capabilities.
+native-bounded RF-DETR-Seg-Small NAS preparation. The earlier container checks
+remain read-only/no-privileged; the current bounded target-GPU regression ran in
+the existing host CUDA environment because the Docker socket is not accessible
+from this session.
 
 Formal supernet training, full subnet sweep, Pareto search, and TensorRT
 benchmarking were not executed.
 
-The 2026-08-08 review hardening is recorded in
+The 2026-08-09 review hardening is recorded in
 `nas_artifacts/hardening_regression.json`. It removes dynamic `num_select`
 from `ArchitectureSpec`, keeps the native PostProcess policy fixed, adds the
 Controller native-state snapshot/reset lifecycle, validates the Group-DETR
 train/eval width invariant, and retains the transformer runtime proposal
-tensor guard. The bounded CPU regression passed; no new target-GPU run was
-possible in this session because the Docker socket is not accessible.
+tensor guard. The bounded CPU regression and the fixed four-case target-GPU
+regression both passed. Formal search remains disabled and target data remains
+unready.
 
 ## Hardening addendum
 
@@ -33,9 +34,10 @@ possible in this session because the Docker socket is not accessible.
 | Group-DETR invariant | PASS | Training `Q_total=active_q*group_detr`, evaluation `Q_total=active_q`; `active_q=50`, `group_detr=13` is accepted. |
 | Proposal estimator | PASS | Renamed `estimate_encoder_proposal_pool_size()` and checked against a real encoder tensor width; transformer runtime guard retained. |
 | Decoder 0 evaluator path | PASS | Encoder-only output shape plus real `PostProcess` regression. |
+| Target GPU hardening regression | PASS | Fixed native, 480/p20/w2, 576/p12/w1, decoder=0/q50 cases; 3 backward checks and A-B-C-A all passed on RTX 3090. |
 | Formal search safety | PASS | `full_search.enabled=false`; no formal search, Pareto search, or full subnet sweep executed. |
 
-The final focused pytest command passed 31 tests with 1 expected environment-
+The final focused pytest command passed 35 tests with 1 expected environment-
 dependent skip; the skip is the existing CUDA-only PostProcess check on this
 CPU-visible session.
 
@@ -84,9 +86,9 @@ correct and flat slicing is not.
 | V21 | PASS (CPU) | native/reduced TorchScript export and reload verification |
 | V22/V23 | PASS | `FULL_SEARCH_MANIFEST.json`, `safety_lock_test.json` |
 
-The CPU checks remain bounded functional checks; the target-GPU gate is now
-covered by the artifacts under `nas_artifacts/gpu_gate/` and
-`nas_artifacts/gpu_smoke/`.
+The CPU checks remain bounded functional checks; the target-GPU hardening gate
+is covered by `tools/hardening_gpu_regression.py` and the summary in
+`nas_artifacts/hardening_regression.json`.
 
 The fixed ten-sample target-GPU probe covers patch 12/16/20, windows 1/2,
 query 50/100, and decoder 0..4. Its pool is recorded as
@@ -99,17 +101,20 @@ valid records, 22 encoder tuples, decoder depth 0..4, and query candidates
 50/100. All query and decoder choices are bounded by native capacity.
 
 ```text
+HARDENING_TARGET_GPU_REGRESSION=PASS
 FULL_SEARCH_EXECUTED=NO
 PARETO_SEARCH_EXECUTED=NO
 FULL_SUBNET_SWEEP_EXECUTED=NO
 NAS_FULL_SEARCH_APPROVED=ABSENT
-WAITING_FOR_GPU_RESOURCE=YES
+TARGET_DATASET_READY=NO
+FORMAL_SEARCH_ENGINE_READY=NO
 ```
 
 Both formal configurations keep `full_search.enabled: false`.
-The dry-run manifest also records all eight future search stages as
-`executed: false` and reports the three-lock state as
-`formal_search_allowed: false`.
+The dry-run manifest records all eight future search stages as
+`executed: false` and reports the four-lock state as
+`formal_search_allowed: false`; the additional target-data lock requires a
+dataset id, split manifest, domain adapter, and explicit ready marker.
 
 The seccomp A/B report shows that the same GPU/image/mount/capability setup
 passes with `seccomp=unconfined` and the minimal custom profile, while Docker
@@ -118,6 +123,7 @@ CUDA requires disabling seccomp.
 
 ## Required next action
 
-Commit the preparation code and artifacts that are in scope, retain the
-three-lock safety state, and stop. No formal search, Pareto search, full subnet
-sweep, or TensorRT batch benchmark is authorized in this phase.
+Commit the execution-preparation code and bounded regression artifacts that are
+in scope, retain the four-lock safety state, and stop. No formal search, Pareto
+search, full subnet sweep, or TensorRT batch benchmark is authorized in this
+phase.
