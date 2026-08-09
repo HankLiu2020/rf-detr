@@ -18,7 +18,10 @@ from torch.utils.data import DataLoader
 from rfdetr._namespace import _namespace_from_configs
 from rfdetr.config import AugmentationBackend, ModelConfig, TrainConfig
 from rfdetr.datasets import build_dataset
+from rfdetr.datasets._aug_utils import resolve_keypoint_flip_pairs
 from rfdetr.datasets.aug_configs import AUG_CONFIG
+from rfdetr.datasets.coco import make_coco_transforms, make_coco_transforms_square_div_64
+from rfdetr.sample_dynamics import DeterministicProbeDataset
 from rfdetr.utilities.box_ops import box_xyxy_to_cxcywh
 from rfdetr.utilities.logger import get_logger
 from rfdetr.utilities.tensors import make_collate_fn
@@ -355,6 +358,51 @@ class RFDETRDataModule(LightningDataModule):
             drop_last=True,  # no-op after alignment, but keeps intent explicit
             collate_fn=self._collate_fn,
             num_workers=num_workers,
+            pin_memory=self._pin_memory,
+            persistent_workers=self._persistent_workers,
+            prefetch_factor=self._prefetch_factor,
+            worker_init_fn=_worker_init_fn,
+        )
+
+    def train_probe_dataloader(self) -> DataLoader[Any]:
+        """Return a fixed-transform sequential loader over the training split.
+
+        The underlying train annotations and stable IDs are reused, but the random training transform is replaced by the
+        validation-style fixed resize pipeline. This loader is intentionally separate from :meth:`train_dataloader` and
+        never participates in optimizer updates.
+        """
+        if self._dataset_train is None:
+            self.setup("fit")
+        dataset = self._require_dataset(self._dataset_train, "fit")
+        resolution = self.model_config.resolution
+        include_keypoints = bool(getattr(self.model_config, "use_grouppose_keypoints", False))
+        keypoint_flip_pairs = resolve_keypoint_flip_pairs(self.train_config, include_keypoints=include_keypoints)
+        transform_kwargs = {
+            "image_set": "val",
+            "resolution": resolution,
+            "multi_scale": False,
+            "expanded_scales": False,
+            "skip_random_resize": True,
+            "patch_size": self.model_config.patch_size,
+            "num_windows": self.model_config.num_windows,
+            "aug_config": {},
+            "scale_jitter": False,
+            "gpu_postprocess": False,
+            "keypoint_flip_pairs": keypoint_flip_pairs,
+        }
+        transform = (
+            make_coco_transforms_square_div_64(**transform_kwargs)
+            if self.train_config.square_resize_div_64
+            else make_coco_transforms(**transform_kwargs)
+        )
+        probe_dataset = DeterministicProbeDataset(dataset, transform)
+        return DataLoader(
+            probe_dataset,
+            batch_size=self._resolve_batch_size(),
+            sampler=torch.utils.data.SequentialSampler(probe_dataset),
+            drop_last=False,
+            collate_fn=self._collate_fn,
+            num_workers=self._num_workers,
             pin_memory=self._pin_memory,
             persistent_workers=self._persistent_workers,
             prefetch_factor=self._prefetch_factor,

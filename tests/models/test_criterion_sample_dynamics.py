@@ -1,8 +1,9 @@
 # ------------------------------------------------------------------------
 # RF-DETR
 # Copyright (c) 2025 Roboflow. All Rights Reserved.
-# Licensed under the Apache License [see LICENSE for details]
+# Licensed under the Apache License, Version 2.0 [see LICENSE for details]
 # ------------------------------------------------------------------------
+
 """Tests for the RF2 per-sample shadow observer."""
 
 from __future__ import annotations
@@ -23,9 +24,7 @@ class _CountingMatcher:
 
     def __call__(self, outputs: dict[str, Tensor], targets: list[dict[str, Tensor]], group_detr: int = 1):
         self.calls += 1
-        return [
-            (torch.arange(len(target["labels"])), torch.arange(len(target["labels"]))) for target in targets
-        ]
+        return [(torch.arange(len(target["labels"])), torch.arange(len(target["labels"]))) for target in targets]
 
 
 def _criterion(losses: list[str] | None = None) -> tuple[SetCriterion, _CountingMatcher]:
@@ -50,8 +49,10 @@ def _batch_outputs(*, requires_grad: bool = False) -> tuple[dict[str, Tensor], l
             requires_grad=requires_grad,
         ),
         "pred_boxes": torch.tensor(
-            [[[0.4, 0.4, 0.2, 0.2], [0.2, 0.2, 0.3, 0.3], [0.5, 0.5, 0.1, 0.1]],
-             [[0.6, 0.6, 0.2, 0.2], [0.3, 0.3, 0.2, 0.2], [0.5, 0.5, 0.1, 0.1]]],
+            [
+                [[0.4, 0.4, 0.2, 0.2], [0.2, 0.2, 0.3, 0.3], [0.5, 0.5, 0.1, 0.1]],
+                [[0.6, 0.6, 0.2, 0.2], [0.3, 0.3, 0.2, 0.2], [0.5, 0.5, 0.1, 0.1]],
+            ],
             requires_grad=requires_grad,
         ),
     }
@@ -157,12 +158,8 @@ def test_segmentation_observer_records_point_mask_components() -> None:
 
     assert packet.raw_numerators["loss_mask_ce"].shape == (2,)
     assert packet.raw_numerators["loss_mask_dice"].shape == (2,)
-    assert packet.raw_numerators["loss_mask_ce"].sum().item() == pytest.approx(
-        losses["loss_mask_ce"].item() * 2
-    )
-    assert packet.raw_numerators["loss_mask_dice"].sum().item() == pytest.approx(
-        losses["loss_mask_dice"].item() * 2
-    )
+    assert packet.raw_numerators["loss_mask_ce"].sum().item() == pytest.approx(losses["loss_mask_ce"].item() * 2)
+    assert packet.raw_numerators["loss_mask_dice"].sum().item() == pytest.approx(losses["loss_mask_dice"].item() * 2)
     assert matcher.calls == 1
 
 

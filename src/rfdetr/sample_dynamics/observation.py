@@ -1,8 +1,9 @@
 # ------------------------------------------------------------------------
 # RF-DETR
 # Copyright (c) 2025 Roboflow. All Rights Reserved.
-# Licensed under the Apache License [see LICENSE for details]
+# Licensed under the Apache License, Version 2.0 [see LICENSE for details]
 # ------------------------------------------------------------------------
+
 """Loss-observation packets and their detached training buffer."""
 
 from __future__ import annotations
@@ -105,8 +106,8 @@ class PerSampleLossPacket:
     def weighted_normalized_loss(self, weight_dict: dict[str, float]) -> Tensor:
         """Return the official weighted normalized loss for every image.
 
-        Losses without an entry in ``weight_dict`` are excluded, matching the
-        reduction in ``RFDETRModelModule.training_step``.
+        Losses without an entry in ``weight_dict`` are excluded, matching the reduction in
+        ``RFDETRModelModule.training_step``.
         """
         result = torch.zeros(self.batch_size, dtype=self.global_num_boxes.dtype, device=self.global_num_boxes.device)
         for name, weight in weight_dict.items():
@@ -131,9 +132,8 @@ class PerSampleLossPacket:
 class SampleObservationBuffer:
     """Detached append-only buffer for RF2 observations.
 
-    The buffer stores ordinary Python values rather than tensors or model
-    references.  It is intentionally small and explicit so later state-policy
-    code can consume the same records without coupling itself to Lightning.
+    The buffer stores ordinary Python values rather than tensors or model references.  It is intentionally small and
+    explicit so later state-policy code can consume the same records without coupling itself to Lightning.
     """
 
     def __init__(self, max_records: int | None = None) -> None:
@@ -168,8 +168,7 @@ class SampleObservationBuffer:
                     name: float(values[index].item()) for name, values in cpu_packet.normalized_losses.items()
                 },
                 "per_image_normalized_losses": {
-                    name: float(values[index].item())
-                    for name, values in cpu_packet.per_image_normalized_losses.items()
+                    name: float(values[index].item()) for name, values in cpu_packet.per_image_normalized_losses.items()
                 },
                 "weighted_normalized_loss": float(weighted[index].item()),
             }
