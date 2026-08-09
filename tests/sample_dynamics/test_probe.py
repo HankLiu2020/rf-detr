@@ -57,7 +57,22 @@ def test_match_predictions_separates_class_error_from_background_fp() -> None:
 
     assert result.class_error == 1
     assert result.fp == 0
-    assert result.fn == 1
+    assert result.fn == 0
+    assert result.matched_count == 1
+
+
+def test_match_predictions_filters_low_confidence_topk_candidates() -> None:
+    """PostProcess Top-K candidates below the protocol threshold are ignored."""
+    prediction = _prediction()
+    prediction["boxes"] = torch.cat([prediction["boxes"], torch.tensor([[0.0, 0.0, 10.0, 10.0]])])
+    prediction["labels"] = torch.tensor([3, 3])
+    prediction["scores"] = torch.tensor([0.9, 0.01])
+
+    result = match_predictions_to_target(prediction, _target(), score_threshold=0.05)
+
+    assert result.fn == 0
+    assert result.fp == 0
+    assert result.class_error == 0
 
 
 class _ProbeModel(nn.Module):

@@ -33,7 +33,14 @@ from rfdetr.config import (
 from rfdetr.datasets.coco import compute_multi_scale_scales
 from rfdetr.models.lwdetr import build_criterion_from_config, build_model_from_config
 from rfdetr.models.weights import apply_lora, interpolate_position_embeddings, load_pretrain_weights
-from rfdetr.sample_dynamics import SampleObservationBuffer, SampleStateStore, SampleWeightPolicy
+from rfdetr.sample_dynamics import (
+    SampleObservationBuffer,
+    SampleStateStore,
+    SampleWeightPolicy,
+    is_global_zero,
+    run_deterministic_probe,
+    synchronize_epoch_state,
+)
 from rfdetr.training.callbacks.coco_eval import _get_ema_inner_module
 from rfdetr.training.param_groups import get_param_dict
 from rfdetr.utilities.logger import get_logger
@@ -412,8 +419,6 @@ class RFDETRModelModule(LightningModule):
             if train_config.sample_dynamics_enabled and train_config.sample_dynamics_mode in {"loss_weight", "combined"}
             else None
         )
-        self._sample_observation_cursor = 0
-
         # torch.compile is opt-in: set model_config.compile=True to enable.
         # Only enabled on CUDA; MPS and CPU do not benefit from compilation.
         # Use the fork-safe DEVICE constant instead of torch.cuda.is_available(),
@@ -851,15 +856,15 @@ class RFDETRModelModule(LightningModule):
         steps schedulers itself.
         """
         if self.sample_state_store is not None and self.sample_observation_buffer is not None:
-            records = self.sample_observation_buffer.records
-            if self._sample_observation_cursor > len(records):
-                self._sample_observation_cursor = 0
-            new_records = records[self._sample_observation_cursor :]
-            self.sample_state_store.update(new_records, epoch=int(self.current_epoch))
-            self._sample_observation_cursor = len(records)
-            if self.sample_weight_policy is not None:
-                self.sample_weight_policy = self.sample_state_store.build_weight_policy(self.sample_weight_policy)
-            if self.train_config.sample_dynamics_output_dir is not None:
+            local_records = self.sample_observation_buffer.drain()
+            self.sample_weight_policy = synchronize_epoch_state(
+                self.sample_state_store,
+                self.sample_weight_policy,
+                local_records,
+                epoch=int(self.current_epoch),
+                probe_factory=self._sample_dynamics_probe_factory(),
+            )
+            if self.train_config.sample_dynamics_output_dir is not None and is_global_zero():
                 output_dir = self.train_config.sample_dynamics_output_dir
                 self.sample_state_store.export_json(f"{output_dir}/sample_state.json")
 
@@ -869,6 +874,29 @@ class RFDETRModelModule(LightningModule):
         if scheduler is None or isinstance(scheduler, ReduceLROnPlateau):
             return
         scheduler.step()
+
+    def _sample_dynamics_probe_factory(self) -> Callable[[], list[dict[str, Any]]] | None:
+        """Build the rank-zero probe action for the current policy boundary."""
+        interval = self.train_config.sample_dynamics_probe_interval
+        if interval == 0 or (int(self.current_epoch) + 1) % interval != 0:
+            return None
+
+        def run_probe() -> list[dict[str, Any]]:
+            trainer = self.trainer
+            datamodule = getattr(trainer, "datamodule", None)
+            if datamodule is None or not hasattr(datamodule, "train_probe_dataloader"):
+                raise RuntimeError("sample dynamics probe requires RFDETRDataModule.train_probe_dataloader()")
+            report = run_deterministic_probe(
+                self.model,
+                self.postprocess,
+                datamodule.train_probe_dataloader(),
+                device=self.device,
+                iou_threshold=self.train_config.sample_dynamics_probe_iou_threshold,
+                score_threshold=self.train_config.sample_dynamics_probe_score_threshold,
+            )
+            return [sample.as_dict() for sample in report.samples]
+
+        return run_probe
 
     def on_validation_epoch_end(self) -> None:
         """Step ``ReduceLROnPlateau`` from the monitored metric on the manual-optimization path.

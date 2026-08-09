@@ -420,6 +420,28 @@ class SetCriterion(nn.Module):
             raw = elementwise.mean(1).sum(1) * query_count
         return cast(Tensor, (raw * weights.to(device=raw.device, dtype=raw.dtype)).sum() / num_boxes)
 
+    def _matched_sample_weights(self, batch_idx: Tensor, reference: Tensor) -> Tensor:
+        """Return matched-instance weights with global mean mass equal to one.
+
+        Image-level weights are mean-normalized for classification.  Box, mask, and keypoint branches operate per
+        matched instance, so their weights are separately normalized by the global matched-instance mass.  This keeps
+        the branch normalizer stable when high-weight images contain more targets.
+        """
+        if self._sample_weights is None:
+            raise RuntimeError("sample weights are not configured")
+        weights = self._sample_weights.to(device=reference.device, dtype=reference.dtype)[batch_idx]
+        statistics = torch.stack(
+            [
+                torch.as_tensor(weights.numel(), dtype=reference.dtype, device=reference.device),
+                weights.sum(),
+            ]
+        )
+        if is_dist_avail_and_initialized():
+            torch.distributed.all_reduce(statistics)
+        if float(statistics[1].detach()) <= 0.0:
+            return weights
+        return weights * (statistics[0] / statistics[1])
+
     @staticmethod
     def _output_device(outputs: dict[str, Any]) -> torch.device:
         """Return the device used by tensor outputs.
@@ -684,8 +706,8 @@ class SetCriterion(nn.Module):
         if self._sample_weights is None:
             losses["loss_bbox"] = loss_bbox.sum() / num_boxes
         else:
-            sample_weights = self._sample_weights.to(device=loss_bbox.device, dtype=loss_bbox.dtype)
-            losses["loss_bbox"] = (loss_bbox.sum(dim=1) * sample_weights[idx[0]]).sum() / num_boxes
+            matched_weights = self._matched_sample_weights(idx[0], loss_bbox)
+            losses["loss_bbox"] = (loss_bbox.sum(dim=1) * matched_weights).sum() / num_boxes
 
         loss_giou = 1 - box_ops.elementwise_generalized_box_iou(
             box_ops.box_cxcywh_to_xyxy(src_boxes),
@@ -694,8 +716,8 @@ class SetCriterion(nn.Module):
         if self._sample_weights is None:
             losses["loss_giou"] = loss_giou.sum() / num_boxes
         else:
-            sample_weights = self._sample_weights.to(device=loss_giou.device, dtype=loss_giou.dtype)
-            losses["loss_giou"] = (loss_giou * sample_weights[idx[0]]).sum() / num_boxes
+            matched_weights = self._matched_sample_weights(idx[0], loss_giou)
+            losses["loss_giou"] = (loss_giou * matched_weights).sum() / num_boxes
         self._record_per_sample(
             "loss_bbox",
             self._scatter_per_sample(loss_bbox.detach().sum(dim=1), idx[0], len(targets)),
@@ -824,8 +846,7 @@ class SetCriterion(nn.Module):
                 "loss_mask_dice": dice_loss_jit(point_logits, point_labels, num_boxes_scalar),
             }
         else:
-            sample_weights = self._sample_weights.to(device=point_logits.device, dtype=point_logits.dtype)
-            matched_weights = sample_weights[idx[0]]
+            matched_weights = self._matched_sample_weights(idx[0], point_logits)
             point_ce_weighted = F.binary_cross_entropy_with_logits(point_logits, point_labels, reduction="none").mean(1)
             point_probs_weighted = point_logits.sigmoid()
             point_flat_targets_weighted = point_labels.flatten(1)
@@ -893,7 +914,7 @@ class SetCriterion(nn.Module):
                 "loss_keypoints_nll": loss_nll.sum() / num_boxes,
             }
         else:
-            sample_weights = self._sample_weights.to(device=loss_l1.device, dtype=loss_l1.dtype)[idx[0]]
+            sample_weights = self._matched_sample_weights(idx[0], loss_l1)
             losses = {
                 "loss_keypoints_l1": (loss_l1 * sample_weights).sum() / num_boxes,
                 "loss_keypoints_findable": (loss_findable * sample_weights).sum() / num_boxes,

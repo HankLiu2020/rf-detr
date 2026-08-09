@@ -6,6 +6,9 @@ pretrain_weights: /path/to/seg-small-checkpoint.pt
 sample_dynamics_enabled: true
 sample_dynamics_mode: combined
 sample_dynamics_output_dir: output/seg-small-sample-dynamics
+sample_dynamics_probe_interval: 5
+sample_dynamics_probe_iou_threshold: 0.5
+sample_dynamics_probe_score_threshold: 0.05
 sample_dynamics_seed: 20260809
 sample_dynamics_base_coverage: 0.60
 sample_dynamics_hard_learnable_quota: 0.25

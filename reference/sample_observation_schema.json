@@ -9,7 +9,9 @@
         "matched_count",
         "raw_numerators",
         "normalized_losses",
-        "per_image_normalized_losses"
+        "per_image_normalized_losses",
+        "weighted_per_image_normalized_loss",
+        "observation_count"
     ],
     "properties": {
         "sample_id": {
@@ -49,7 +51,14 @@
         "weighted_normalized_loss": {
             "type": "number"
         },
-        "step": {
+        "weighted_per_image_normalized_loss": {
+            "type": "number"
+        },
+        "observation_count": {
+            "type": "integer",
+            "minimum": 1
+        },
+        "global_step": {
             "type": "integer",
             "minimum": 0
         },

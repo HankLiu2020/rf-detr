@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 import torch
 from torch import Tensor
@@ -116,6 +116,20 @@ class PerSampleLossPacket:
                 result = result + values.to(result) * float(weight)
         return result
 
+    def weighted_per_image_normalized_loss(self, weight_dict: dict[str, float]) -> Tensor:
+        """Return the weighted image-local diagnostic loss for every image.
+
+        Unlike :meth:`weighted_normalized_loss`, this view divides every component numerator by ``max(gt_count_i, 1)``.
+        It is the default signal used for cross-image difficulty ranking because it does not make an image harder merely
+        because it contains more target instances.
+        """
+        result = torch.zeros(self.batch_size, dtype=self.global_num_boxes.dtype, device=self.global_num_boxes.device)
+        for name, weight in weight_dict.items():
+            values = self.per_image_normalized_losses.get(name)
+            if values is not None:
+                result = result + values.to(result) * float(weight)
+        return result
+
     def detached_cpu(self) -> "PerSampleLossPacket":
         """Return a CPU copy that cannot retain an autograd graph."""
         return PerSampleLossPacket(
@@ -129,8 +143,67 @@ class PerSampleLossPacket:
         )
 
 
+def _observation_count(record: Mapping[str, Any]) -> int:
+    """Return the positive multiplicity represented by an observation record."""
+    return max(1, int(record.get("observation_count", 1)))
+
+
+def _weighted_mean(records: list[Mapping[str, Any]], key: str) -> float:
+    """Return an observation-count-weighted mean for one scalar field."""
+    total = sum(_observation_count(record) for record in records)
+    return sum(float(record.get(key, 0.0)) * _observation_count(record) for record in records) / total
+
+
+def _weighted_mapping_mean(records: list[Mapping[str, Any]], key: str) -> dict[str, float]:
+    """Return weighted means for a nested numeric mapping field."""
+    names = sorted({str(name) for record in records for name in dict(record.get(key, {}))})
+    total = sum(_observation_count(record) for record in records)
+    return {
+        name: sum(float(dict(record.get(key, {})).get(name, 0.0)) * _observation_count(record) for record in records)
+        / total
+        for name in names
+    }
+
+
+def aggregate_observations(records: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Collapse repeated appearances into one epoch-level record per sample.
+
+    Already-aggregated records carry ``observation_count`` and can be merged again after DDP gather without biasing
+    ranks that saw fewer replays.
+    """
+    grouped: dict[str, list[Mapping[str, Any]]] = {}
+    for record in records:
+        grouped.setdefault(str(record["sample_id"]), []).append(record)
+    aggregated: list[dict[str, Any]] = []
+    for sample_id in sorted(grouped):
+        sample_records = grouped[sample_id]
+        latest = max(
+            sample_records, key=lambda record: (int(record.get("epoch", -1)), int(record.get("global_step", -1)))
+        )
+        result: dict[str, Any] = {
+            "sample_id": sample_id,
+            "global_step": max(int(record.get("global_step", -1)) for record in sample_records),
+            "epoch": max(int(record.get("epoch", -1)) for record in sample_records),
+            "observation_count": sum(_observation_count(record) for record in sample_records),
+            "global_num_boxes": _weighted_mean(sample_records, "global_num_boxes"),
+            "gt_count": int(round(_weighted_mean(sample_records, "gt_count"))),
+            "matched_count": int(round(_weighted_mean(sample_records, "matched_count"))),
+        }
+        for key in ("raw_numerators", "normalized_losses", "per_image_normalized_losses"):
+            if any(key in record for record in sample_records):
+                result[key] = _weighted_mapping_mean(sample_records, key)
+        for key in ("weighted_normalized_loss", "weighted_per_image_normalized_loss"):
+            if any(key in record for record in sample_records):
+                result[key] = _weighted_mean(sample_records, key)
+        for key in ("relative_path", "path"):
+            if key in latest:
+                result[key] = latest[key]
+        aggregated.append(result)
+    return aggregated
+
+
 class SampleObservationBuffer:
-    """Detached append-only buffer for RF2 observations.
+    """Detached, policy-boundary buffer for RF2 observations.
 
     The buffer stores ordinary Python values rather than tensors or model references.  It is intentionally small and
     explicit so later state-policy code can consume the same records without coupling itself to Lightning.
@@ -152,7 +225,14 @@ class SampleObservationBuffer:
     ) -> None:
         """Append one detached packet, one JSON-friendly record per image."""
         cpu_packet = packet.detached_cpu()
-        weighted = cpu_packet.weighted_normalized_loss(weight_dict or {})
+        if self.max_records is not None and len(self.records) + cpu_packet.batch_size > self.max_records:
+            raise RuntimeError(
+                "sample observation buffer capacity would be exceeded before the epoch boundary; "
+                "increase sample_dynamics_max_records or leave it unset. Records are never silently discarded."
+            )
+        weights = weight_dict or {name: 1.0 for name in cpu_packet.raw_numerators}
+        weighted = cpu_packet.weighted_normalized_loss(weights)
+        weighted_per_image = cpu_packet.weighted_per_image_normalized_loss(weights)
         for index, sample_id in enumerate(cpu_packet.sample_ids):
             record: dict[str, Any] = {
                 "sample_id": sample_id,
@@ -171,10 +251,15 @@ class SampleObservationBuffer:
                     name: float(values[index].item()) for name, values in cpu_packet.per_image_normalized_losses.items()
                 },
                 "weighted_normalized_loss": float(weighted[index].item()),
+                "weighted_per_image_normalized_loss": float(weighted_per_image[index].item()),
             }
             self.records.append(record)
-        if self.max_records is not None and len(self.records) > self.max_records:
-            del self.records[: len(self.records) - self.max_records]
+
+    def drain(self, *, aggregate: bool = True) -> list[dict[str, Any]]:
+        """Consume pending records and reset the buffer at a policy boundary."""
+        pending = self.records
+        self.records = []
+        return aggregate_observations(pending) if aggregate else pending
 
     def clear(self) -> None:
         """Remove all buffered records."""

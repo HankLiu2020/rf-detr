@@ -198,4 +198,73 @@ def test_observation_buffer_detaches_and_exports_jsonl(tmp_path) -> None:
 
     assert len(buffer.records) == 1
     assert isinstance(buffer.records[0]["raw_numerators"]["loss_ce"], float)
+    assert buffer.records[0]["weighted_per_image_normalized_loss"] == pytest.approx(3.0)
     assert output.read_text(encoding="utf-8").count("train:1:a.jpg") == 1
+
+
+def test_observation_buffer_drains_and_aggregates_replays() -> None:
+    """Policy boundaries consume storage and collapse same-epoch replays."""
+    packet = PerSampleLossPacket.from_numerators(
+        ("train:1:a.jpg",),
+        torch.tensor(2.0),
+        torch.tensor([1]),
+        torch.tensor([1]),
+        {"loss_ce": torch.tensor([2.0])},
+    )
+    buffer = SampleObservationBuffer()
+    buffer.append(packet, global_step=1, epoch=0, weight_dict={"loss_ce": 1.0})
+    buffer.append(packet, global_step=2, epoch=0, weight_dict={"loss_ce": 1.0})
+
+    drained = buffer.drain()
+
+    assert buffer.records == []
+    assert len(drained) == 1
+    assert drained[0]["observation_count"] == 2
+    assert drained[0]["weighted_per_image_normalized_loss"] == pytest.approx(2.0)
+
+
+def test_observation_buffer_capacity_never_silently_discards_records() -> None:
+    """A finite buffer fails before overflow instead of invalidating a cursor."""
+    packet = PerSampleLossPacket.from_numerators(
+        ("train:1:a.jpg",),
+        torch.tensor(1.0),
+        torch.tensor([1]),
+        torch.tensor([1]),
+        {"loss_ce": torch.tensor([1.0])},
+    )
+    buffer = SampleObservationBuffer(max_records=1)
+    buffer.append(packet, global_step=1, epoch=0)
+
+    with pytest.raises(RuntimeError, match="never silently discarded"):
+        buffer.append(packet, global_step=2, epoch=0)
+
+    assert len(buffer.records) == 1
+
+
+def test_instance_weight_normalization_preserves_box_branch_mass() -> None:
+    """Matched-instance weights retain mean one for imbalanced target counts."""
+    criterion, _ = _criterion()
+    weights = torch.tensor([1.3, 0.7])
+    batch_idx = torch.tensor([0] * 10 + [1])
+
+    criterion._sample_weights = weights
+    normalized = criterion._matched_sample_weights(batch_idx, torch.ones(11))
+
+    assert normalized.mean().item() == pytest.approx(1.0)
+    assert normalized[:10].mean().item() > normalized[-1].item()
+
+
+def test_weighted_box_losses_use_instance_mass_normalization() -> None:
+    """The active criterion path applies the normalized matched-instance mass."""
+    criterion, _ = _criterion()
+    outputs, targets = _batch_outputs()
+    targets[0]["labels"] = torch.tensor([0, 0])
+    targets[0]["boxes"] = torch.tensor([[0.5, 0.5, 0.2, 0.2], [0.2, 0.2, 0.3, 0.3]])
+    weights = torch.tensor([1.3, 0.7])
+
+    losses, packet = criterion(outputs, targets, num_boxes=3.0, return_per_sample=True, sample_weights=weights)
+
+    scale = 3.0 / (2 * 1.3 + 0.7)
+    for name in ("loss_bbox", "loss_giou"):
+        expected = (packet.raw_numerators[name] * weights * scale).sum().item() / 3.0
+        assert losses[name].item() == pytest.approx(expected)

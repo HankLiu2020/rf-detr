@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from typing import cast
 
 import torch
 from torch.utils.data import Sampler
@@ -119,8 +120,17 @@ class BucketQuotaSampler(Sampler[int]):
         choices = torch.randint(len(source), (count,), generator=generator).tolist()
         return [source[choice] for choice in choices]
 
-    def global_epoch_indices(self) -> list[int]:
-        """Generate the auditable global index list for the current epoch."""
+    @staticmethod
+    def _draw_coverage(bucket: list[int], count: int, generator: torch.Generator) -> list[int]:
+        """Draw base coverage without replacement, cycling only when necessary."""
+        result: list[int] = []
+        while len(result) < count:
+            permutation = torch.randperm(len(bucket), generator=generator).tolist()
+            result.extend(bucket[index] for index in permutation[: count - len(result)])
+        return result
+
+    def _generate_global_epoch_indices(self) -> list[int]:
+        """Generate a global list from this process's state snapshot."""
         total_samples = self.num_samples * self.world_size
         generator = torch.Generator()
         generator.manual_seed(self.seed + self.epoch)
@@ -130,12 +140,26 @@ class BucketQuotaSampler(Sampler[int]):
         mastered_count = int(round(total_samples * self.quotas[2]))
         exploration_count = total_samples - base_count - hard_count - mastered_count
         indices = []
-        indices.extend(self._draw(all_indices, all_indices, base_count, generator))
+        indices.extend(self._draw_coverage(all_indices, base_count, generator))
         indices.extend(self._draw(hard, all_indices, hard_count, generator))
         indices.extend(self._draw(mastered, all_indices, mastered_count, generator))
         indices.extend(self._draw(all_indices, all_indices, exploration_count, generator))
         permutation = torch.randperm(len(indices), generator=generator).tolist()
         return [indices[index] for index in permutation]
+
+    def global_epoch_indices(self) -> list[int]:
+        """Return one rank-zero-authored global index list for the current epoch."""
+        use_collective = self.world_size > 1 and torch.distributed.is_available() and torch.distributed.is_initialized()
+        if not use_collective:
+            return self._generate_global_epoch_indices()
+        if torch.distributed.get_world_size() != self.world_size or torch.distributed.get_rank() != self.rank:
+            raise RuntimeError("BucketQuotaSampler rank/world_size must match the active process group")
+        objects: list[object] = [self._generate_global_epoch_indices() if self.rank == 0 else None]
+        torch.distributed.broadcast_object_list(objects, src=0)
+        indices = objects[0]
+        if not isinstance(indices, list) or not all(isinstance(index, int) for index in indices):
+            raise TypeError("rank-zero dynamic sampler plan must be a list of integer indices")
+        return cast(list[int], indices)
 
     def __iter__(self) -> Iterator[int]:
         """Yield this rank's slice of one shared global epoch list."""

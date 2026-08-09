@@ -85,19 +85,26 @@ def match_predictions_to_target(
     target: dict[str, Any],
     *,
     iou_threshold: float = 0.5,
+    score_threshold: float = 0.05,
 ) -> ProbeSampleResult:
     """Compute deterministic FN/FP/class-error metrics for one image.
 
-    Matching is greedy and score-ordered. Correct matches require both an IoU above the threshold and the same class. A
-    prediction overlapping an unused ground truth at the threshold with the wrong class is counted as a class error
-    rather than both a false positive and a false negative.
+    Predictions below ``score_threshold`` are removed before greedy, score-ordered IoU matching.  An IoU match consumes
+    one prediction and one ground truth regardless of class; a wrong label is therefore one ``class_error`` and is not
+    counted again as FP or FN.
     """
     if not 0.0 < iou_threshold <= 1.0:
         raise ValueError(f"iou_threshold must be in (0, 1], got {iou_threshold}")
+    if not 0.0 <= score_threshold <= 1.0:
+        raise ValueError(f"score_threshold must be in [0, 1], got {score_threshold}")
     device = prediction["boxes"].device
     pred_boxes = prediction["boxes"].to(device)
     pred_labels = prediction["labels"].to(device)
     scores = prediction.get("scores", torch.ones(len(pred_boxes), device=device)).to(device)
+    keep = scores >= score_threshold
+    pred_boxes = pred_boxes[keep]
+    pred_labels = pred_labels[keep]
+    scores = scores[keep]
     gt_boxes = _target_boxes_xyxy(target, device)
     gt_labels = target["labels"].to(device)
     sample_id = str(target["sample_id"])
@@ -113,14 +120,19 @@ def match_predictions_to_target(
     class_errors = 0
     false_positives = 0
     for prediction_index in order.tolist():
-        candidate_iou, candidate_gt = ious[prediction_index].max(dim=0)
+        available = torch.ones(len(gt_boxes), dtype=torch.bool, device=device)
+        if used_gt:
+            available[list(used_gt)] = False
+        candidate_values = ious[prediction_index].masked_fill(~available, -1.0)
+        candidate_iou, candidate_gt = candidate_values.max(dim=0)
         gt_index = int(candidate_gt.item())
-        if float(candidate_iou.item()) < iou_threshold or gt_index in used_gt:
+        if float(candidate_iou.item()) < iou_threshold:
             false_positives += 1
             continue
         used_gt.add(gt_index)
+        matched_ious.append(float(candidate_iou.item()))
         if int(pred_labels[prediction_index].item()) == int(gt_labels[gt_index].item()):
-            matched_ious.append(float(candidate_iou.item()))
+            continue
         else:
             class_errors += 1
 
@@ -166,6 +178,7 @@ def run_deterministic_probe(
     *,
     device: torch.device | str | None = None,
     iou_threshold: float = 0.5,
+    score_threshold: float = 0.05,
 ) -> ProbeReport:
     """Run a no-grad probe and restore the model's original train/eval state.
 
@@ -175,6 +188,7 @@ def run_deterministic_probe(
         dataloader: Deterministic train-probe loader.
         device: Optional target device. If omitted, model parameters determine it.
         iou_threshold: IoU threshold used by :func:`match_predictions_to_target`.
+        score_threshold: Minimum prediction confidence retained by the probe protocol.
 
     Returns:
         A report containing one result for every image in loader order.
@@ -196,7 +210,12 @@ def run_deterministic_probe(
                 outputs = model(samples)
                 predictions = postprocess(outputs, target_sizes)
                 results.extend(
-                    match_predictions_to_target(prediction, target, iou_threshold=iou_threshold)
+                    match_predictions_to_target(
+                        prediction,
+                        target,
+                        iou_threshold=iou_threshold,
+                        score_threshold=score_threshold,
+                    )
                     for prediction, target in zip(predictions, targets)
                 )
     finally:

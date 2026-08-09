@@ -10,7 +10,17 @@ The observer types in this module are deliberately independent from the model an
 enabled for diagnostics without changing the default RF-DETR training path.
 """
 
-from rfdetr.sample_dynamics.observation import PerSampleLossPacket, SampleObservationBuffer
+from rfdetr.sample_dynamics.distributed import (
+    distributed_is_initialized,
+    gather_observation_records,
+    is_global_zero,
+    synchronize_epoch_state,
+)
+from rfdetr.sample_dynamics.observation import (
+    PerSampleLossPacket,
+    SampleObservationBuffer,
+    aggregate_observations,
+)
 from rfdetr.sample_dynamics.probe import (
     DeterministicProbeDataset,
     ProbeReport,
@@ -34,11 +44,15 @@ from rfdetr.sample_dynamics.weighting import SampleWeightPolicy, cap_effective_c
 __all__ = [
     "DeterministicProbeDataset",
     "BucketQuotaSampler",
+    "aggregate_observations",
+    "distributed_is_initialized",
     "ema_update",
     "PerSampleLossPacket",
     "ProbeReport",
     "ProbeSampleResult",
     "ReviewExporter",
+    "gather_observation_records",
+    "is_global_zero",
     "SampleObservationBuffer",
     "SampleState",
     "SampleStateRecord",
@@ -46,6 +60,7 @@ __all__ = [
     "SampleWeightPolicy",
     "cap_effective_contribution",
     "StatePolicy",
+    "synchronize_epoch_state",
     "percentile_rank",
     "match_predictions_to_target",
     "run_deterministic_probe",

@@ -59,6 +59,23 @@ def test_sampler_honors_hard_and_mastered_bucket_quotas() -> None:
     assert sum(report.get(sample_id, 0) for sample_id in ids[2:]) == 5
 
 
+def test_base_coverage_uses_unique_samples_before_cycling() -> None:
+    """Base coverage means distinct uniform coverage, not replacement slots."""
+    ids = [f"train:{index}:image-{index}.jpg" for index in range(10)]
+    sampler = BucketQuotaSampler(
+        len(ids),
+        ids,
+        6,
+        base_coverage=1.0,
+        hard_learnable=0.0,
+        mastered_replay=0.0,
+        exploration=0.0,
+        seed=3,
+    )
+
+    assert len(set(sampler.global_epoch_indices())) == 6
+
+
 def test_sampler_maps_aligned_indices_to_original_ids() -> None:
     """Padding indices are classified and reported using original sample IDs."""
     source = torch.utils.data.TensorDataset(torch.arange(5))

@@ -13,6 +13,8 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterable, Mapping
 
+from rfdetr.sample_dynamics.observation import aggregate_observations
+
 if TYPE_CHECKING:
     from rfdetr.sample_dynamics.weighting import SampleWeightPolicy
 
@@ -120,17 +122,24 @@ class SampleStateStore:
     @staticmethod
     def instant_loss_baseline(records: Iterable[Mapping[str, Any]]) -> dict[str, float]:
         """Return current normalized-loss percentiles, the RF4 instant baseline."""
-        materialized = list(records)
+        materialized = aggregate_observations(records)
         values = [SampleStateStore._loss_value(record) for record in materialized]
         return {str(record["sample_id"]): percentile_rank(value, values) for record, value in zip(materialized, values)}
 
     @staticmethod
     def _loss_value(record: Mapping[str, Any]) -> float:
-        """Read the observer's weighted loss, with a component-sum fallback."""
+        """Read image-local weighted loss, retaining global views for audit only."""
+        if "weighted_per_image_normalized_loss" in record:
+            return float(record["weighted_per_image_normalized_loss"])
+        per_image = record.get("per_image_normalized_losses")
+        if isinstance(per_image, Mapping):
+            return sum(float(value) for value in per_image.values())
         if "weighted_normalized_loss" in record:
             return float(record["weighted_normalized_loss"])
         normalized = record.get("normalized_losses", {})
-        return sum(float(value) for value in normalized.values())
+        if isinstance(normalized, Mapping):
+            return sum(float(value) for value in normalized.values())
+        return 0.0
 
     @staticmethod
     def _probe_conflict(probe: Mapping[str, Any] | None) -> bool:
@@ -166,7 +175,7 @@ class SampleStateStore:
         The current batch/observation-set percentile is retained as the simple Instant-Loss baseline. State transitions
         use only prior observations and therefore cannot feed the current raw loss back into the same step.
         """
-        materialized = list(records)
+        materialized = aggregate_observations(records)
         if not materialized:
             return {}
         baseline = self.instant_loss_baseline(materialized)
@@ -249,6 +258,9 @@ class SampleStateStore:
 
     def load_state_dict(self, state: Mapping[str, Any]) -> None:
         """Restore a state dictionary produced by :meth:`state_dict`."""
+        policy = state.get("policy")
+        if isinstance(policy, Mapping):
+            self.policy = StatePolicy(**dict(policy))
         self.policy_version = int(state.get("policy_version", 0))
         records = state.get("states", {})
         self.states = {}
