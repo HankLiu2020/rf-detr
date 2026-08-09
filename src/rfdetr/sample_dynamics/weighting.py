@@ -48,9 +48,7 @@ class SampleWeightPolicy:
         }
         self.version += 1
         self.weights = {
-            str(state["sample_id"]): float(
-                max(self.minimum, min(self.maximum, state_weights[str(state["state"])]))
-            )
+            str(state["sample_id"]): float(max(self.minimum, min(self.maximum, state_weights[str(state["state"])])))
             for state in states
         }
 
@@ -103,7 +101,11 @@ class SampleWeightPolicy:
                 if not bool(torch.any(eligible)):
                     break
                 delta = (-residual) / max(int(eligible.sum().item()), 1)
-                values = torch.where(eligible, torch.maximum(values - delta, torch.as_tensor(self.minimum, device=device)), values)
+                values = torch.where(
+                    eligible,
+                    torch.maximum(values - delta, torch.as_tensor(self.minimum, device=device)),
+                    values,
+                )
         return values
 
     def state_dict(self) -> dict[str, object]:

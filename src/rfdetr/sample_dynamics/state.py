@@ -8,11 +8,13 @@
 from __future__ import annotations
 
 import json
-import math
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import TYPE_CHECKING, Any, Iterable, Mapping
+
+if TYPE_CHECKING:
+    from rfdetr.sample_dynamics.weighting import SampleWeightPolicy
 
 
 class SampleState(str, Enum):
@@ -120,10 +122,7 @@ class SampleStateStore:
         """Return current normalized-loss percentiles, the RF4 instant baseline."""
         materialized = list(records)
         values = [SampleStateStore._loss_value(record) for record in materialized]
-        return {
-            str(record["sample_id"]): percentile_rank(value, values)
-            for record, value in zip(materialized, values)
-        }
+        return {str(record["sample_id"]): percentile_rank(value, values) for record, value in zip(materialized, values)}
 
     @staticmethod
     def _loss_value(record: Mapping[str, Any]) -> float:
@@ -164,9 +163,8 @@ class SampleStateStore:
     ) -> dict[str, SampleStateRecord]:
         """Update state from detached observer records and optional probe metrics.
 
-        The current batch/observation-set percentile is retained as the simple
-        Instant-Loss baseline. State transitions use only prior observations and
-        therefore cannot feed the current raw loss back into the same step.
+        The current batch/observation-set percentile is retained as the simple Instant-Loss baseline. State transitions
+        use only prior observations and therefore cannot feed the current raw loss back into the same step.
         """
         materialized = list(records)
         if not materialized:
