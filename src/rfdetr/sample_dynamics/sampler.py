@@ -12,7 +12,6 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 import torch
 from torch.utils.data import Sampler
 
-
 StateProvider = Callable[[], Mapping[str, object]]
 IndexMapper = Callable[[int], int]
 

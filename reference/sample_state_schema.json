@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SampleStateRecord",
+  "type": "object",
+  "required": ["sample_id", "state", "current_loss", "loss_percentile", "loss_ema", "slope", "variance", "consecutive_hard_count", "forgetting_count", "probe_conflict_count", "difficulty", "policy_version"],
+  "properties": {
+    "sample_id": {"type": "string", "minLength": 1},
+    "state": {"enum": ["MASTERED", "LEARNING", "HARD_LEARNABLE", "SUSPECT"]},
+    "current_loss": {"type": "number"},
+    "loss_percentile": {"type": "number", "minimum": 0, "maximum": 1},
+    "loss_ema": {"type": ["number", "null"]},
+    "slope": {"type": "number"},
+    "variance": {"type": "number", "minimum": 0},
+    "consecutive_hard_count": {"type": "integer", "minimum": 0},
+    "forgetting_count": {"type": "integer", "minimum": 0},
+    "probe_conflict_count": {"type": "integer", "minimum": 0},
+    "difficulty": {"type": "number", "minimum": 0, "maximum": 1},
+    "last_epoch": {"type": "integer"},
+    "policy_version": {"type": "integer", "minimum": 0},
+    "history": {"type": "array", "items": {"type": "number"}},
+    "probe_history": {"type": "array", "items": {"type": "object"}}
+  },
+  "additionalProperties": true
+}

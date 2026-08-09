@@ -1,0 +1,17 @@
+model: RFDETRSegSmall
+model_config:
+  pretrain_weights: null
+  resolution: 384
+  num_classes: 2
+train_config:
+  dataset_file: roboflow
+  sample_dynamics_enabled: true
+  sample_dynamics_mode: combined
+  sample_dynamics_weight_min: 0.7
+  sample_dynamics_weight_max: 1.3
+  sample_dynamics_effective_cap: 2.5
+  sample_dynamics_base_coverage: 0.60
+  sample_dynamics_hard_learnable_quota: 0.25
+  sample_dynamics_mastered_replay: 0.10
+  sample_dynamics_exploration: 0.05
+  sample_dynamics_seed: 20260809
