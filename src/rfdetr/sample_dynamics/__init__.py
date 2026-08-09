@@ -18,6 +18,7 @@ from rfdetr.sample_dynamics.probe import (
     match_predictions_to_target,
     run_deterministic_probe,
 )
+from rfdetr.sample_dynamics.sampler import BucketQuotaSampler
 from rfdetr.sample_dynamics.state import (
     SampleState,
     SampleStateRecord,
@@ -31,6 +32,7 @@ from rfdetr.sample_dynamics.weighting import SampleWeightPolicy, cap_effective_c
 
 __all__ = [
     "DeterministicProbeDataset",
+    "BucketQuotaSampler",
     "ema_update",
     "PerSampleLossPacket",
     "ProbeReport",

@@ -87,10 +87,9 @@ def match_predictions_to_target(
 ) -> ProbeSampleResult:
     """Compute deterministic FN/FP/class-error metrics for one image.
 
-    Matching is greedy and score-ordered. Correct matches require both an IoU
-    above the threshold and the same class. A prediction overlapping an unused
-    ground truth at the threshold with the wrong class is counted as a class
-    error rather than both a false positive and a false negative.
+    Matching is greedy and score-ordered. Correct matches require both an IoU above the threshold and the same class. A
+    prediction overlapping an unused ground truth at the threshold with the wrong class is counted as a class error
+    rather than both a false positive and a false negative.
     """
     if not 0.0 < iou_threshold <= 1.0:
         raise ValueError(f"iou_threshold must be in (0, 1], got {iou_threshold}")
@@ -140,9 +139,8 @@ def match_predictions_to_target(
 class DeterministicProbeDataset(torch.utils.data.Dataset[Any]):
     """Shallow-copy a train dataset and replace only its transform pipeline.
 
-    Dataset annotations and stable IDs remain identical to training. The
-    replacement transform is the validation-style fixed resize pipeline, so the
-    probe does not consume random augmentation state.
+    Dataset annotations and stable IDs remain identical to training. The replacement transform is the validation-style
+    fixed resize pipeline, so the probe does not consume random augmentation state.
     """
 
     def __init__(self, dataset: torch.utils.data.Dataset[Any], transform: Any) -> None:

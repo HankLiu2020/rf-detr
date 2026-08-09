@@ -708,6 +708,15 @@ def build_trainer(
     if not xla_accelerator:
         trainer_config["precision"] = _resolve_precision()
     trainer_config.update(trainer_kwargs)
+    if tc.sample_dynamics_enabled and tc.sample_dynamics_mode in {"sampler", "combined"}:
+        if trainer_kwargs.get("use_distributed_sampler") is True:
+            warnings.warn(
+                "Dynamic sample-dynamics sampling owns the global index stream; "
+                "overriding use_distributed_sampler=True to False.",
+                UserWarning,
+                stacklevel=2,
+            )
+        trainer_config["use_distributed_sampler"] = False
     if xla_accelerator:
         from pytorch_lightning.plugins import XLAPrecision
 

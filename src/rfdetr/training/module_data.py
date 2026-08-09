@@ -21,7 +21,7 @@ from rfdetr.datasets import build_dataset
 from rfdetr.datasets._aug_utils import resolve_keypoint_flip_pairs
 from rfdetr.datasets.aug_configs import AUG_CONFIG
 from rfdetr.datasets.coco import make_coco_transforms, make_coco_transforms_square_div_64
-from rfdetr.sample_dynamics import DeterministicProbeDataset
+from rfdetr.sample_dynamics import BucketQuotaSampler, DeterministicProbeDataset
 from rfdetr.utilities.box_ops import box_xyxy_to_cxcywh
 from rfdetr.utilities.logger import get_logger
 from rfdetr.utilities.tensors import make_collate_fn
@@ -125,8 +125,13 @@ class GradAccumAlignedDataset(torch.utils.data.Dataset[Any]):
         """Return the item at the (possibly remapped) index."""
         # pad_indices are fixed at __init__ time; same indices reused every epoch
         # (different augmentations per epoch due to online augmentation)
-        dataset_idx = idx if idx < self._dataset_length else self._pad_indices[idx - self._dataset_length]
-        return self._dataset[dataset_idx]
+        return self._dataset[self.original_index(idx)]
+
+    def original_index(self, idx: int) -> int:
+        """Map a visible padded index back to its underlying dataset index."""
+        if not 0 <= idx < self._length:
+            raise IndexError(f"dataset index {idx} out of range for length {self._length}")
+        return idx if idx < self._dataset_length else self._pad_indices[idx - self._dataset_length]
 
 
 class RFDETRDataModule(LightningDataModule):
@@ -160,6 +165,7 @@ class RFDETRDataModule(LightningDataModule):
         self._dataset_train: torch.utils.data.Dataset[Any] | None = None
         self._dataset_val: torch.utils.data.Dataset[Any] | None = None
         self._dataset_test: torch.utils.data.Dataset[Any] | None = None
+        self._train_sampler: BucketQuotaSampler | None = None
 
         # GPU augmentation pipeline (Kornia); built lazily in setup("fit").
         self._kornia_pipeline: Any | None = None
@@ -303,6 +309,61 @@ class RFDETRDataModule(LightningDataModule):
             raise RuntimeError(f"{split} dataset was not built; call setup({split!r}) before requesting a dataloader.")
         return dataset
 
+    @staticmethod
+    def _stable_sample_ids(dataset: torch.utils.data.Dataset[Any]) -> tuple[str, ...]:
+        """Read stable IDs from a dataset without fetching transformed samples."""
+        sample_ids = getattr(dataset, "sample_ids", None)
+        if sample_ids is not None and len(sample_ids) == len(dataset):
+            return tuple(str(sample_id) for sample_id in sample_ids)
+        sample_id_for_index = getattr(dataset, "sample_id_for_index", None)
+        if callable(sample_id_for_index):
+            return tuple(str(sample_id_for_index(index)) for index in range(len(dataset)))
+        raise ValueError(
+            f"Dynamic sampling requires stable sample IDs on {type(dataset).__name__}; "
+            "implement `sample_ids` or `sample_id_for_index()` on the dataset."
+        )
+
+    def _sample_state_provider(self) -> dict[str, object]:
+        """Return the latest state map from the attached Lightning module."""
+        trainer = self.trainer
+        module = getattr(trainer, "lightning_module", None) if trainer is not None else None
+        store = getattr(module, "sample_state_store", None)
+        if store is None:
+            return {}
+        return {sample_id: record.state for sample_id, record in store.states.items()}
+
+    def _dynamic_sampler(
+        self,
+        dataset: torch.utils.data.Dataset[Any],
+        *,
+        num_samples: int,
+        index_mapper: Any | None = None,
+    ) -> BucketQuotaSampler:
+        """Construct the configured sampler using one global DDP index stream."""
+        trainer = self.trainer
+        world_size = int(getattr(trainer, "world_size", 1)) if trainer is not None else 1
+        rank = int(getattr(trainer, "global_rank", 0)) if trainer is not None else 0
+        base_dataset = self._dataset_train if self._dataset_train is not None else dataset
+        return BucketQuotaSampler(
+            dataset_length=len(dataset),
+            sample_ids=self._stable_sample_ids(base_dataset),
+            num_samples=num_samples,
+            state_provider=self._sample_state_provider,
+            index_mapper=index_mapper,
+            world_size=world_size,
+            rank=rank,
+            seed=self.train_config.sample_dynamics_seed,
+            base_coverage=self.train_config.sample_dynamics_base_coverage,
+            hard_learnable=self.train_config.sample_dynamics_hard_learnable_quota,
+            mastered_replay=self.train_config.sample_dynamics_mastered_replay,
+            exploration=self.train_config.sample_dynamics_exploration,
+        )
+
+    def on_train_epoch_start(self) -> None:
+        """Advance the dynamic sampler's deterministic epoch seed."""
+        if self._train_sampler is not None:
+            self._train_sampler.set_epoch(int(getattr(self.trainer, "current_epoch", 0)))
+
     def train_dataloader(self) -> DataLoader[Any]:
         """Return the training DataLoader.
 
@@ -327,15 +388,26 @@ class RFDETRDataModule(LightningDataModule):
                 dataset_length,
                 effective_batch_size * _MIN_TRAIN_BATCHES,
             )
-            sampler = torch.utils.data.RandomSampler(
-                dataset,  # type: ignore[arg-type]
-                replacement=True,
-                num_samples=effective_batch_size * _MIN_TRAIN_BATCHES,
-            )
+            if self.train_config.sample_dynamics_enabled and self.train_config.sample_dynamics_mode in {
+                "sampler",
+                "combined",
+            }:
+                sampler = self._dynamic_sampler(
+                    dataset,
+                    num_samples=effective_batch_size * _MIN_TRAIN_BATCHES,
+                )
+                self._train_sampler = sampler
+            else:
+                sampler = torch.utils.data.RandomSampler(
+                    dataset,  # type: ignore[arg-type]
+                    replacement=True,
+                    num_samples=effective_batch_size * _MIN_TRAIN_BATCHES,
+                )
             return DataLoader(
                 dataset,
                 batch_size=batch_size,
                 sampler=sampler,
+                drop_last=True,
                 collate_fn=self._collate_fn,
                 num_workers=num_workers,
                 pin_memory=self._pin_memory,
@@ -350,6 +422,28 @@ class RFDETRDataModule(LightningDataModule):
         # See https://github.com/Lightning-AI/pytorch-lightning/issues/19987
         world_size: int = getattr(self.trainer, "world_size", 1) if self.trainer else 1
         aligned_dataset = GradAccumAlignedDataset(dataset, effective_batch_size, world_size)
+
+        if self.train_config.sample_dynamics_enabled and self.train_config.sample_dynamics_mode in {
+            "sampler",
+            "combined",
+        }:
+            self._train_sampler = self._dynamic_sampler(
+                aligned_dataset,
+                num_samples=len(aligned_dataset) // world_size,
+                index_mapper=aligned_dataset.original_index,
+            )
+            return DataLoader(
+                aligned_dataset,
+                batch_size=batch_size,
+                sampler=self._train_sampler,
+                drop_last=True,
+                collate_fn=self._collate_fn,
+                num_workers=num_workers,
+                pin_memory=self._pin_memory,
+                persistent_workers=self._persistent_workers,
+                prefetch_factor=self._prefetch_factor,
+                worker_init_fn=_worker_init_fn,
+            )
 
         return DataLoader(
             aligned_dataset,

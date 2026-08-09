@@ -957,12 +957,23 @@ class YoloDetection(VisionDataset):  # type: ignore[misc]  # torchvision ships n
 
         self.classes = self.sv_dataset.classes
         self.ids = list(range(len(self.sv_dataset)))
+        self.sample_ids = tuple(self._sample_id_for_index(index) for index in self.ids)
 
         # Create COCO-compatible API for evaluation
         self.coco = _build_coco_api_from_samples(self.classes, self.sv_dataset, self.keypoint_schema)
 
     def __len__(self) -> int:
         return len(self.sv_dataset)
+
+    def _sample_id_for_index(self, idx: int) -> str:
+        """Build a stable sample ID from lazy image metadata."""
+        image_path = self.sv_dataset.get_image_info(idx).image_path
+        relative_path = Path(image_path).relative_to(self._img_folder).as_posix()
+        return make_sample_id(self._split, self.ids[idx], relative_path)
+
+    def sample_id_for_index(self, idx: int) -> str:
+        """Return the stable sample ID without loading image pixels."""
+        return self.sample_ids[idx]
 
     def __getitem__(self, idx: int) -> tuple[Image.Image | torch.Tensor, dict[str, Any] | None]:
         image_id = self.ids[idx]

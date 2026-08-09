@@ -264,6 +264,9 @@ class CocoDetection(torchvision.datasets.CocoDetection):
         super().__init__(img_folder, ann_file)
         self._transforms = transforms
         self._split = split
+        self.sample_ids = tuple(
+            make_sample_id(split, image_id, str(self.coco.imgs[image_id]["file_name"])) for image_id in self.ids
+        )
         self.include_masks = include_masks
         self.include_keypoints = include_keypoints
         if remap_category_ids:
@@ -298,6 +301,10 @@ class CocoDetection(torchvision.datasets.CocoDetection):
             # normalized [cx, cy, w, h] occurs inside Normalize
             img, target = self._transforms(img, target)
         return img, target
+
+    def sample_id_for_index(self, idx: int) -> str:
+        """Return the stable sample ID without loading image pixels."""
+        return self.sample_ids[idx]
 
 
 class ConvertCoco:
