@@ -12,7 +12,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any
+from typing import Any, cast
 
 import torch
 import torch.nn.functional as F  # noqa: N812
@@ -258,7 +258,7 @@ class SetCriterion(nn.Module):
         if alpha >= 0:
             alpha_t = alpha * targets + (1 - alpha) * (1 - targets)
             loss = alpha_t * loss
-        return loss
+        return cast(Tensor, loss)
 
     @torch.no_grad()
     def _record_classification_numerator(
@@ -418,7 +418,7 @@ class SetCriterion(nn.Module):
                     mode="focal",
                 )
             raw = elementwise.mean(1).sum(1) * query_count
-        return (raw * weights.to(device=raw.device, dtype=raw.dtype)).sum() / num_boxes
+        return cast(Tensor, (raw * weights.to(device=raw.device, dtype=raw.dtype)).sum() / num_boxes)
 
     @staticmethod
     def _output_device(outputs: dict[str, Any]) -> torch.device:

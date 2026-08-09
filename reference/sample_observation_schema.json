@@ -1,19 +1,62 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "SampleObservation",
-  "type": "object",
-  "required": ["sample_id", "global_num_boxes", "gt_count", "matched_count", "raw_numerators", "normalized_losses", "per_image_normalized_losses"],
-  "properties": {
-    "sample_id": {"type": "string", "minLength": 1},
-    "global_num_boxes": {"type": "number", "minimum": 0},
-    "gt_count": {"type": "integer", "minimum": 0},
-    "matched_count": {"type": "integer", "minimum": 0},
-    "raw_numerators": {"type": "object", "additionalProperties": {"type": "number"}},
-    "normalized_losses": {"type": "object", "additionalProperties": {"type": "number"}},
-    "per_image_normalized_losses": {"type": "object", "additionalProperties": {"type": "number"}},
-    "weighted_normalized_loss": {"type": "number"},
-    "step": {"type": "integer", "minimum": 0},
-    "epoch": {"type": "integer", "minimum": 0}
-  },
-  "additionalProperties": true
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "SampleObservation",
+    "type": "object",
+    "required": [
+        "sample_id",
+        "global_num_boxes",
+        "gt_count",
+        "matched_count",
+        "raw_numerators",
+        "normalized_losses",
+        "per_image_normalized_losses"
+    ],
+    "properties": {
+        "sample_id": {
+            "type": "string",
+            "minLength": 1
+        },
+        "global_num_boxes": {
+            "type": "number",
+            "minimum": 0
+        },
+        "gt_count": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "matched_count": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "raw_numerators": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "number"
+            }
+        },
+        "normalized_losses": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "number"
+            }
+        },
+        "per_image_normalized_losses": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "number"
+            }
+        },
+        "weighted_normalized_loss": {
+            "type": "number"
+        },
+        "step": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "epoch": {
+            "type": "integer",
+            "minimum": 0
+        }
+    },
+    "additionalProperties": true
 }

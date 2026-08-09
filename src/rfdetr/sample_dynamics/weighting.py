@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterable, Mapping
+from typing import Any, Iterable, Mapping
 
 import torch
 from torch import Tensor
@@ -121,7 +121,7 @@ class SampleWeightPolicy:
             "weights": dict(self.weights),
         }
 
-    def load_state_dict(self, state: Mapping[str, object]) -> None:
+    def load_state_dict(self, state: Mapping[str, Any]) -> None:
         """Restore a policy saved by :meth:`state_dict`."""
         self.version = int(state.get("version", 0))
         self.mastered = float(state.get("mastered", self.mastered))

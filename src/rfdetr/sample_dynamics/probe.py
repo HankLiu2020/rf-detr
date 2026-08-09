@@ -8,8 +8,9 @@
 from __future__ import annotations
 
 import copy
+from collections.abc import Sized
 from dataclasses import dataclass
-from typing import Any, Iterable
+from typing import Any, Iterable, cast
 
 import torch
 import torch.utils.data
@@ -147,11 +148,11 @@ class DeterministicProbeDataset(torch.utils.data.Dataset[Any]):
         if not hasattr(dataset, "_transforms"):
             raise TypeError("deterministic train probe requires a dataset exposing a _transforms pipeline")
         self.dataset = copy.copy(dataset)
-        self.dataset._transforms = transform  # type: ignore[attr-defined]
+        self.dataset._transforms = transform
 
     def __len__(self) -> int:
         """Return the original train split length."""
-        return len(self.dataset)
+        return len(cast(Sized, self.dataset))
 
     def __getitem__(self, index: int) -> Any:
         """Return a deterministically transformed train item."""

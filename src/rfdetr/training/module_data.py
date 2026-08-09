@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sized
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, cast
 
@@ -313,11 +314,11 @@ class RFDETRDataModule(LightningDataModule):
     def _stable_sample_ids(dataset: torch.utils.data.Dataset[Any]) -> tuple[str, ...]:
         """Read stable IDs from a dataset without fetching transformed samples."""
         sample_ids = getattr(dataset, "sample_ids", None)
-        if sample_ids is not None and len(sample_ids) == len(dataset):
+        if sample_ids is not None and len(sample_ids) == len(cast(Sized, dataset)):
             return tuple(str(sample_id) for sample_id in sample_ids)
         sample_id_for_index = getattr(dataset, "sample_id_for_index", None)
         if callable(sample_id_for_index):
-            return tuple(str(sample_id_for_index(index)) for index in range(len(dataset)))
+            return tuple(str(sample_id_for_index(index)) for index in range(len(cast(Sized, dataset))))
         raise ValueError(
             f"Dynamic sampling requires stable sample IDs on {type(dataset).__name__}; "
             "implement `sample_ids` or `sample_id_for_index()` on the dataset."
@@ -345,7 +346,7 @@ class RFDETRDataModule(LightningDataModule):
         rank = int(getattr(trainer, "global_rank", 0)) if trainer is not None else 0
         base_dataset = self._dataset_train if self._dataset_train is not None else dataset
         return BucketQuotaSampler(
-            dataset_length=len(dataset),
+            dataset_length=len(cast(Sized, dataset)),
             sample_ids=self._stable_sample_ids(base_dataset),
             num_samples=num_samples,
             state_provider=self._sample_state_provider,
@@ -381,22 +382,24 @@ class RFDETRDataModule(LightningDataModule):
         effective_batch_size = batch_size * self.train_config.grad_accum_steps
         num_workers = self._num_workers
 
-        dataset_length = len(dataset)  # type: ignore[arg-type]
+        dataset_length = len(cast(Sized, dataset))
         if dataset_length < effective_batch_size * _MIN_TRAIN_BATCHES:
             logger.info(
                 "Training with uniform sampler because dataset is too small: %d < %d",
                 dataset_length,
                 effective_batch_size * _MIN_TRAIN_BATCHES,
             )
+            sampler: torch.utils.data.Sampler[int]
             if self.train_config.sample_dynamics_enabled and self.train_config.sample_dynamics_mode in {
                 "sampler",
                 "combined",
             }:
-                sampler = self._dynamic_sampler(
+                dynamic_sampler = self._dynamic_sampler(
                     dataset,
                     num_samples=effective_batch_size * _MIN_TRAIN_BATCHES,
                 )
-                self._train_sampler = sampler
+                self._train_sampler = dynamic_sampler
+                sampler = dynamic_sampler
             else:
                 sampler = torch.utils.data.RandomSampler(
                     dataset,  # type: ignore[arg-type]
@@ -471,7 +474,7 @@ class RFDETRDataModule(LightningDataModule):
         resolution = self.model_config.resolution
         include_keypoints = bool(getattr(self.model_config, "use_grouppose_keypoints", False))
         keypoint_flip_pairs = resolve_keypoint_flip_pairs(self.train_config, include_keypoints=include_keypoints)
-        transform_kwargs = {
+        transform_kwargs: dict[str, Any] = {
             "image_set": "val",
             "resolution": resolution,
             "multi_scale": False,

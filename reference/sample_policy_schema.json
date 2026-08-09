@@ -1,17 +1,52 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "SampleWeightPolicy",
-  "type": "object",
-  "required": ["version", "mastered", "learning", "hard_learnable", "suspect", "minimum", "maximum", "weights"],
-  "properties": {
-    "version": {"type": "integer", "minimum": 0},
-    "mastered": {"type": "number", "exclusiveMinimum": 0},
-    "learning": {"type": "number", "exclusiveMinimum": 0},
-    "hard_learnable": {"type": "number", "exclusiveMinimum": 0},
-    "suspect": {"type": "number", "exclusiveMinimum": 0},
-    "minimum": {"type": "number", "exclusiveMinimum": 0},
-    "maximum": {"type": "number", "exclusiveMinimum": 0},
-    "weights": {"type": "object", "additionalProperties": {"type": "number"}}
-  },
-  "additionalProperties": false
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "SampleWeightPolicy",
+    "type": "object",
+    "required": [
+        "version",
+        "mastered",
+        "learning",
+        "hard_learnable",
+        "suspect",
+        "minimum",
+        "maximum",
+        "weights"
+    ],
+    "properties": {
+        "version": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "mastered": {
+            "type": "number",
+            "exclusiveMinimum": 0
+        },
+        "learning": {
+            "type": "number",
+            "exclusiveMinimum": 0
+        },
+        "hard_learnable": {
+            "type": "number",
+            "exclusiveMinimum": 0
+        },
+        "suspect": {
+            "type": "number",
+            "exclusiveMinimum": 0
+        },
+        "minimum": {
+            "type": "number",
+            "exclusiveMinimum": 0
+        },
+        "maximum": {
+            "type": "number",
+            "exclusiveMinimum": 0
+        },
+        "weights": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "number"
+            }
+        }
+    },
+    "additionalProperties": false
 }

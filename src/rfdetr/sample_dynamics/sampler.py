@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 
 import torch
 from torch.utils.data import Sampler
@@ -137,7 +137,7 @@ class BucketQuotaSampler(Sampler[int]):
         permutation = torch.randperm(len(indices), generator=generator).tolist()
         return [indices[index] for index in permutation]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[int]:
         """Yield this rank's slice of one shared global epoch list."""
         global_indices = self.global_epoch_indices()
         self.last_global_indices = tuple(global_indices)

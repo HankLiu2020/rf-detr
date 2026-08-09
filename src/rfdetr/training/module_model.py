@@ -687,7 +687,7 @@ class RFDETRModelModule(LightningModule):
         exposure_multipliers = getattr(sampler, "exposure_multipliers", None)
         if not callable(exposure_multipliers):
             return None
-        return exposure_multipliers()
+        return cast(dict[str, float], exposure_multipliers())
 
     def _compute_train_losses(
         self,
@@ -1327,7 +1327,9 @@ class RFDETRModelModule(LightningModule):
         """Persist optional sample-dynamics state and previous policy for resume."""
         if getattr(self, "sample_state_store", None) is None:
             return
-        checkpoint["sample_dynamics_state"] = self.sample_state_store.state_dict()
+        sample_state_store = self.sample_state_store
+        assert sample_state_store is not None
+        checkpoint["sample_dynamics_state"] = sample_state_store.state_dict()
         if self.sample_weight_policy is not None:
             checkpoint["sample_dynamics_policy"] = self.sample_weight_policy.state_dict()
 
