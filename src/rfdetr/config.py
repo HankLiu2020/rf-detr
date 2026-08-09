@@ -1054,6 +1054,12 @@ class TrainConfig(BaseConfig):
     dataset_file: Literal["coco", "o365", "roboflow", "yolo"] = "roboflow"
     square_resize_div_64: bool = True
     dataset_dir: PathLikeStr | None
+    # Optional sample-dynamics experiment controls. All are default-off so the
+    # official RF-DETR loss, optimizer, and sampler remain untouched.
+    sample_dynamics_enabled: bool = False
+    sample_dynamics_mode: Literal["observe", "loss_weight", "sampler", "combined"] = "observe"
+    sample_dynamics_output_dir: PathLikeStr | None = None
+    sample_dynamics_max_records: int | None = Field(default=None, ge=1)
     output_dir: PathLikeStr = "output"
     # XLA/TPU: every distinct (H, W) triggers a separate graph compilation. Set multi_scale=False
     # for a static shape (zero recompilations after the first batch) when training on TPU.

@@ -33,6 +33,7 @@ from rfdetr.config import (
 from rfdetr.datasets.coco import compute_multi_scale_scales
 from rfdetr.models.lwdetr import build_criterion_from_config, build_model_from_config
 from rfdetr.models.weights import apply_lora, interpolate_position_embeddings, load_pretrain_weights
+from rfdetr.sample_dynamics import SampleObservationBuffer
 from rfdetr.training.callbacks.coco_eval import _get_ema_inner_module
 from rfdetr.training.param_groups import get_param_dict
 from rfdetr.utilities.logger import get_logger
@@ -395,6 +396,11 @@ class RFDETRModelModule(LightningModule):
         # Build criterion/postprocessors after potential num_classes alignment so
         # they are constructed with a config that matches the current model head.
         self.criterion, self.postprocess = build_criterion_from_config(self.model_config, self.train_config)
+        self.sample_observation_buffer: SampleObservationBuffer | None = (
+            SampleObservationBuffer(max_records=train_config.sample_dynamics_max_records)
+            if train_config.sample_dynamics_enabled
+            else None
+        )
 
         # torch.compile is opt-in: set model_config.compile=True to enable.
         # Only enabled on CUDA; MPS and CPU do not benefit from compilation.
@@ -552,7 +558,19 @@ class RFDETRModelModule(LightningModule):
             loss_dict, raw_loss, normalizer = self._compute_train_losses(outputs, targets)
             loss_for_backward = self._scale_loss_for_accumulation(raw_loss, normalizer)
         else:
-            loss_dict = self.criterion(outputs, targets)
+            if self.sample_observation_buffer is not None:
+                criterion_result = self.criterion(outputs, targets, return_per_sample=True)
+                if not isinstance(criterion_result, tuple):
+                    raise TypeError("sample-dynamics observer expected criterion to return (loss_dict, packet)")
+                loss_dict, packet = criterion_result
+                self.sample_observation_buffer.append(
+                    packet,
+                    global_step=int(self.global_step),
+                    epoch=int(self.current_epoch),
+                    weight_dict=self.criterion.weight_dict,
+                )
+            else:
+                loss_dict = self.criterion(outputs, targets)
             loss_for_backward = None
         weight_dict = self.criterion.weight_dict
         loss: Tensor = torch.stack([loss_dict[k] * weight_dict[k] for k in loss_dict if k in weight_dict]).sum()
