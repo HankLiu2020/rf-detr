@@ -18,13 +18,32 @@ from rfdetr.sample_dynamics.probe import (
     match_predictions_to_target,
     run_deterministic_probe,
 )
+from rfdetr.sample_dynamics.state import (
+    SampleState,
+    SampleStateRecord,
+    SampleStateStore,
+    StatePolicy,
+    ema_update,
+    percentile_rank,
+    window_slope,
+)
+from rfdetr.sample_dynamics.weighting import SampleWeightPolicy, cap_effective_contribution
 
 __all__ = [
     "DeterministicProbeDataset",
+    "ema_update",
     "PerSampleLossPacket",
     "ProbeReport",
     "ProbeSampleResult",
     "SampleObservationBuffer",
+    "SampleState",
+    "SampleStateRecord",
+    "SampleStateStore",
+    "SampleWeightPolicy",
+    "cap_effective_contribution",
+    "StatePolicy",
+    "percentile_rank",
     "match_predictions_to_target",
     "run_deterministic_probe",
+    "window_slope",
 ]

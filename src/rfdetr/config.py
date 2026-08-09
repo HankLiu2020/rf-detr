@@ -1060,6 +1060,14 @@ class TrainConfig(BaseConfig):
     sample_dynamics_mode: Literal["observe", "loss_weight", "sampler", "combined"] = "observe"
     sample_dynamics_output_dir: PathLikeStr | None = None
     sample_dynamics_max_records: int | None = Field(default=None, ge=1)
+    sample_dynamics_weight_min: float = Field(default=0.7, gt=0.0)
+    sample_dynamics_weight_max: float = Field(default=1.3, gt=0.0)
+    sample_dynamics_effective_cap: float = Field(default=2.5, gt=0.0)
+    sample_dynamics_base_coverage: float = Field(default=0.60, ge=0.0)
+    sample_dynamics_hard_learnable_quota: float = Field(default=0.25, ge=0.0)
+    sample_dynamics_mastered_replay: float = Field(default=0.10, ge=0.0)
+    sample_dynamics_exploration: float = Field(default=0.05, ge=0.0)
+    sample_dynamics_seed: int = 0
     output_dir: PathLikeStr = "output"
     # XLA/TPU: every distinct (H, W) triggers a separate graph compilation. Set multi_scale=False
     # for a static shape (zero recompilations after the first batch) when training on TPU.

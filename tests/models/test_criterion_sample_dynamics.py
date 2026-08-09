@@ -163,6 +163,25 @@ def test_segmentation_observer_records_point_mask_components() -> None:
     assert matcher.calls == 1
 
 
+def test_sample_weights_change_only_the_explicit_active_reduction() -> None:
+    """Active RF5 weights reduce the same per-image numerators with new contributions."""
+    criterion, _ = _criterion()
+    outputs, targets = _batch_outputs()
+    weights = torch.tensor([0.5, 1.5])
+
+    losses, packet = criterion(
+        outputs,
+        targets,
+        num_boxes=2.0,
+        return_per_sample=True,
+        sample_weights=weights,
+    )
+
+    for name in ("loss_ce", "loss_bbox", "loss_giou"):
+        expected = (packet.raw_numerators[name] * weights).sum().item() / 2.0
+        assert losses[name].item() == pytest.approx(expected)
+
+
 def test_observation_buffer_detaches_and_exports_jsonl(tmp_path) -> None:
     """The long-lived buffer contains Python values rather than model tensors."""
     packet = PerSampleLossPacket.from_numerators(

@@ -211,6 +211,7 @@ class SetCriterion(nn.Module):
         # path leaves this unset and therefore has no observer allocation.
         self._per_sample_numerators: dict[str, Tensor] | None = None
         self._per_sample_prefix = ""
+        self._sample_weights: Tensor | None = None
 
     def _record_per_sample(self, name: str, values: Tensor) -> None:
         """Record a detached per-image numerator when RF2 collection is enabled."""
@@ -339,6 +340,85 @@ class SetCriterion(nn.Module):
                 )
             raw = elementwise.mean(1).sum(1) * query_count
         self._record_per_sample("loss_ce", raw)
+
+    def _weighted_classification_loss(
+        self,
+        outputs: dict[str, Any],
+        targets: list[dict[str, Tensor]],
+        indices: list[tuple[Tensor, Tensor]],
+        num_boxes: Tensor,
+    ) -> Tensor:
+        """Compute a sample-weighted classification reduction for RF5/RF7."""
+        weights = self._sample_weights
+        if weights is None:
+            raise RuntimeError("sample weights are not configured")
+        src_logits = outputs["pred_logits"]
+        batch_size, query_count = src_logits.shape[:2]
+        idx = self._get_src_permutation_idx(indices)
+        target_classes_o = torch.cat([t["labels"][target_idx] for t, (_, target_idx) in zip(targets, indices)])
+        if self.ia_bce_loss:
+            src_boxes = outputs["pred_boxes"][idx]
+            target_boxes = torch.cat([t["boxes"][target_idx] for t, (_, target_idx) in zip(targets, indices)], dim=0)
+            iou_targets, _ = box_ops.elementwise_box_iou(
+                box_ops.box_cxcywh_to_xyxy(src_boxes),
+                box_ops.box_cxcywh_to_xyxy(target_boxes),
+            )
+            prob = src_logits.sigmoid()
+            pos_weights = torch.zeros_like(src_logits)
+            neg_weights = prob**2
+            pos_ind = list(idx)
+            pos_ind.append(target_classes_o)
+            t = prob[tuple(pos_ind)].pow(self.focal_alpha) * iou_targets.pow(1 - self.focal_alpha)
+            t = torch.clamp(t, 0.01).detach()
+            pos_weights[tuple(pos_ind)] = t.to(pos_weights.dtype)
+            neg_weights[tuple(pos_ind)] = 1 - t.to(neg_weights.dtype)
+            elementwise = neg_weights * src_logits - F.logsigmoid(src_logits) * (pos_weights + neg_weights)
+            raw = elementwise.sum(dim=(1, 2))
+        else:
+            if self.use_position_supervised_loss or self.use_varifocal_loss:
+                src_boxes = outputs["pred_boxes"][idx]
+                target_boxes = torch.cat(
+                    [t["boxes"][target_idx] for t, (_, target_idx) in zip(targets, indices)], dim=0
+                )
+                iou_targets, _ = box_ops.elementwise_box_iou(
+                    box_ops.box_cxcywh_to_xyxy(src_boxes),
+                    box_ops.box_cxcywh_to_xyxy(target_boxes),
+                )
+                target_classes = torch.zeros(
+                    (batch_size, query_count, self.num_classes), dtype=src_logits.dtype, device=src_logits.device
+                )
+                target_classes[tuple(list(idx) + [target_classes_o])] = iou_targets
+                mode = "position" if self.use_position_supervised_loss else "varifocal"
+                if self.use_position_supervised_loss:
+                    target_classes = target_classes / (target_classes.view(batch_size, -1, 1).amax(1, True) + 1e-8)
+                elementwise = self._classification_elementwise(
+                    src_logits,
+                    target_classes,
+                    alpha=self.focal_alpha,
+                    gamma=2,
+                    mode=mode,
+                )
+            else:
+                target_classes = torch.full(
+                    src_logits.shape[:2], self.num_classes, dtype=torch.int64, device=src_logits.device
+                )
+                target_classes[idx] = target_classes_o
+                target_onehot = torch.zeros(
+                    [batch_size, query_count, src_logits.shape[2] + 1],
+                    dtype=src_logits.dtype,
+                    layout=src_logits.layout,
+                    device=src_logits.device,
+                )
+                target_onehot.scatter_(2, target_classes.unsqueeze(-1), 1)
+                elementwise = self._classification_elementwise(
+                    src_logits,
+                    target_onehot[:, :, :-1],
+                    alpha=self.focal_alpha,
+                    gamma=2,
+                    mode="focal",
+                )
+            raw = elementwise.mean(1).sum(1) * query_count
+        return (raw * weights.to(device=raw.device, dtype=raw.dtype)).sum() / num_boxes
 
     @staticmethod
     def _output_device(outputs: dict[str, Any]) -> torch.device:
@@ -551,6 +631,8 @@ class SetCriterion(nn.Module):
                 )
                 * src_logits.shape[1]
             )
+        if self._sample_weights is not None:
+            loss_ce = self._weighted_classification_loss(outputs, targets, indices, num_boxes)
         self._record_classification_numerator(outputs, targets, indices)
         losses = {"loss_ce": loss_ce}
 
@@ -599,13 +681,21 @@ class SetCriterion(nn.Module):
         loss_bbox = F.l1_loss(src_boxes, target_boxes, reduction="none")
 
         losses = {}
-        losses["loss_bbox"] = loss_bbox.sum() / num_boxes
+        if self._sample_weights is None:
+            losses["loss_bbox"] = loss_bbox.sum() / num_boxes
+        else:
+            sample_weights = self._sample_weights.to(device=loss_bbox.device, dtype=loss_bbox.dtype)
+            losses["loss_bbox"] = (loss_bbox.sum(dim=1) * sample_weights[idx[0]]).sum() / num_boxes
 
         loss_giou = 1 - box_ops.elementwise_generalized_box_iou(
             box_ops.box_cxcywh_to_xyxy(src_boxes),
             box_ops.box_cxcywh_to_xyxy(target_boxes),
         )
-        losses["loss_giou"] = loss_giou.sum() / num_boxes
+        if self._sample_weights is None:
+            losses["loss_giou"] = loss_giou.sum() / num_boxes
+        else:
+            sample_weights = self._sample_weights.to(device=loss_giou.device, dtype=loss_giou.dtype)
+            losses["loss_giou"] = (loss_giou * sample_weights[idx[0]]).sum() / num_boxes
         self._record_per_sample(
             "loss_bbox",
             self._scatter_per_sample(loss_bbox.detach().sum(dim=1), idx[0], len(targets)),
@@ -728,10 +818,25 @@ class SetCriterion(nn.Module):
         # ``float(...)`` instead of ``.item()`` keeps the conversion safe whether
         # ``num_boxes`` arrives as a Tensor, a Python int/float, or a numpy scalar.
         num_boxes_scalar = float(num_boxes)
-        losses = {
-            "loss_mask_ce": sigmoid_ce_loss_jit(point_logits, point_labels, num_boxes_scalar),
-            "loss_mask_dice": dice_loss_jit(point_logits, point_labels, num_boxes_scalar),
-        }
+        if self._sample_weights is None:
+            losses = {
+                "loss_mask_ce": sigmoid_ce_loss_jit(point_logits, point_labels, num_boxes_scalar),
+                "loss_mask_dice": dice_loss_jit(point_logits, point_labels, num_boxes_scalar),
+            }
+        else:
+            sample_weights = self._sample_weights.to(device=point_logits.device, dtype=point_logits.dtype)
+            matched_weights = sample_weights[idx[0]]
+            point_ce_weighted = F.binary_cross_entropy_with_logits(point_logits, point_labels, reduction="none").mean(1)
+            point_probs_weighted = point_logits.sigmoid()
+            point_flat_targets_weighted = point_labels.flatten(1)
+            point_flat_probs_weighted = point_probs_weighted.flatten(1)
+            point_dice_weighted = 1 - (2 * (point_flat_probs_weighted * point_flat_targets_weighted).sum(-1) + 1) / (
+                point_flat_probs_weighted.sum(-1) + point_flat_targets_weighted.sum(-1) + 1
+            )
+            losses = {
+                "loss_mask_ce": (point_ce_weighted * matched_weights).sum() / num_boxes,
+                "loss_mask_dice": (point_dice_weighted * matched_weights).sum() / num_boxes,
+            }
         with torch.no_grad():
             point_logits_detached = point_logits.detach()
             point_ce = F.binary_cross_entropy_with_logits(
@@ -780,12 +885,21 @@ class SetCriterion(nn.Module):
             num_keypoints_per_class=self.num_keypoints_per_class,
         )
 
-        losses = {
-            "loss_keypoints_l1": loss_l1.sum() / num_boxes,
-            "loss_keypoints_findable": loss_findable.sum() / num_boxes,
-            "loss_keypoints_visible": loss_visible.sum() / num_boxes,
-            "loss_keypoints_nll": loss_nll.sum() / num_boxes,
-        }
+        if self._sample_weights is None:
+            losses = {
+                "loss_keypoints_l1": loss_l1.sum() / num_boxes,
+                "loss_keypoints_findable": loss_findable.sum() / num_boxes,
+                "loss_keypoints_visible": loss_visible.sum() / num_boxes,
+                "loss_keypoints_nll": loss_nll.sum() / num_boxes,
+            }
+        else:
+            sample_weights = self._sample_weights.to(device=loss_l1.device, dtype=loss_l1.dtype)[idx[0]]
+            losses = {
+                "loss_keypoints_l1": (loss_l1 * sample_weights).sum() / num_boxes,
+                "loss_keypoints_findable": (loss_findable * sample_weights).sum() / num_boxes,
+                "loss_keypoints_visible": (loss_visible * sample_weights).sum() / num_boxes,
+                "loss_keypoints_nll": (loss_nll * sample_weights).sum() / num_boxes,
+            }
         self._record_per_sample(
             "loss_keypoints_l1",
             self._scatter_per_sample(loss_l1.detach(), idx[0], len(targets)),
@@ -841,6 +955,7 @@ class SetCriterion(nn.Module):
         targets: list[dict[str, Tensor]],
         num_boxes: Tensor | float | None = None,
         return_per_sample: bool = False,
+        sample_weights: Tensor | None = None,
     ) -> dict[str, Tensor] | tuple[dict[str, Tensor], PerSampleLossPacket]:
         """Compute every configured loss for one (outputs, targets) pair.
 
@@ -872,6 +987,9 @@ class SetCriterion(nn.Module):
             return_per_sample: When ``True``, return ``(losses, packet)``. The
                 packet contains detached per-image numerators computed from the
                 same Hungarian indices; the default return protocol is unchanged.
+            sample_weights: Optional mean-normalized per-image weights used only
+                by the explicit RF5/RF7 active experiment path. ``None`` keeps
+                the official loss reduction exactly unchanged.
 
         Returns:
             Dictionary of named loss tensors. Last-layer losses keep their base
@@ -897,6 +1015,7 @@ class SetCriterion(nn.Module):
         """
         self._per_sample_numerators = {} if return_per_sample else None
         self._per_sample_prefix = ""
+        self._sample_weights = None if sample_weights is None else sample_weights.detach()
         group_detr = self.group_detr if self.training else 1
         outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
 
@@ -910,6 +1029,10 @@ class SetCriterion(nn.Module):
             num_boxes = torch.as_tensor(num_boxes, dtype=torch.float, device=self._output_device(outputs))
         else:
             num_boxes = num_boxes.to(device=self._output_device(outputs), dtype=torch.float)
+        if self._sample_weights is not None:
+            if self._sample_weights.ndim != 1 or self._sample_weights.numel() != len(targets):
+                raise ValueError("sample_weights must contain one value per target image")
+            self._sample_weights = self._sample_weights.to(device=num_boxes.device, dtype=num_boxes.dtype)
 
         # Compute all the requested losses
         losses = {}
@@ -965,7 +1088,9 @@ class SetCriterion(nn.Module):
             )
             self._per_sample_numerators = None
             self._per_sample_prefix = ""
+            self._sample_weights = None
             return losses, packet
         self._per_sample_numerators = None
         self._per_sample_prefix = ""
+        self._sample_weights = None
         return losses

@@ -33,7 +33,7 @@ from rfdetr.config import (
 from rfdetr.datasets.coco import compute_multi_scale_scales
 from rfdetr.models.lwdetr import build_criterion_from_config, build_model_from_config
 from rfdetr.models.weights import apply_lora, interpolate_position_embeddings, load_pretrain_weights
-from rfdetr.sample_dynamics import SampleObservationBuffer
+from rfdetr.sample_dynamics import SampleObservationBuffer, SampleStateStore, SampleWeightPolicy
 from rfdetr.training.callbacks.coco_eval import _get_ema_inner_module
 from rfdetr.training.param_groups import get_param_dict
 from rfdetr.utilities.logger import get_logger
@@ -401,6 +401,18 @@ class RFDETRModelModule(LightningModule):
             if train_config.sample_dynamics_enabled
             else None
         )
+        self.sample_state_store: SampleStateStore | None = (
+            SampleStateStore() if train_config.sample_dynamics_enabled else None
+        )
+        self.sample_weight_policy: SampleWeightPolicy | None = (
+            SampleWeightPolicy(
+                minimum=train_config.sample_dynamics_weight_min,
+                maximum=train_config.sample_dynamics_weight_max,
+            )
+            if train_config.sample_dynamics_enabled and train_config.sample_dynamics_mode in {"loss_weight", "combined"}
+            else None
+        )
+        self._sample_observation_cursor = 0
 
         # torch.compile is opt-in: set model_config.compile=True to enable.
         # Only enabled on CUDA; MPS and CPU do not benefit from compilation.
@@ -524,6 +536,15 @@ class RFDETRModelModule(LightningModule):
         ``num_training_batches``) a partial window may survive epoch end with un-stepped gradients; those are
         discarded here and the optimizer is zeroed so the first microbatch of the new epoch starts from a clean state.
         """
+        try:
+            trainer = self.trainer
+        except RuntimeError:
+            trainer = None
+        datamodule = getattr(trainer, "datamodule", None)
+        sampler = getattr(datamodule, "_train_sampler", None)
+        if sampler is not None:
+            sampler.set_epoch(int(self.current_epoch))
+
         if self._accumulated_box_normalizer is not None:
             # Discard any partial accumulation window that survived the epoch boundary
             # (only possible for IterableDatasets where num_training_batches is infinite).
@@ -559,7 +580,21 @@ class RFDETRModelModule(LightningModule):
             loss_for_backward = self._scale_loss_for_accumulation(raw_loss, normalizer)
         else:
             if self.sample_observation_buffer is not None:
-                criterion_result = self.criterion(outputs, targets, return_per_sample=True)
+                sample_weights = None
+                if self.sample_weight_policy is not None:
+                    exposure_multipliers = self._sample_dynamics_exposure_multipliers()
+                    sample_weights = self.sample_weight_policy.batch_weights(
+                        [str(target["sample_id"]) for target in targets],
+                        device=samples.tensors.device,
+                        exposure_multipliers=exposure_multipliers,
+                        effective_cap=self.train_config.sample_dynamics_effective_cap,
+                    )
+                criterion_result = self.criterion(
+                    outputs,
+                    targets,
+                    return_per_sample=True,
+                    sample_weights=sample_weights,
+                )
                 if not isinstance(criterion_result, tuple):
                     raise TypeError("sample-dynamics observer expected criterion to return (loss_dict, packet)")
                 loss_dict, packet = criterion_result
@@ -642,6 +677,17 @@ class RFDETRModelModule(LightningModule):
                 "targets": targets,
             }
         return loss_for_return.detach() if self._use_manual_optimization else loss_for_return
+
+    def _sample_dynamics_exposure_multipliers(self) -> dict[str, float] | None:
+        """Read sampler exposure for RF7's combined contribution cap."""
+        if self.train_config.sample_dynamics_mode != "combined":
+            return None
+        datamodule = getattr(self.trainer, "datamodule", None)
+        sampler = getattr(datamodule, "_train_sampler", None)
+        exposure_multipliers = getattr(sampler, "exposure_multipliers", None)
+        if not callable(exposure_multipliers):
+            return None
+        return exposure_multipliers()
 
     def _compute_train_losses(
         self,
@@ -799,11 +845,24 @@ class RFDETRModelModule(LightningModule):
         scheduler.step()
 
     def on_train_epoch_end(self) -> None:
-        """Step epoch-interval (non-plateau) schedulers on the manual-optimization path.
+        """Update optional sample state and step epoch-interval schedulers.
 
         The automatic-optimization path leaves scheduler stepping entirely to Lightning; only the manual keypoint loop
         steps schedulers itself.
         """
+        if self.sample_state_store is not None and self.sample_observation_buffer is not None:
+            records = self.sample_observation_buffer.records
+            if self._sample_observation_cursor > len(records):
+                self._sample_observation_cursor = 0
+            new_records = records[self._sample_observation_cursor :]
+            self.sample_state_store.update(new_records, epoch=int(self.current_epoch))
+            self._sample_observation_cursor = len(records)
+            if self.sample_weight_policy is not None:
+                self.sample_weight_policy = self.sample_state_store.build_weight_policy(self.sample_weight_policy)
+            if self.train_config.sample_dynamics_output_dir is not None:
+                output_dir = self.train_config.sample_dynamics_output_dir
+                self.sample_state_store.export_json(f"{output_dir}/sample_state.json")
+
         if self.automatic_optimization or self._lr_scheduler_interval != "epoch":
             return
         scheduler = self._current_lr_scheduler()
@@ -1264,6 +1323,14 @@ class RFDETRModelModule(LightningModule):
         orig_sizes = torch.stack([t["orig_size"] for t in targets])
         return self.postprocess(outputs, orig_sizes)
 
+    def on_save_checkpoint(self, checkpoint: dict[str, Any]) -> None:
+        """Persist optional sample-dynamics state and previous policy for resume."""
+        if getattr(self, "sample_state_store", None) is None:
+            return
+        checkpoint["sample_dynamics_state"] = self.sample_state_store.state_dict()
+        if self.sample_weight_policy is not None:
+            checkpoint["sample_dynamics_policy"] = self.sample_weight_policy.state_dict()
+
     def on_load_checkpoint(self, checkpoint: dict[str, Any]) -> None:
         """Auto-detect legacy formats and reconcile PE shapes at checkpoint load time.
 
@@ -1319,6 +1386,14 @@ class RFDETRModelModule(LightningModule):
                 UserWarning,
                 stacklevel=2,
             )
+        sample_state = checkpoint.get("sample_dynamics_state")
+        sample_state_store = getattr(self, "sample_state_store", None)
+        if sample_state_store is not None and isinstance(sample_state, dict):
+            sample_state_store.load_state_dict(sample_state)
+        sample_policy = checkpoint.get("sample_dynamics_policy")
+        sample_weight_policy = getattr(self, "sample_weight_policy", None)
+        if sample_weight_policy is not None and isinstance(sample_policy, dict):
+            sample_weight_policy.load_state_dict(sample_policy)
 
     def reinitialize_detection_head(self, num_classes: int) -> None:
         """Reinitialize the detection head for a new class count.
