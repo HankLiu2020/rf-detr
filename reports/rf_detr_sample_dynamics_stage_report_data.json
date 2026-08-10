@@ -1,0 +1,646 @@
+{
+  "schema_version": 1,
+  "title": "RF-DETR Sample Dynamics 阶段性实验汇报",
+  "scope": "NON-BENCHMARK / RF4 MECHANISM VALIDATION",
+  "gate_status": "FAIL_SEMANTIC_REVIEW_REQUIRED",
+  "source_analysis": "reports/mvtec_rf4_longitudinal_analysis.json",
+  "contract": {
+    "epoch_count": 15,
+    "sample_count": 128,
+    "manifest_sha256": "90673182af0c409e99778f30545f550e91b6845e48f6894a7ebe029c53172528",
+    "state_sha256": "f1f0b36c5943e5bcfddf1df13673837174d718f108d73cbe5bd184d3d7411b62",
+    "checkpoint_sha256_verified": true,
+    "corruption_counts": {
+      "drop_component": 1,
+      "drop_mask": 2,
+      "mask_shift": 2
+    },
+    "expected_batch_size": 4,
+    "expected_epochs": 15,
+    "expected_sample_count": 128,
+    "expected_seed": 20260810,
+    "frozen_state_policy_verified": true,
+    "manifest_sha256_verified": true,
+    "status": "PASS"
+  },
+  "policy": {
+    "ema_alpha": 0.3,
+    "error_weight": 0.3,
+    "forgetting_weight": 0.05,
+    "hard_percentile": 0.75,
+    "improvement_epsilon": 0.0001,
+    "loss_weight": 0.5,
+    "mask_error_weight": 0.5,
+    "mastered_percentile": 0.25,
+    "max_history": 32,
+    "min_history_for_mastered": 3,
+    "probe_mask_iou_threshold": 0.5,
+    "suspect_patience": 3,
+    "trend_weight": 0.15,
+    "window_size": 5
+  },
+  "epoch_summary": [
+    {
+      "analysis_probe_conflict_sample_count": 66,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 32,
+        "LEARNING": 96
+      },
+      "epoch": 0,
+      "frozen_probe_conflict_count": 128,
+      "instant_bucket_counts": {
+        "EASY": 32,
+        "HARD": 32,
+        "MIDDLE": 64
+      },
+      "mean_class_error": 0.0625,
+      "mean_fn": 0.453125,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.625,
+      "mean_loss_ema": 191.3282313421696,
+      "mean_matched_mask_iou": 0.6824901252985001,
+      "mean_slope": 0.0,
+      "state_transition_count": 0
+    },
+    {
+      "analysis_probe_conflict_sample_count": 66,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 32,
+        "LEARNING": 96
+      },
+      "epoch": 1,
+      "frozen_probe_conflict_count": 128,
+      "instant_bucket_counts": {
+        "EASY": 32,
+        "HARD": 32,
+        "MIDDLE": 64
+      },
+      "mean_class_error": 0.0625,
+      "mean_fn": 0.453125,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.59375,
+      "mean_loss_ema": 179.43327938584665,
+      "mean_matched_mask_iou": 0.7509916201233864,
+      "mean_slope": -39.64983985440995,
+      "state_transition_count": 12
+    },
+    {
+      "analysis_probe_conflict_sample_count": 66,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 29,
+        "LEARNING": 86,
+        "MASTERED": 10,
+        "SUSPECT": 3
+      },
+      "epoch": 2,
+      "frozen_probe_conflict_count": 128,
+      "instant_bucket_counts": {
+        "EASY": 32,
+        "HARD": 32,
+        "MIDDLE": 64
+      },
+      "mean_class_error": 0.09375,
+      "mean_fn": 0.421875,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.5703125,
+      "mean_loss_ema": 165.37091471782168,
+      "mean_matched_mask_iou": 0.7498537103335062,
+      "mean_slope": -29.384750424869708,
+      "state_transition_count": 17
+    },
+    {
+      "analysis_probe_conflict_sample_count": 66,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 30,
+        "LEARNING": 74,
+        "MASTERED": 22,
+        "SUSPECT": 2
+      },
+      "epoch": 3,
+      "frozen_probe_conflict_count": 128,
+      "instant_bucket_counts": {
+        "EASY": 32,
+        "HARD": 32,
+        "MIDDLE": 64
+      },
+      "mean_class_error": 0.0703125,
+      "mean_fn": 0.4453125,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.390625,
+      "mean_loss_ema": 151.52451701983207,
+      "mean_matched_mask_iou": 0.807904945479499,
+      "mean_slope": -23.545558784826977,
+      "state_transition_count": 23
+    },
+    {
+      "analysis_probe_conflict_sample_count": 66,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 31,
+        "LEARNING": 69,
+        "MASTERED": 27,
+        "SUSPECT": 1
+      },
+      "epoch": 4,
+      "frozen_probe_conflict_count": 128,
+      "instant_bucket_counts": {
+        "EASY": 32,
+        "HARD": 32,
+        "MIDDLE": 64
+      },
+      "mean_class_error": 0.0703125,
+      "mean_fn": 0.4453125,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.375,
+      "mean_loss_ema": 138.9678085014682,
+      "mean_matched_mask_iou": 0.8524080912272135,
+      "mean_slope": -19.578095453033704,
+      "state_transition_count": 20
+    },
+    {
+      "analysis_probe_conflict_sample_count": 66,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 32,
+        "LEARNING": 66,
+        "MASTERED": 30
+      },
+      "epoch": 5,
+      "frozen_probe_conflict_count": 128,
+      "instant_bucket_counts": {
+        "EASY": 32,
+        "HARD": 32,
+        "MIDDLE": 64
+      },
+      "mean_class_error": 0.078125,
+      "mean_fn": 0.4375,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.3046875,
+      "mean_loss_ema": 128.32936085753332,
+      "mean_matched_mask_iou": 0.825166204571724,
+      "mean_slope": -11.923405879929309,
+      "state_transition_count": 20
+    },
+    {
+      "analysis_probe_conflict_sample_count": 66,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 31,
+        "LEARNING": 65,
+        "MASTERED": 31,
+        "SUSPECT": 1
+      },
+      "epoch": 6,
+      "frozen_probe_conflict_count": 128,
+      "instant_bucket_counts": {
+        "EASY": 32,
+        "HARD": 32,
+        "MIDDLE": 64
+      },
+      "mean_class_error": 0.0625,
+      "mean_fn": 0.453125,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.1328125,
+      "mean_loss_ema": 119.09464994753151,
+      "mean_matched_mask_iou": 0.8864356353878975,
+      "mean_slope": -8.573341803931003,
+      "state_transition_count": 14
+    },
+    {
+      "analysis_probe_conflict_sample_count": 66,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 32,
+        "LEARNING": 64,
+        "MASTERED": 32
+      },
+      "epoch": 7,
+      "frozen_probe_conflict_count": 128,
+      "instant_bucket_counts": {
+        "EASY": 32,
+        "HARD": 32,
+        "MIDDLE": 64
+      },
+      "mean_class_error": 0.0390625,
+      "mean_fn": 0.4765625,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.1171875,
+      "mean_loss_ema": 111.52425397832931,
+      "mean_matched_mask_iou": 0.872107744216919,
+      "mean_slope": -6.283434881642277,
+      "state_transition_count": 16
+    },
+    {
+      "analysis_probe_conflict_sample_count": 66,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 30,
+        "LEARNING": 96,
+        "SUSPECT": 2
+      },
+      "epoch": 8,
+      "frozen_probe_conflict_count": 128,
+      "instant_bucket_counts": {
+        "HARD": 32,
+        "MIDDLE": 96
+      },
+      "mean_class_error": 0.0234375,
+      "mean_fn": 0.4921875,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.140625,
+      "mean_loss_ema": 105.97826810733461,
+      "mean_matched_mask_iou": 0.8767021497090658,
+      "mean_slope": -4.290869473870589,
+      "state_transition_count": 36
+    },
+    {
+      "analysis_probe_conflict_sample_count": 66,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 27,
+        "LEARNING": 96,
+        "SUSPECT": 5
+      },
+      "epoch": 9,
+      "frozen_probe_conflict_count": 128,
+      "instant_bucket_counts": {
+        "HARD": 32,
+        "MIDDLE": 96
+      },
+      "mean_class_error": 0.0,
+      "mean_fn": 0.515625,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.109375,
+      "mean_loss_ema": 101.84829631225683,
+      "mean_matched_mask_iou": null,
+      "mean_slope": -2.7098598545066133,
+      "state_transition_count": 5
+    },
+    {
+      "analysis_probe_conflict_sample_count": 62,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 27,
+        "LEARNING": 96,
+        "SUSPECT": 5
+      },
+      "epoch": 10,
+      "frozen_probe_conflict_count": 124,
+      "instant_bucket_counts": {
+        "HARD": 32,
+        "MIDDLE": 96
+      },
+      "mean_class_error": 0.0078125,
+      "mean_fn": 0.4765625,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.078125,
+      "mean_loss_ema": 98.25443612605652,
+      "mean_matched_mask_iou": 0.9617819786071777,
+      "mean_slope": -1.7004758858325655,
+      "state_transition_count": 2
+    },
+    {
+      "analysis_probe_conflict_sample_count": 53,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 28,
+        "LEARNING": 68,
+        "MASTERED": 28,
+        "SUSPECT": 4
+      },
+      "epoch": 11,
+      "frozen_probe_conflict_count": 115,
+      "instant_bucket_counts": {
+        "EASY": 32,
+        "HARD": 32,
+        "MIDDLE": 64
+      },
+      "mean_class_error": 0.0,
+      "mean_fn": 0.4140625,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.0859375,
+      "mean_loss_ema": 95.48136267793178,
+      "mean_matched_mask_iou": 0.8658083723141596,
+      "mean_slope": -1.2867149552525017,
+      "state_transition_count": 33
+    },
+    {
+      "analysis_probe_conflict_sample_count": 31,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 29,
+        "LEARNING": 77,
+        "MASTERED": 19,
+        "SUSPECT": 3
+      },
+      "epoch": 12,
+      "frozen_probe_conflict_count": 93,
+      "instant_bucket_counts": {
+        "EASY": 32,
+        "HARD": 32,
+        "MIDDLE": 64
+      },
+      "mean_class_error": 0.0,
+      "mean_fn": 0.234375,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.0625,
+      "mean_loss_ema": 92.85381678189721,
+      "mean_matched_mask_iou": 0.8510343440704875,
+      "mean_slope": -1.5830353592495157,
+      "state_transition_count": 16
+    },
+    {
+      "analysis_probe_conflict_sample_count": 17,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 29,
+        "LEARNING": 83,
+        "MASTERED": 13,
+        "SUSPECT": 3
+      },
+      "epoch": 13,
+      "frozen_probe_conflict_count": 79,
+      "instant_bucket_counts": {
+        "EASY": 32,
+        "HARD": 32,
+        "MIDDLE": 64
+      },
+      "mean_class_error": 0.0,
+      "mean_fn": 0.1171875,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.234375,
+      "mean_loss_ema": 90.351532825514,
+      "mean_matched_mask_iou": 0.8372259847089356,
+      "mean_slope": -1.8543536393350233,
+      "state_transition_count": 14
+    },
+    {
+      "analysis_probe_conflict_sample_count": 12,
+      "dynamics_state_counts": {
+        "HARD_LEARNABLE": 31,
+        "LEARNING": 88,
+        "MASTERED": 8,
+        "SUSPECT": 1
+      },
+      "epoch": 14,
+      "frozen_probe_conflict_count": 74,
+      "instant_bucket_counts": {
+        "EASY": 32,
+        "HARD": 32,
+        "MIDDLE": 64
+      },
+      "mean_class_error": 0.0,
+      "mean_fn": 0.078125,
+      "mean_forgetting_count": 0.0,
+      "mean_fp": 0.3046875,
+      "mean_loss_ema": 88.2024203811446,
+      "mean_matched_mask_iou": 0.829234783670732,
+      "mean_slope": -1.7859863066300021,
+      "state_transition_count": 15
+    }
+  ],
+  "stability": {
+    "dynamics": {
+      "epoch_count": 15,
+      "sample_count": 128,
+      "total_transitions": 243,
+      "mean_transitions_per_sample": 1.8984375,
+      "unchanged_sample_count": 38,
+      "unchanged_sample_fraction": 0.296875,
+      "mean_unique_labels_per_sample": 1.7265625
+    },
+    "instant": {
+      "epoch_count": 15,
+      "sample_count": 128,
+      "total_transitions": 236,
+      "mean_transitions_per_sample": 1.84375,
+      "unchanged_sample_count": 45,
+      "unchanged_sample_fraction": 0.3515625,
+      "mean_unique_labels_per_sample": 1.6484375
+    }
+  },
+  "future_predictivity": [
+    {
+      "signal_key": "dynamics_difficulty",
+      "signal": "Training-Dynamics difficulty",
+      "target_key": "fn_reduction",
+      "target": "FN reduction: FN[t] - FN[t+h]",
+      "horizon": 1,
+      "defined_windows": 14,
+      "mean_pearson": 0.1121868843573989,
+      "mean_spearman": 0.10068975125798095
+    },
+    {
+      "signal_key": "dynamics_difficulty",
+      "signal": "Training-Dynamics difficulty",
+      "target_key": "fn_reduction",
+      "target": "FN reduction: FN[t] - FN[t+h]",
+      "horizon": 2,
+      "defined_windows": 13,
+      "mean_pearson": 0.14932978588379994,
+      "mean_spearman": 0.13568881896444787
+    },
+    {
+      "signal_key": "dynamics_difficulty",
+      "signal": "Training-Dynamics difficulty",
+      "target_key": "loss_improvement",
+      "target": "loss improvement: loss[t] - loss[t+h]",
+      "horizon": 1,
+      "defined_windows": 14,
+      "mean_pearson": 0.32932985520771296,
+      "mean_spearman": 0.4343716752592515
+    },
+    {
+      "signal_key": "dynamics_difficulty",
+      "signal": "Training-Dynamics difficulty",
+      "target_key": "loss_improvement",
+      "target": "loss improvement: loss[t] - loss[t+h]",
+      "horizon": 2,
+      "defined_windows": 13,
+      "mean_pearson": 0.43179644930049194,
+      "mean_spearman": 0.5314917302906191
+    },
+    {
+      "signal_key": "dynamics_difficulty",
+      "signal": "Training-Dynamics difficulty",
+      "target_key": "mask_iou_improvement",
+      "target": "mask IoU improvement: IoU[t+h] - IoU[t]",
+      "horizon": 1,
+      "defined_windows": 12,
+      "mean_pearson": -0.019205644626314005,
+      "mean_spearman": -0.08008019978608215
+    },
+    {
+      "signal_key": "dynamics_difficulty",
+      "signal": "Training-Dynamics difficulty",
+      "target_key": "mask_iou_improvement",
+      "target": "mask IoU improvement: IoU[t+h] - IoU[t]",
+      "horizon": 2,
+      "defined_windows": 10,
+      "mean_pearson": 0.23366739031298023,
+      "mean_spearman": 0.05654638154638155
+    },
+    {
+      "signal_key": "instant_loss_percentile",
+      "signal": "Instant-Loss percentile",
+      "target_key": "fn_reduction",
+      "target": "FN reduction: FN[t] - FN[t+h]",
+      "horizon": 1,
+      "defined_windows": 14,
+      "mean_pearson": 0.06107368281331902,
+      "mean_spearman": 0.06139660988262468
+    },
+    {
+      "signal_key": "instant_loss_percentile",
+      "signal": "Instant-Loss percentile",
+      "target_key": "fn_reduction",
+      "target": "FN reduction: FN[t] - FN[t+h]",
+      "horizon": 2,
+      "defined_windows": 13,
+      "mean_pearson": 0.09222539114893398,
+      "mean_spearman": 0.09423041171573042
+    },
+    {
+      "signal_key": "instant_loss_percentile",
+      "signal": "Instant-Loss percentile",
+      "target_key": "loss_improvement",
+      "target": "loss improvement: loss[t] - loss[t+h]",
+      "horizon": 1,
+      "defined_windows": 14,
+      "mean_pearson": 0.3542222890901828,
+      "mean_spearman": 0.45522418227044487
+    },
+    {
+      "signal_key": "instant_loss_percentile",
+      "signal": "Instant-Loss percentile",
+      "target_key": "loss_improvement",
+      "target": "loss improvement: loss[t] - loss[t+h]",
+      "horizon": 2,
+      "defined_windows": 13,
+      "mean_pearson": 0.46950358683659565,
+      "mean_spearman": 0.5473293392681885
+    },
+    {
+      "signal_key": "instant_loss_percentile",
+      "signal": "Instant-Loss percentile",
+      "target_key": "mask_iou_improvement",
+      "target": "mask IoU improvement: IoU[t+h] - IoU[t]",
+      "horizon": 1,
+      "defined_windows": 12,
+      "mean_pearson": 0.09334013458852049,
+      "mean_spearman": 0.08130636454165865
+    },
+    {
+      "signal_key": "instant_loss_percentile",
+      "signal": "Instant-Loss percentile",
+      "target_key": "mask_iou_improvement",
+      "target": "mask IoU improvement: IoU[t+h] - IoU[t]",
+      "horizon": 2,
+      "defined_windows": 10,
+      "mean_pearson": 0.3391985788678839,
+      "mean_spearman": 0.261087516087516
+    }
+  ],
+  "hard_learnable_natural_improvement": {
+    "interpretation": "HARD_LEARNABLE is reported as a high-loss candidate; no learnability claim is made.",
+    "excluded_controlled_corruption_event_count": 36,
+    "hard_events_excluding_last_epoch": 383,
+    "unique_samples_with_hard_event": 41,
+    "events_with_next_loss_improvement": 297,
+    "events_with_any_future_loss_improvement": 366,
+    "events_with_next_mask_iou_improvement": 22,
+    "events_with_any_future_mask_iou_improvement": 32,
+    "first_entry_sample_count": 41,
+    "first_entry_natural_improvement_by_horizon": {
+      "horizon_1": {
+        "available_events": 41,
+        "fn_reduced": 1,
+        "left_instant_hard": 8,
+        "loss_improved": 36,
+        "mask_iou_improved": 1
+      },
+      "horizon_2": {
+        "available_events": 41,
+        "fn_reduced": 3,
+        "left_instant_hard": 7,
+        "loss_improved": 37,
+        "mask_iou_improved": 1
+      },
+      "horizon_3": {
+        "available_events": 40,
+        "fn_reduced": 3,
+        "left_instant_hard": 8,
+        "loss_improved": 38,
+        "mask_iou_improved": 1
+      }
+    },
+    "final_epoch_hard_learnable_count_excluding_controlled_corruption": 28
+  },
+  "empty_gt_frozen_conflict_observations": 930,
+  "controlled_corruption": {
+    "sample_count": 5,
+    "rf8_precision_recall_claimed": false,
+    "samples": [
+      {
+        "any_suspect": false,
+        "corruption_type": "mask_shift",
+        "final_analysis_probe_conflict_streak": 15,
+        "final_class_error": 0,
+        "final_fn": 1,
+        "final_fp": 0,
+        "final_frozen_probe_conflict_count": 15,
+        "final_matched_mask_iou": null,
+        "final_state": "HARD_LEARNABLE",
+        "max_conflict_streak": 15,
+        "sample_id": "train:1023827126115464097:grid/test/thread/006.png",
+        "source_image": "grid/test/thread/006.png"
+      },
+      {
+        "any_suspect": false,
+        "corruption_type": "drop_mask",
+        "final_analysis_probe_conflict_streak": 0,
+        "final_class_error": 0,
+        "final_fn": 0,
+        "final_fp": 0,
+        "final_frozen_probe_conflict_count": 15,
+        "final_matched_mask_iou": null,
+        "final_state": "LEARNING",
+        "max_conflict_streak": 0,
+        "sample_id": "train:1718245752427016899:pill/test/faulty_imprint/014.png",
+        "source_image": "pill/test/faulty_imprint/014.png"
+      },
+      {
+        "any_suspect": true,
+        "corruption_type": "mask_shift",
+        "final_analysis_probe_conflict_streak": 15,
+        "final_class_error": 0,
+        "final_fn": 1,
+        "final_fp": 0,
+        "final_frozen_probe_conflict_count": 15,
+        "final_matched_mask_iou": null,
+        "final_state": "HARD_LEARNABLE",
+        "max_conflict_streak": 15,
+        "sample_id": "train:4832004734997902173:capsule/test/crack/020.png",
+        "source_image": "capsule/test/crack/020.png"
+      },
+      {
+        "any_suspect": false,
+        "corruption_type": "drop_mask",
+        "final_analysis_probe_conflict_streak": 0,
+        "final_class_error": 0,
+        "final_fn": 0,
+        "final_fp": 0,
+        "final_frozen_probe_conflict_count": 15,
+        "final_matched_mask_iou": null,
+        "final_state": "LEARNING",
+        "max_conflict_streak": 0,
+        "sample_id": "train:5899465832141176488:grid/test/broken/003.png",
+        "source_image": "grid/test/broken/003.png"
+      },
+      {
+        "any_suspect": false,
+        "corruption_type": "drop_component",
+        "final_analysis_probe_conflict_streak": 0,
+        "final_class_error": 0,
+        "final_fn": 0,
+        "final_fp": 3,
+        "final_frozen_probe_conflict_count": 0,
+        "final_matched_mask_iou": 0.7042039036750793,
+        "final_state": "HARD_LEARNABLE",
+        "max_conflict_streak": 11,
+        "sample_id": "train:6016708638749308861:grid/test/broken/010.png",
+        "source_image": "grid/test/broken/010.png"
+      }
+    ]
+  }
+}
