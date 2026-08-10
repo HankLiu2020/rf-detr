@@ -8,9 +8,12 @@
 from __future__ import annotations
 
 import importlib
+import hashlib
 import inspect
+import json
 import math
 import random
+import time
 import warnings
 from typing import Any, Callable, cast
 
@@ -378,6 +381,12 @@ class RFDETRModelModule(LightningModule):
         self._lr_scheduler_interval: str = "step"
         self._lr_scheduler_monitor: str | None = None
         self._accumulated_box_normalizer: Tensor | None = None
+        # Lightweight, streaming provenance for E0/E2 fairness checks.  This
+        # records only stable sample IDs and never retains image/target data.
+        self._sample_order_digest = hashlib.sha256()
+        self._sample_order_count = 0
+        self._sample_order_history: list[dict[str, Any]] = []
+        self._epoch_started_at: float | None = None
         # Allow partial state-dict loading when resuming from a .pth checkpoint
         # (which contains only model weights, not criterion/postprocess state).
         self.strict_loading = False
@@ -541,6 +550,11 @@ class RFDETRModelModule(LightningModule):
         ``num_training_batches``) a partial window may survive epoch end with un-stepped gradients; those are
         discarded here and the optimizer is zeroed so the first microbatch of the new epoch starts from a clean state.
         """
+        self._sample_order_digest = hashlib.sha256()
+        self._sample_order_count = 0
+        self._epoch_started_at = time.perf_counter()
+        if self.device.type == "cuda":
+            torch.cuda.reset_peak_memory_stats(self.device)
         try:
             trainer = self.trainer
         except RuntimeError:
@@ -578,6 +592,14 @@ class RFDETRModelModule(LightningModule):
             detached postprocessed predictions for train mAP logging.
         """
         samples, targets = batch
+        self._sample_order_digest.update(f"batch:{batch_idx}\n".encode("utf-8"))
+        for target in targets:
+            sample_id = target.get("sample_id")
+            if sample_id is None:
+                raise KeyError("training target is missing stable sample_id for sample-order provenance")
+            self._sample_order_digest.update(str(sample_id).encode("utf-8"))
+            self._sample_order_digest.update(b"\n")
+            self._sample_order_count += 1
         batch_size = len(targets)
         outputs = self.model(samples, targets)
         if self._use_manual_optimization:
@@ -855,6 +877,19 @@ class RFDETRModelModule(LightningModule):
         The automatic-optimization path leaves scheduler stepping entirely to Lightning; only the manual keypoint loop
         steps schedulers itself.
         """
+        self._sample_order_history.append(
+            {
+                "epoch": int(self.current_epoch),
+                "sample_count": self._sample_order_count,
+                "sha256": self._sample_order_digest.hexdigest(),
+                "epoch_seconds": time.perf_counter() - self._epoch_started_at
+                if self._epoch_started_at is not None
+                else None,
+                "peak_vram_bytes": torch.cuda.max_memory_allocated(self.device)
+                if self.device.type == "cuda"
+                else 0,
+            }
+        )
         if self.sample_state_store is not None and self.sample_observation_buffer is not None:
             local_records = self.sample_observation_buffer.drain()
             self.sample_weight_policy = synchronize_epoch_state(
@@ -874,6 +909,21 @@ class RFDETRModelModule(LightningModule):
         if scheduler is None or isinstance(scheduler, ReduceLROnPlateau):
             return
         scheduler.step()
+
+    def on_train_end(self) -> None:
+        """Persist streaming sample-order provenance for reproducibility checks."""
+        if not is_global_zero() or not self._sample_order_history:
+            return
+        try:
+            output_dir = self.train_config.output_dir
+            import os
+
+            os.makedirs(output_dir, exist_ok=True)
+            with open(os.path.join(output_dir, "sample_order_hash.json"), "w", encoding="utf-8") as handle:
+                json.dump({"epochs": self._sample_order_history}, handle, indent=2, sort_keys=True)
+                handle.write("\n")
+        except OSError as error:
+            logger.warning("Could not save sample-order provenance: %s", error)
 
     def _sample_dynamics_probe_factory(self) -> Callable[[], list[dict[str, Any]]] | None:
         """Build the rank-zero probe action for the current policy boundary."""

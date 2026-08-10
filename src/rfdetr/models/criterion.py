@@ -225,6 +225,12 @@ class SetCriterion(nn.Module):
     @staticmethod
     def _scatter_per_sample(values: Tensor, batch_idx: Tensor, batch_size: int) -> Tensor:
         """Scatter matched-instance values into a dense batch-length vector."""
+        # Hungarian matching returns CPU index tensors.  The matched loss values
+        # live on the model device (normally CUDA), including when the observer
+        # is disabled because the call site evaluates its arguments before the
+        # no-op ``_record_per_sample`` method is entered.
+        if batch_idx.device != values.device:
+            batch_idx = batch_idx.to(device=values.device)
         result = torch.zeros(batch_size, dtype=values.dtype, device=values.device)
         if values.numel() > 0:
             result.scatter_add_(0, batch_idx, values)

@@ -1,0 +1,198 @@
+{
+  "batch_padding_shape": [
+    3,
+    384,
+    384
+  ],
+  "batch_tensor_shape": [
+    3,
+    3,
+    384,
+    384
+  ],
+  "contract": "dataset -> collate -> forward -> criterion -> backward",
+  "dataset": "/workspace/mvtec-pilot",
+  "device": "cuda",
+  "gradient_norm": 1141.153076171875,
+  "head_shapes": {
+    "class_embed.bias": [
+      2
+    ],
+    "class_embed.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.0.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.0.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.1.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.1.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.10.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.10.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.11.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.11.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.12.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.12.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.2.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.2.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.3.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.3.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.4.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.4.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.5.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.5.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.6.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.6.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.7.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.7.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.8.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.8.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.9.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.9.weight": [
+      2,
+      256
+    ]
+  },
+  "losses": {
+    "bbox": 0.18439754843711853,
+    "giou": 0.8926878571510315,
+    "loss_cls": 0.2942565679550171,
+    "mask_ce": 0.03922595456242561,
+    "mask_dice": 0.4964478611946106
+  },
+  "manifest_sha256": "90673182af0c409e99778f30545f550e91b6845e48f6894a7ebe029c53172528",
+  "model": "RFDETRSegSmall",
+  "num_classes": 1,
+  "outputs": {
+    "pred_boxes": [
+      3,
+      1300,
+      4
+    ],
+    "pred_logits": [
+      3,
+      1300,
+      2
+    ]
+  },
+  "scope": "NON-BENCHMARK / MECHANISM VALIDATION",
+  "seed": 20260810,
+  "status": "PASS",
+  "targets": [
+    {
+      "boxes": [
+        0,
+        4
+      ],
+      "image_id": 5785470941730447148,
+      "labels": [
+        0
+      ],
+      "mask_foreground": 0,
+      "masks": [
+        0,
+        384,
+        384
+      ],
+      "sample_id": "train:5785470941730447148:capsule/train/good/005.png"
+    },
+    {
+      "boxes": [
+        1,
+        4
+      ],
+      "image_id": 7024662019878768951,
+      "labels": [
+        1
+      ],
+      "mask_foreground": 506,
+      "masks": [
+        1,
+        384,
+        384
+      ],
+      "sample_id": "train:7024662019878768951:capsule/test/crack/003.png"
+    },
+    {
+      "boxes": [
+        1,
+        4
+      ],
+      "image_id": 4832004734997902173,
+      "labels": [
+        1
+      ],
+      "mask_foreground": 101,
+      "masks": [
+        1,
+        384,
+        384
+      ],
+      "sample_id": "train:4832004734997902173:capsule/test/crack/020.png"
+    }
+  ],
+  "total_loss": 33.793617248535156,
+  "weights": "/workspace/models/rf-detr-seg-small.pt",
+  "weights_sha256": "6de3da31b2572cac214a1c76cce4a92a13966d56390ac2b3a3de9a8dc2b2bca3"
+}

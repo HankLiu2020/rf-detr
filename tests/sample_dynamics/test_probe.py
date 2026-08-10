@@ -7,6 +7,9 @@
 
 from __future__ import annotations
 
+import random
+
+import numpy as np
 import pytest
 import torch
 from torch import Tensor, nn
@@ -131,6 +134,32 @@ def test_run_probe_restores_train_state_and_is_repeatable() -> None:
     assert model.training
     assert first.as_dict() == second.as_dict()
     assert first.samples[0].gt_recall == 1.0
+
+
+def test_run_probe_restores_process_rng_state() -> None:
+    """Probe iteration must not change the RNG stream used by training."""
+    random.seed(17)
+    np.random.seed(17)
+    torch.manual_seed(17)
+    python_state = random.getstate()
+    numpy_state = np.random.get_state()
+    torch_state = torch.get_rng_state()
+    model = _ProbeModel()
+    loader = [(torch.zeros(1), [_target()])]
+
+    def postprocess(outputs: dict[str, Tensor], target_sizes: Tensor) -> list[dict[str, Tensor]]:
+        """Return a fixed prediction independent of model output."""
+        del outputs, target_sizes
+        return [_prediction()]
+
+    run_deterministic_probe(model, postprocess, loader)
+
+    assert random.getstate() == python_state
+    after_numpy = np.random.get_state()
+    assert after_numpy[0] == numpy_state[0]
+    assert np.array_equal(after_numpy[1], numpy_state[1])
+    assert after_numpy[2:] == numpy_state[2:]
+    assert torch.equal(torch.get_rng_state(), torch_state)
 
 
 def test_run_probe_pushes_threshold_into_segmentation_postprocess() -> None:

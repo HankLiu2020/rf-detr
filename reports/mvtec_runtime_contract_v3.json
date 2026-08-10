@@ -1,0 +1,205 @@
+{
+  "batch_padding_shape": [
+    3,
+    384,
+    384
+  ],
+  "batch_tensor_shape": [
+    3,
+    3,
+    384,
+    384
+  ],
+  "contract": "dataset -> collate -> forward -> criterion -> backward",
+  "dataset": "/workspace/mvtec-pilot",
+  "device": "cuda",
+  "gradient_norm": 1215.2677001953125,
+  "head_shapes": {
+    "class_embed.bias": [
+      2
+    ],
+    "class_embed.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.0.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.0.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.1.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.1.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.10.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.10.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.11.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.11.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.12.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.12.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.2.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.2.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.3.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.3.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.4.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.4.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.5.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.5.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.6.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.6.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.7.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.7.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.8.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.8.weight": [
+      2,
+      256
+    ],
+    "transformer.enc_out_class_embed.9.bias": [
+      2
+    ],
+    "transformer.enc_out_class_embed.9.weight": [
+      2,
+      256
+    ]
+  },
+  "losses": {
+    "bbox": 0.1752459853887558,
+    "giou": 0.880729615688324,
+    "loss_cls": 0.30908966064453125,
+    "mask_ce": 0.05117180943489075,
+    "mask_dice": 0.5982190370559692
+  },
+  "manifest_sha256": "90673182af0c409e99778f30545f550e91b6845e48f6894a7ebe029c53172528",
+  "model": "RFDETRSegSmall",
+  "num_classes": 1,
+  "observer_equivalence": {
+    "baseline_repeat_gradient_max_abs_diff": 0.050380706787109375,
+    "baseline_repeat_loss_max_abs_diff": 0.0,
+    "gradient_max_abs_diff": 0.029193878173828125,
+    "loss_max_abs_diff": 0.0,
+    "status": "PASS"
+  },
+  "outputs": {
+    "pred_boxes": [
+      3,
+      1300,
+      4
+    ],
+    "pred_logits": [
+      3,
+      1300,
+      2
+    ]
+  },
+  "scope": "NON-BENCHMARK / MECHANISM VALIDATION",
+  "seed": 20260810,
+  "status": "PASS",
+  "targets": [
+    {
+      "boxes": [
+        0,
+        4
+      ],
+      "image_id": 5785470941730447148,
+      "labels": [
+        0
+      ],
+      "mask_foreground": 0,
+      "masks": [
+        0,
+        384,
+        384
+      ],
+      "sample_id": "train:5785470941730447148:capsule/train/good/005.png"
+    },
+    {
+      "boxes": [
+        1,
+        4
+      ],
+      "image_id": 7024662019878768951,
+      "labels": [
+        1
+      ],
+      "mask_foreground": 506,
+      "masks": [
+        1,
+        384,
+        384
+      ],
+      "sample_id": "train:7024662019878768951:capsule/test/crack/003.png"
+    },
+    {
+      "boxes": [
+        1,
+        4
+      ],
+      "image_id": 4832004734997902173,
+      "labels": [
+        1
+      ],
+      "mask_foreground": 101,
+      "masks": [
+        1,
+        384,
+        384
+      ],
+      "sample_id": "train:4832004734997902173:capsule/test/crack/020.png"
+    }
+  ],
+  "total_loss": 32.90387725830078,
+  "weights": "/workspace/models/rf-detr-seg-small.pt",
+  "weights_sha256": "6de3da31b2572cac214a1c76cce4a92a13966d56390ac2b3a3de9a8dc2b2bca3"
+}

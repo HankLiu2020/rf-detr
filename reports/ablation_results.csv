@@ -1,7 +1,7 @@
 experiment,status,loss_change,sampler_change,metrics,notes
-E0-baseline,not-run,none,none,mAP/F1 pending,requires user dataset and checkpoint
+E0-baseline,real-pilot-completed,none,none,segm_mAP_50_95=0.0135206021; F1=0.0675675645,3-epoch MVTec mechanism pilot; fairness snapshot and order hashes recorded; no benchmark/effect claim
 E1-instant-loss,not-run,none,instant percentile,mAP/F1 pending,baseline for current-loss ranking
-E2-observe-only,correctness-verified,none,none,414 targeted tests passed,no effect claim; epoch aggregation and probe lifecycle verified
+E2-observe-only,real-pilot-completed-with-caveat,none,none,segm_mAP_50_95=0.0141994040; F1=0.0575539581,observer-only 3-epoch MVTec pilot; initial model/order/steps matched E0; CUDA non-determinism caveat; no benchmark/effect claim
 E3-loss-weight-only,correctness-verified,previous policy,none,414 targeted tests passed,no effect claim; image and instance mass normalization verified
 E4-sampler-only,correctness-verified,none,bucket quotas,2GPU smoke passed,no effect claim; rank0 state and sampler plan broadcast verified
 E5-loss-plus-sampler,correctness-verified,capped previous policy,capped bucket exposure,2GPU smoke passed,no effect claim; effective cap default 2.5

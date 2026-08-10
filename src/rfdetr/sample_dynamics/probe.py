@@ -9,10 +9,12 @@ from __future__ import annotations
 
 import copy
 import inspect
+import random
 from collections.abc import Sized
 from dataclasses import dataclass
 from typing import Any, Iterable, cast
 
+import numpy as np
 import torch
 import torch.nn.functional as F  # noqa: N812
 import torch.utils.data
@@ -298,6 +300,10 @@ def run_deterministic_probe(
             device = torch.device("cpu")
     device = torch.device(device)
     was_training = model.training
+    python_rng_state = random.getstate()
+    numpy_rng_state = np.random.get_state()
+    torch_rng_state = torch.get_rng_state()
+    cuda_rng_state = torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None
     model.eval()
     results: list[ProbeSampleResult] = []
     try:
@@ -323,4 +329,12 @@ def run_deterministic_probe(
                 )
     finally:
         model.train(was_training)
+        # DataLoader iteration, model kernels, or a future stochastic eval
+        # component must not consume the RNG stream used by the next training
+        # epoch.  Restore all process-local streams after every probe.
+        random.setstate(python_rng_state)
+        np.random.set_state(numpy_rng_state)
+        torch.set_rng_state(torch_rng_state)
+        if cuda_rng_state is not None:
+            torch.cuda.set_rng_state_all(cuda_rng_state)
     return ProbeReport(tuple(results))
