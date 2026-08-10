@@ -7,8 +7,10 @@
 """Build a reproducible, non-benchmark MVTec-AD segmentation pilot.
 
 The source MVTec tree is read-only.  Generated Roboflow-style COCO splits use
-symlinks to source images and encode pristine or deterministically corrupted
-binary masks as connected-component instances.
+symlinks to source images and encode one semantic union-mask annotation per
+abnormal image when the effective mask is non-empty. A ``drop_mask`` corruption
+intentionally has no COCO annotation; connected components remain metadata and
+are used only for the deterministic ``drop_component`` corruption.
 """
 
 from __future__ import annotations
