@@ -16,7 +16,7 @@ OVERALL:
 
 - Repository: `/home/liujiyuan/rf-detr-sample-dynamics`
 - Branch: `agent/dynamic-scheduling-rfdetr`
-- Commit: `86be32a2babfb04b0da09de7065152f25acde43a` (current committed checkpoint before final RF4 evidence commit)
+- Commit: `aaa42b1ddfd4c65757ae8c5be6045d063c545a33`
 - Remote branch: `HankLiu2020/rf-detr:agent/dynamic-scheduling-rfdetr`
 - Scope: `NON-BENCHMARK / MECHANISM VALIDATION`
 - Current rule: RF4 Longitudinal must complete before any E3/E4/E5 intervention.
