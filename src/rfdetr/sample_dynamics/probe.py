@@ -8,11 +8,13 @@
 from __future__ import annotations
 
 import copy
+import inspect
 from collections.abc import Sized
 from dataclasses import dataclass
 from typing import Any, Iterable, cast
 
 import torch
+import torch.nn.functional as F  # noqa: N812
 import torch.utils.data
 from torch import Tensor, nn
 
@@ -21,7 +23,7 @@ from rfdetr.utilities import box_ops
 
 @dataclass(frozen=True)
 class ProbeSampleResult:
-    """Detection-quality probe metrics for one stable sample ID."""
+    """Detection and optional segmentation probe metrics for one stable sample ID."""
 
     sample_id: str
     fn: int
@@ -30,6 +32,7 @@ class ProbeSampleResult:
     matched_iou: float
     gt_count: int
     matched_count: int
+    matched_mask_iou: float | None = None
 
     @property
     def gt_recall(self) -> float:
@@ -46,6 +49,7 @@ class ProbeSampleResult:
             "matched_iou": self.matched_iou,
             "gt_count": self.gt_count,
             "matched_count": self.matched_count,
+            "matched_mask_iou": self.matched_mask_iou,
             "gt_recall": self.gt_recall,
         }
 
@@ -60,6 +64,14 @@ class ProbeReport:
         """Return aggregate and per-sample metrics."""
         gt_count = sum(sample.gt_count for sample in self.samples)
         matched_count = sum(sample.matched_count for sample in self.samples)
+        mask_samples = [sample for sample in self.samples if sample.matched_mask_iou is not None]
+        mask_matched_count = sum(sample.matched_count for sample in mask_samples)
+        mask_iou_mass = sum(
+            float(sample.matched_mask_iou) * sample.matched_count
+            for sample in mask_samples
+            if sample.matched_mask_iou is not None
+        )
+        matched_mask_iou = mask_iou_mass / max(mask_matched_count, 1) if mask_samples else None
         return {
             "sample_count": len(self.samples),
             "fn": sum(sample.fn for sample in self.samples),
@@ -67,6 +79,8 @@ class ProbeReport:
             "class_error": sum(sample.class_error for sample in self.samples),
             "gt_count": gt_count,
             "matched_count": matched_count,
+            "segmentation_sample_count": len(mask_samples),
+            "matched_mask_iou": matched_mask_iou,
             "gt_recall": matched_count / max(gt_count, 1),
             "samples": [sample.as_dict() for sample in self.samples],
         }
@@ -78,6 +92,40 @@ def _target_boxes_xyxy(target: dict[str, Any], device: torch.device) -> Tensor:
     height, width = (int(value) for value in target["orig_size"].tolist())
     scale = torch.tensor([width, height, width, height], dtype=boxes.dtype, device=device)
     return box_ops.box_cxcywh_to_xyxy(boxes) * scale
+
+
+def _matched_mask_iou(
+    prediction_masks: Tensor,
+    target_masks: Tensor,
+    matches: list[tuple[int, int]],
+    *,
+    device: torch.device,
+) -> float:
+    """Return mean IoU for box-matched instance masks at prediction resolution."""
+    if not matches:
+        return 0.0
+    predicted = prediction_masks.to(device=device)
+    expected = target_masks.to(device=device)
+    if predicted.ndim == 4 and predicted.shape[1] == 1:
+        predicted = predicted[:, 0]
+    if expected.ndim == 4 and expected.shape[1] == 1:
+        expected = expected[:, 0]
+    if predicted.ndim != 3 or expected.ndim != 3:
+        raise ValueError("probe masks must have shape [N,H,W] or [N,1,H,W]")
+    if expected.shape[-2:] != predicted.shape[-2:]:
+        expected = F.interpolate(
+            expected.to(dtype=torch.float32).unsqueeze(1),
+            size=predicted.shape[-2:],
+            mode="nearest",
+        )[:, 0]
+    predicted = predicted if predicted.dtype == torch.bool else predicted > 0.5
+    expected = expected if expected.dtype == torch.bool else expected > 0.5
+    values: list[float] = []
+    for prediction_index, target_index in matches:
+        intersection = torch.logical_and(predicted[prediction_index], expected[target_index]).sum()
+        union = torch.logical_or(predicted[prediction_index], expected[target_index]).sum()
+        values.append(float((intersection.float() / union.clamp_min(1).float()).item()) if int(union.item()) else 0.0)
+    return sum(values) / len(values)
 
 
 def match_predictions_to_target(
@@ -102,21 +150,44 @@ def match_predictions_to_target(
     pred_labels = prediction["labels"].to(device)
     scores = prediction.get("scores", torch.ones(len(pred_boxes), device=device)).to(device)
     keep = scores >= score_threshold
+    pred_masks = prediction.get("masks")
+    if pred_masks is not None:
+        pred_masks = pred_masks[keep]
     pred_boxes = pred_boxes[keep]
     pred_labels = pred_labels[keep]
     scores = scores[keep]
     gt_boxes = _target_boxes_xyxy(target, device)
     gt_labels = target["labels"].to(device)
     sample_id = str(target["sample_id"])
+    has_masks = pred_masks is not None and isinstance(target.get("masks"), Tensor)
     if len(pred_boxes) == 0:
-        return ProbeSampleResult(sample_id, len(gt_boxes), 0, 0, 0.0, len(gt_boxes), 0)
+        return ProbeSampleResult(
+            sample_id,
+            len(gt_boxes),
+            0,
+            0,
+            0.0,
+            len(gt_boxes),
+            0,
+            0.0 if has_masks else None,
+        )
     if len(gt_boxes) == 0:
-        return ProbeSampleResult(sample_id, 0, len(pred_boxes), 0, 0.0, 0, 0)
+        return ProbeSampleResult(
+            sample_id,
+            0,
+            len(pred_boxes),
+            0,
+            0.0,
+            0,
+            0,
+            0.0 if has_masks else None,
+        )
 
     order = torch.argsort(scores, descending=True)
     ious = box_ops.box_iou(pred_boxes, gt_boxes)[0]
     used_gt: set[int] = set()
     matched_ious: list[float] = []
+    matches: list[tuple[int, int]] = []
     class_errors = 0
     false_positives = 0
     for prediction_index in order.tolist():
@@ -130,6 +201,7 @@ def match_predictions_to_target(
             false_positives += 1
             continue
         used_gt.add(gt_index)
+        matches.append((prediction_index, gt_index))
         matched_ious.append(float(candidate_iou.item()))
         if int(pred_labels[prediction_index].item()) == int(gt_labels[gt_index].item()):
             continue
@@ -138,6 +210,9 @@ def match_predictions_to_target(
 
     matched_count = len(matched_ious)
     fn = len(gt_boxes) - matched_count
+    matched_mask_iou = None
+    if has_masks and pred_masks is not None:
+        matched_mask_iou = _matched_mask_iou(pred_masks, target["masks"], matches, device=device)
     return ProbeSampleResult(
         sample_id,
         fn,
@@ -146,7 +221,30 @@ def match_predictions_to_target(
         sum(matched_ious) / max(matched_count, 1),
         len(gt_boxes),
         matched_count,
+        matched_mask_iou,
     )
+
+
+def _postprocess_probe_outputs(
+    postprocess: nn.Module,
+    outputs: dict[str, Tensor],
+    target_sizes: Tensor,
+    *,
+    score_threshold: float,
+) -> list[dict[str, Tensor]]:
+    """Let segmentation postprocessors filter before expensive mask upsampling."""
+    callable_target = getattr(postprocess, "forward", postprocess)
+    try:
+        parameters = inspect.signature(callable_target).parameters.values()
+    except (TypeError, ValueError):
+        parameters = ()
+    supports_threshold = any(
+        parameter.name == "score_threshold" or parameter.kind is inspect.Parameter.VAR_KEYWORD
+        for parameter in parameters
+    )
+    if supports_threshold:
+        return postprocess(outputs, target_sizes, score_threshold=score_threshold)
+    return postprocess(outputs, target_sizes)
 
 
 class DeterministicProbeDataset(torch.utils.data.Dataset[Any]):
@@ -208,7 +306,12 @@ def run_deterministic_probe(
                 samples = samples.to(device)
                 target_sizes = torch.stack([target["orig_size"] for target in targets]).to(device)
                 outputs = model(samples)
-                predictions = postprocess(outputs, target_sizes)
+                predictions = _postprocess_probe_outputs(
+                    postprocess,
+                    outputs,
+                    target_sizes,
+                    score_threshold=score_threshold,
+                )
                 results.extend(
                     match_predictions_to_target(
                         prediction,

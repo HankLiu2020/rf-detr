@@ -75,6 +75,37 @@ def test_match_predictions_filters_low_confidence_topk_candidates() -> None:
     assert result.class_error == 0
 
 
+def test_match_predictions_reports_box_matched_mask_iou() -> None:
+    """Seg Small probes compare masks only across the deterministic box matches."""
+    target = _target()
+    target_mask = torch.zeros((1, 100, 200), dtype=torch.bool)
+    target_mask[:, 30:70, 80:120] = True
+    target["masks"] = target_mask
+    prediction = _prediction()
+    prediction["masks"] = target_mask.unsqueeze(1).clone()
+
+    result = match_predictions_to_target(prediction, target)
+
+    assert result.matched_mask_iou == pytest.approx(1.0)
+    assert result.as_dict()["matched_mask_iou"] == pytest.approx(1.0)
+
+
+def test_match_predictions_reports_zero_for_disjoint_mask() -> None:
+    """A correct box cannot hide a disjoint segmentation mask."""
+    target = _target()
+    target_mask = torch.zeros((1, 100, 200), dtype=torch.bool)
+    target_mask[:, 30:70, 80:120] = True
+    target["masks"] = target_mask
+    prediction = _prediction()
+    prediction_mask = torch.zeros((1, 1, 100, 200), dtype=torch.bool)
+    prediction_mask[:, :, :10, :10] = True
+    prediction["masks"] = prediction_mask
+
+    result = match_predictions_to_target(prediction, target)
+
+    assert result.matched_mask_iou == pytest.approx(0.0)
+
+
 class _ProbeModel(nn.Module):
     """Tiny model used to verify probe state restoration."""
 
@@ -100,6 +131,33 @@ def test_run_probe_restores_train_state_and_is_repeatable() -> None:
     assert model.training
     assert first.as_dict() == second.as_dict()
     assert first.samples[0].gt_recall == 1.0
+
+
+def test_run_probe_pushes_threshold_into_segmentation_postprocess() -> None:
+    """Segmentation masks below the Probe threshold are filtered before full-resolution resize."""
+    model = _ProbeModel()
+    loader = [(torch.zeros(1), [_target()])]
+
+    class _ThresholdPostprocess(nn.Module):
+        def __init__(self) -> None:
+            super().__init__()
+            self.received_threshold: float | None = None
+
+        def forward(
+            self,
+            outputs: dict[str, Tensor],
+            target_sizes: Tensor,
+            score_threshold: float | None = None,
+        ) -> list[dict[str, Tensor]]:
+            del outputs, target_sizes
+            self.received_threshold = score_threshold
+            return [_prediction()]
+
+    postprocess = _ThresholdPostprocess()
+
+    run_deterministic_probe(model, postprocess, loader, score_threshold=0.2)
+
+    assert postprocess.received_threshold == pytest.approx(0.2)
 
 
 class _TransformDataset(torch.utils.data.Dataset):

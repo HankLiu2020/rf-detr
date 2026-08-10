@@ -66,8 +66,11 @@ class StatePolicy:
     max_history: int = 32
     mastered_percentile: float = 0.25
     hard_percentile: float = 0.75
+    min_history_for_mastered: int = 3
     suspect_patience: int = 3
     improvement_epsilon: float = 1e-4
+    probe_mask_iou_threshold: float = 0.5
+    mask_error_weight: float = 0.5
     loss_weight: float = 0.5
     error_weight: float = 0.3
     trend_weight: float = 0.15
@@ -80,8 +83,14 @@ class StatePolicy:
             raise ValueError("max_history must be >= window_size >= 2")
         if not 0.0 <= self.mastered_percentile < self.hard_percentile <= 1.0:
             raise ValueError("mastered_percentile and hard_percentile must satisfy 0 <= mastered < hard <= 1")
+        if self.min_history_for_mastered < 1:
+            raise ValueError("min_history_for_mastered must be >= 1")
         if self.suspect_patience < 1:
             raise ValueError("suspect_patience must be >= 1")
+        if not 0.0 <= self.probe_mask_iou_threshold <= 1.0:
+            raise ValueError("probe_mask_iou_threshold must be in [0, 1]")
+        if self.mask_error_weight < 0.0:
+            raise ValueError("mask_error_weight must be >= 0")
 
 
 @dataclass
@@ -141,27 +150,35 @@ class SampleStateStore:
             return sum(float(value) for value in normalized.values())
         return 0.0
 
-    @staticmethod
-    def _probe_conflict(probe: Mapping[str, Any] | None) -> bool:
-        """Return whether a probe result has a stable detection conflict."""
+    def _probe_conflict(self, probe: Mapping[str, Any] | None) -> bool:
+        """Return whether a probe result has a stable detection or mask conflict."""
         if probe is None:
             return False
+        matched_mask_iou = probe.get("matched_mask_iou")
         return bool(
             int(probe.get("fn", 0)) > 0
             or int(probe.get("class_error", 0)) > 0
             or float(probe.get("gt_recall", 1.0)) < 1.0
+            or (
+                matched_mask_iou is not None
+                and float(matched_mask_iou) < self.policy.probe_mask_iou_threshold
+            )
         )
 
-    @staticmethod
-    def _error_severity(probe: Mapping[str, Any] | None) -> float:
-        """Convert probe errors into a bounded difficulty component."""
+    def _error_severity(self, probe: Mapping[str, Any] | None) -> float:
+        """Convert detection and segmentation probe errors into one bounded component."""
         if probe is None:
             return 0.0
         fn = float(probe.get("fn", 0))
         fp = float(probe.get("fp", 0))
         class_error = float(probe.get("class_error", 0))
         gt_count = max(float(probe.get("gt_count", 1)), 1.0)
-        return min(1.0, (fn + 0.7 * class_error + 0.3 * fp) / gt_count)
+        matched_count = float(probe.get("matched_count", 0))
+        matched_mask_iou = probe.get("matched_mask_iou")
+        mask_error = 0.0
+        if matched_mask_iou is not None:
+            mask_error = self.policy.mask_error_weight * (1.0 - float(matched_mask_iou)) * matched_count
+        return min(1.0, (fn + 0.7 * class_error + 0.3 * fp + mask_error) / gt_count)
 
     def update(
         self,
@@ -226,7 +243,11 @@ class SampleStateStore:
         )
         if suspect:
             return SampleState.SUSPECT
-        if state_record.loss_percentile <= self.policy.mastered_percentile and state_record.slope <= 0.0:
+        if (
+            len(state_record.history) >= self.policy.min_history_for_mastered
+            and state_record.loss_percentile <= self.policy.mastered_percentile
+            and state_record.slope <= 0.0
+        ):
             return SampleState.MASTERED
         if state_record.loss_percentile >= self.policy.hard_percentile:
             return SampleState.HARD_LEARNABLE

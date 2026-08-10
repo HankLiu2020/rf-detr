@@ -100,6 +100,7 @@ class ReviewExporter:
                     "fp": int(probe.get("fp", 0)) if probe is not None else 0,
                     "class_error": int(probe.get("class_error", 0)) if probe is not None else 0,
                     "matched_iou": float(probe.get("matched_iou", 0.0)) if probe is not None else 0.0,
+                    "matched_mask_iou": probe.get("matched_mask_iou") if probe is not None else None,
                     "gt_recall": float(probe.get("gt_recall", 0.0)) if probe is not None else 0.0,
                     "gt_count": int(probe.get("gt_count", 0)) if probe is not None else 0,
                     "pred_count": int(probe.get("pred_count", 0)) if probe is not None else 0,

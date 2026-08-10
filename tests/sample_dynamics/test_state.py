@@ -52,10 +52,13 @@ def test_state_store_tracks_ema_hard_patience_probe_conflict_and_difficulty() ->
 def test_state_store_counts_forgetting_and_round_trips_checkpoint() -> None:
     """A mastered sample becoming hard increments forgetting and survives reload."""
     store = SampleStateStore(StatePolicy(window_size=2, max_history=4))
-    store.update([_record("sample", 0.1), _record("other", 1.0)], epoch=0)
+    for epoch in range(3):
+        store.update([_record("sample", 0.1), _record("other", 1.0)], epoch=epoch)
+        if epoch < 2:
+            assert store.get("sample").state is SampleState.LEARNING  # type: ignore[union-attr]
     assert store.get("sample").state is SampleState.MASTERED  # type: ignore[union-attr]
 
-    store.update([_record("sample", 1.0), _record("other", 0.1)], epoch=1)
+    store.update([_record("sample", 1.0), _record("other", 0.1)], epoch=3)
     assert store.get("sample").forgetting_count == 1  # type: ignore[union-attr]
 
     restored = SampleStateStore()
@@ -88,3 +91,23 @@ def test_state_store_ranks_image_local_loss_before_global_loss() -> None:
 
     assert store.get("many-targets").loss_percentile == 0.0  # type: ignore[union-attr]
     assert store.get("one-target").loss_percentile == 1.0  # type: ignore[union-attr]
+
+
+def test_segmentation_mask_error_contributes_to_probe_difficulty() -> None:
+    """Bad masks remain visible even when box matching and recall are perfect."""
+    good_store = SampleStateStore()
+    bad_store = SampleStateStore()
+    common_probe = {
+        "sample_id": "sample",
+        "fn": 0,
+        "fp": 0,
+        "class_error": 0,
+        "gt_recall": 1.0,
+        "gt_count": 1,
+        "matched_count": 1,
+    }
+    good_store.update([_record("sample", 0.1)], probe_records=[{**common_probe, "matched_mask_iou": 1.0}])
+    bad_store.update([_record("sample", 0.1)], probe_records=[{**common_probe, "matched_mask_iou": 0.0}])
+
+    assert bad_store.get("sample").difficulty > good_store.get("sample").difficulty  # type: ignore[union-attr]
+    assert bad_store.get("sample").probe_conflict_count == 1  # type: ignore[union-attr]

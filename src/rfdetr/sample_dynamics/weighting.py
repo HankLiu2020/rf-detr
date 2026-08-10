@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any, Iterable, Mapping
 
 import torch
+import torch.distributed as distributed
 from torch import Tensor
 
 
@@ -19,6 +20,32 @@ def cap_effective_contribution(weight: float, exposure_multiplier: float, cap: f
     if weight < 0.0 or exposure_multiplier < 0.0 or cap <= 0.0:
         raise ValueError("weight, exposure_multiplier, and cap must be non-negative with cap > 0")
     return min(float(cap), float(weight) * float(exposure_multiplier))
+
+
+def _distributed_is_initialized() -> bool:
+    """Return whether loss-weight normalization spans multiple ranks."""
+    return distributed.is_available() and distributed.is_initialized() and distributed.get_world_size() > 1
+
+
+def _global_sum(value: Tensor) -> Tensor:
+    """Return a detached scalar sum across the active process group."""
+    result = value.detach().clone()
+    if _distributed_is_initialized():
+        distributed.all_reduce(result, op=distributed.ReduceOp.SUM)
+    return result
+
+
+def _global_sum_and_count(values: Tensor) -> tuple[Tensor, Tensor]:
+    """Return global value mass and image count on ``values.device``."""
+    statistics = torch.stack(
+        (
+            values.sum(),
+            values.new_tensor(float(values.numel())),
+        )
+    )
+    if _distributed_is_initialized():
+        distributed.all_reduce(statistics, op=distributed.ReduceOp.SUM)
+    return statistics[0], statistics[1]
 
 
 @dataclass
@@ -60,16 +87,21 @@ class SampleWeightPolicy:
         exposure_multipliers: Mapping[str, float] | None = None,
         effective_cap: float | None = None,
     ) -> Tensor:
-        """Return mean-normalized weights while respecting optional RF7 exposure caps."""
+        """Return globally mean-normalized weights with optional RF7 caps.
+
+        In DDP, all ranks participate in the same scalar Tensor collectives.  Normalization and post-clipping residual
+        redistribution therefore use the global image batch rather than each rank's local state composition.
+        """
         ids = tuple(str(sample_id) for sample_id in sample_ids)
         values = torch.tensor(
             [self.weights.get(sample_id, 1.0) for sample_id in ids],
             dtype=torch.float32,
             device=device,
         )
-        if values.numel() == 0:
+        global_sum, global_count = _global_sum_and_count(values)
+        if float(global_count.item()) == 0.0:
             return values
-        values = values / values.mean().clamp_min(1e-8)
+        values = values / (global_sum / global_count).clamp_min(1e-8)
         upper = torch.full_like(values, self.maximum)
         if exposure_multipliers is not None and effective_cap is not None:
             if effective_cap <= 0.0:
@@ -80,27 +112,36 @@ class SampleWeightPolicy:
                 device=device,
             )
             upper = torch.minimum(upper, float(effective_cap) / exposures.clamp_min(1e-8))
-            if bool(torch.any(upper < self.minimum)):
+            incompatible = values.new_tensor(float(bool(torch.any(upper < self.minimum))))
+            if _distributed_is_initialized():
+                distributed.all_reduce(incompatible, op=distributed.ReduceOp.MAX)
+            if bool(incompatible.item()):
                 raise ValueError("effective contribution cap is incompatible with the configured minimum weight")
+        global_upper_sum = _global_sum(upper.sum())
+        if float(global_upper_sum.item()) < float(global_count.item()) - 1e-6 or self.minimum > 1.0:
+            raise ValueError("sample weight bounds cannot preserve a global mean of one")
         values = torch.maximum(torch.minimum(values, upper), torch.as_tensor(self.minimum, device=device))
         # Clipping can move the mean away from one. Redistribute the residual
-        # over non-saturated entries so the batch normalization contract remains
-        # true while every value stays within the configured bounds.
-        for _ in range(values.numel() + 1):
-            residual = values.numel() - values.sum()
+        # over globally non-saturated entries so rank composition cannot erase
+        # the intended MASTERED/HARD_LEARNABLE ratio.
+        for _ in range(32):
+            current_sum, _ = _global_sum_and_count(values)
+            residual = global_count - current_sum
             if abs(float(residual.item())) < 1e-6:
                 break
             if residual > 0:
                 eligible = values < upper - 1e-6
-                if not bool(torch.any(eligible)):
+                eligible_count = _global_sum(eligible.sum(dtype=values.dtype))
+                if float(eligible_count.item()) == 0.0:
                     break
-                delta = residual / max(int(eligible.sum().item()), 1)
+                delta = residual / eligible_count
                 values = torch.where(eligible, torch.minimum(values + delta, upper), values)
             else:
                 eligible = values > self.minimum + 1e-6
-                if not bool(torch.any(eligible)):
+                eligible_count = _global_sum(eligible.sum(dtype=values.dtype))
+                if float(eligible_count.item()) == 0.0:
                     break
-                delta = (-residual) / max(int(eligible.sum().item()), 1)
+                delta = (-residual) / eligible_count
                 values = torch.where(
                     eligible,
                     torch.maximum(values - delta, torch.as_tensor(self.minimum, device=device)),
