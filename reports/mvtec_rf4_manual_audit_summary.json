@@ -1,0 +1,20 @@
+{
+  "contact_sheets": [
+    "reports/mvtec_rf4_manual_audit_sheets/sheet_00.png",
+    "reports/mvtec_rf4_manual_audit_sheets/sheet_01.png",
+    "reports/mvtec_rf4_manual_audit_sheets/sheet_02.png",
+    "reports/mvtec_rf4_manual_audit_sheets/sheet_03.png",
+    "reports/mvtec_rf4_manual_audit_sheets/sheet_04.png"
+  ],
+  "csv": "reports/mvtec_rf4_manual_audit.csv",
+  "decisions_json": "reports/mvtec_rf4_manual_audit_decisions.json",
+  "label_counts": {
+    "questionable": 5,
+    "reasonable": 23,
+    "wrong": 22
+  },
+  "pending_count": 0,
+  "sample_count": 50,
+  "schema_version": 1,
+  "selection_rule": "5 controlled corruption + 20 CLEAN_NATURAL_HARD + 15 REFERENCE_MASTERED + deterministic other train fill"
+}

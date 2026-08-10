@@ -1,0 +1,252 @@
+{
+  "train:1023827126115464097:grid/test/thread/006.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible grid-thread defect; persistent FN/conflict is consistent with the deliberately shifted mask smoke case.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:1718245752427016899:pill/test/faulty_imprint/014.png": {
+    "review_label": "questionable",
+    "review_reason": "Visible pill anomaly but the controlled drop-mask annotation is empty, so low loss and LEARNING do not test the visual defect.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:4832004734997902173:capsule/test/crack/020.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible capsule crack/scratch; shifted target produces the expected persistent FN/conflict smoke signal.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:5899465832141176488:grid/test/broken/003.png": {
+    "review_label": "questionable",
+    "review_reason": "Visible grid break but drop-mask target is empty; LEARNING with no analysis conflict is protocol-induced, not evidence of visual success.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:6016708638749308861:grid/test/broken/010.png": {
+    "review_label": "questionable",
+    "review_reason": "Visible grid break and high loss are plausible, but the drop-component corruption only produced transient FP/conflict and no persistent SUSPECT.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:130323337572733479:capsule/test/poke/007.png": {
+    "review_label": "reasonable",
+    "review_reason": "Subtle visible capsule poke; high-loss HARD_LEARNABLE candidate is a plausible uncertainty signal.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:1334861589954683747:grid/test/bent/001.png": {
+    "review_label": "reasonable",
+    "review_reason": "Clear grid deformation/break; persistent HARD_LEARNABLE state agrees with the visual difficulty.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:1612102227848134492:capsule/test/faulty_imprint/016.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible capsule imprint defect; sustained high-loss candidate state is consistent with the image.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:1691446223478622750:capsule/test/scratch/010.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible scratch near capsule edge; HARD_LEARNABLE trajectory is visually plausible.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:1879538272500325958:pill/test/scratch/018.png": {
+    "review_label": "reasonable",
+    "review_reason": "Moderate visible pill scratch; the sample improved out of HARD into LEARNING rather than remaining permanently hard.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:2286936129831654433:pill/test/crack/010.png": {
+    "review_label": "reasonable",
+    "review_reason": "Multiple visible pill defects with FN; high-loss HARD_LEARNABLE state is consistent.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:2655419239836892122:grid/test/bent/010.png": {
+    "review_label": "reasonable",
+    "review_reason": "Clear grid bend/break; hard trajectory and occasional FP are plausible for localization difficulty.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:3049095876839103288:grid/test/thread/002.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible thread defect on the grid; persistent hard candidate state agrees with the image.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:3141768559057378213:grid/test/bent/006.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible central grid deformation; sustained HARD_LEARNABLE state is plausible.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:3417209080956311570:capsule/test/poke/006.png": {
+    "review_label": "reasonable",
+    "review_reason": "Subtle capsule poke with FN; moderate LEARNING trajectory is more defensible than an automatic hard claim.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:3544459544906768490:capsule/test/squeeze/004.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible capsule deformation; high-loss hard state and FN are consistent.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:3805211079559930078:capsule/test/scratch/021.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible capsule scratch; persistent hard state is a plausible high-loss candidate.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:4007568285886619920:pill/test/combined/009.png": {
+    "review_label": "reasonable",
+    "review_reason": "Multiple visible pill anomalies; hard state with FP is consistent with combined-defect ambiguity.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:4097742676584527066:capsule/test/squeeze/012.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible capsule squeeze/deformation; very high loss and persistent hard state are plausible.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:4117635759692635188:pill/test/combined/007.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible multi-defect pill image; high-loss hard state with FN/FP is consistent.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:4278975938648514112:capsule/test/scratch/012.png": {
+    "review_label": "questionable",
+    "review_reason": "The scratch is visually subtle and the sample remains only LEARNING/MIDDLE despite a high absolute loss; difficulty interpretation is uncertain.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:4510235891147841902:pill/test/color/007.png": {
+    "review_label": "reasonable",
+    "review_reason": "Many visible color/spot anomalies; sustained hard candidate state is plausible.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:4929878822268887463:pill/test/combined/000.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible combined pill defects; high-loss state with FN/FP is consistent.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:49314652492266362:grid/test/bent/003.png": {
+    "review_label": "reasonable",
+    "review_reason": "Clear grid deformation; persistent hard candidate state is visually plausible.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:5088599339705452313:pill/test/scratch/002.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible pill scratch/marks; high-loss hard state is consistent with the defect.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:1609930916752120815:capsule/train/good/131.png": {
+    "review_label": "wrong",
+    "review_reason": "Visually normal empty-GT sample with no analysis conflict, but frozen core records gt_recall=0 as conflict in all epochs; probe semantics are wrong for clean background images.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:1729354100676714091:grid/train/good/230.png": {
+    "review_label": "wrong",
+    "review_reason": "Visually normal empty-GT grid sample; frozen core counts undefined empty-GT recall as conflict every epoch despite analysis-side exclusion.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:2063657006683759332:pill/train/good/022.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT pill sample; frozen probe conflict is a semantic false positive even though loss remains tiny.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:2480008252367027160:capsule/train/good/170.png": {
+    "review_label": "wrong",
+    "review_reason": "Visually normal empty-GT capsule; core gt_recall=0 conflict is undefined rather than a miss.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:2597022681582508303:grid/train/good/086.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT grid sample reaches MASTERED, but frozen conflict remains semantically wrong for the probe signal.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:2832729411921490110:capsule/train/good/132.png": {
+    "review_label": "wrong",
+    "review_reason": "Visually normal empty-GT capsule with tiny loss; all-epoch frozen conflict is an undefined-recall false positive.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:2872813516846611074:capsule/train/good/035.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT capsule; frozen conflict semantics do not represent a real detection miss.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:3064240740115889573:capsule/train/good/088.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT capsule with low loss; core conflict is a false positive caused by gt_recall=0 on an empty target.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:3337943932668878757:grid/train/good/022.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT grid reaches MASTERED but still has frozen conflict records; the probe predicate is semantically wrong for this sample.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:3485617813109734361:capsule/train/good/187.png": {
+    "review_label": "wrong",
+    "review_reason": "Visually normal empty-GT capsule; analysis conflict is correctly zero but frozen conflict remains a false positive.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:3516369204695933484:grid/train/good/027.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT grid; frozen core treats undefined recall as conflict for all epochs.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:3809427062992315454:capsule/train/good/204.png": {
+    "review_label": "wrong",
+    "review_reason": "Visually normal empty-GT capsule; tiny loss does not justify the frozen conflict signal.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:3920375656357970402:grid/train/good/256.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT grid; frozen conflict is undefined-recall pollution rather than a real error.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:4069803555220086838:grid/train/good/244.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT grid reaches MASTERED, but frozen conflict remains a semantic false positive.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:4198455449116363733:grid/train/good/180.png": {
+    "review_label": "wrong",
+    "review_reason": "Visually normal empty-GT grid; analysis-side conflict is zero while frozen predicate still flags undefined recall.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:1100938321423648088:pill/train/good/070.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT pill with tiny loss; MIDDLE percentile is a baseline-ranking artifact and frozen conflict is semantically invalid.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:1310311874643652317:capsule/train/good/163.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT capsule; low loss does not support a real conflict, but frozen core records one each epoch.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:1388612642754228285:pill/train/good/114.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT pill; MIDDLE instant bucket and frozen conflict highlight the current no-GT baseline semantic issue.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:1605097113760341175:pill/train/good/100.png": {
+    "review_label": "wrong",
+    "review_reason": "Visually normal empty-GT pill with low loss; frozen conflict is not a real miss.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:1740823932691553001:pill/test/pill_type/002.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible yellow pill-type anomaly; moderate loss/LEARNING state is plausible for a non-corrupted defect.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:1945384868948333553:pill/train/good/257.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT pill reaches MASTERED, but frozen conflict remains a probe semantic false positive.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:199958455221314673:pill/test/pill_type/007.png": {
+    "review_label": "reasonable",
+    "review_reason": "Visible yellow pill-type anomaly with one FP; moderate LEARNING state is plausible in this smoke run.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:2393414823739843695:grid/test/metal_contamination/000.png": {
+    "review_label": "questionable",
+    "review_reason": "Metal-contamination label is visually subtle in the contact sheet while loss is high; this is an appropriate manual-review uncertainty case.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:2548632831571252407:pill/train/good/261.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT pill; frozen conflict is semantically invalid even though the state reaches MASTERED.",
+    "reviewer": "Codex visual review 2026-08-10"
+  },
+  "train:2557981520441401042:pill/train/good/168.png": {
+    "review_label": "wrong",
+    "review_reason": "Normal empty-GT pill with tiny loss; frozen core conflict is an undefined-recall false positive.",
+    "reviewer": "Codex visual review 2026-08-10"
+  }
+}

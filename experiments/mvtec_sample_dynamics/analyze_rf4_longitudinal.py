@@ -35,6 +35,22 @@ EXPECTED_CORRUPTION_TYPES = {"drop_mask", "mask_shift", "drop_component"}
 EXPECTED_CORRUPTION_COUNTS = {"drop_mask": 2, "mask_shift": 2, "drop_component": 1}
 EXPECTED_MANIFEST_RECORD_COUNT = 186
 EXPECTED_VALID_SAMPLE_COUNT = 58
+# These rules are deliberately experiment-side and are frozen before any
+# intervention run.  They use only the E2 reference trajectory and exclude
+# the five controlled-corruption IDs from natural subsets.
+REFERENCE_SUBSET_RULES = {
+    "REFERENCE_HARD": (
+        "non-corruption train samples with at least 3 epochs in instant HARD "
+        "or at least 3 epochs in HARD_LEARNABLE"
+    ),
+    "REFERENCE_MASTERED": "non-corruption train samples with at least 3 MASTERED state epochs",
+    "CLEAN_NATURAL_HARD": (
+        "REFERENCE_HARD samples that are not controlled corruptions; this is a "
+        "frozen natural-hard comparison subset, not an intervention-derived label"
+    ),
+    "CONTROLLED_CORRUPTION": "the five manifest corruption records, by stable_sample_id",
+    "ALL_VALID": "all validation stable_sample_id values from the frozen manifest",
+}
 FROZEN_STATE_POLICY = {
     "ema_alpha": 0.3,
     "window_size": 5,
@@ -206,6 +222,31 @@ def _aggregate_correlations(entries: list[dict[str, Any]]) -> dict[str, Any]:
     return {"windows": entries, "pearson": summary(pearson), "spearman": summary(spearman)}
 
 
+def _distribution(values: list[float]) -> dict[str, Any]:
+    """Return compact distribution statistics for an auditable per-sample vector."""
+    if not values:
+        return {"count": 0, "mean": None, "median": None, "p90": None, "min": None, "max": None}
+    ordered = sorted(float(value) for value in values)
+
+    def quantile(fraction: float) -> float:
+        position = (len(ordered) - 1) * fraction
+        lower = int(math.floor(position))
+        upper = int(math.ceil(position))
+        if lower == upper:
+            return ordered[lower]
+        weight = position - lower
+        return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
+
+    return {
+        "count": len(ordered),
+        "mean": sum(ordered) / len(ordered),
+        "median": quantile(0.5),
+        "p90": quantile(0.9),
+        "min": ordered[0],
+        "max": ordered[-1],
+    }
+
+
 def _deep_equal(left: Any, right: Any, *, tolerance: float = 1e-6) -> bool:
     """Compare JSON-compatible values while allowing float serialization noise."""
     if isinstance(left, float) or isinstance(right, float):
@@ -227,11 +268,15 @@ def _deep_equal(left: Any, right: Any, *, tolerance: float = 1e-6) -> bool:
 
 def _stability(labels_by_sample: Mapping[str, list[str]]) -> dict[str, Any]:
     """Measure label churn for one trajectory family."""
-    transitions = []
-    unique_counts = []
-    for labels in labels_by_sample.values():
-        transitions.append(sum(previous != current for previous, current in zip(labels, labels[1:])))
-        unique_counts.append(len(set(labels)))
+    transition_counts_by_sample = {
+        sample_id: sum(previous != current for previous, current in zip(labels, labels[1:]))
+        for sample_id, labels in sorted(labels_by_sample.items())
+    }
+    unique_counts_by_sample = {
+        sample_id: len(set(labels)) for sample_id, labels in sorted(labels_by_sample.items())
+    }
+    transitions = list(transition_counts_by_sample.values())
+    unique_counts = list(unique_counts_by_sample.values())
     sample_count = len(transitions)
     epoch_count = len(next(iter(labels_by_sample.values()))) if labels_by_sample else 0
     transition_slots = max(epoch_count - 1, 0)
@@ -248,6 +293,10 @@ def _stability(labels_by_sample: Mapping[str, list[str]]) -> dict[str, Any]:
         if sample_count
         else 0.0,
         "mean_unique_labels_per_sample": sum(unique_counts) / sample_count if sample_count else 0.0,
+        "transition_count_distribution": _distribution([float(value) for value in transitions]),
+        "unique_label_count_distribution": _distribution([float(value) for value in unique_counts]),
+        "transition_count_by_sample": transition_counts_by_sample,
+        "unique_label_count_by_sample": unique_counts_by_sample,
     }
 
 
@@ -263,6 +312,7 @@ def _build_correlation_analysis(
     for target_key, target_label in (
         ("loss_improvement", "loss improvement: loss[t] - loss[t+h]"),
         ("mask_iou_improvement", "mask IoU improvement: IoU[t+h] - IoU[t]"),
+        ("fn_reduction", "FN reduction: FN[t] - FN[t+h]"),
     ):
         horizons: dict[str, Any] = {}
         for horizon in (1, 2):
@@ -274,12 +324,14 @@ def _build_correlation_analysis(
                     signal = float(sample[signal_key][epoch])
                     if target_key == "loss_improvement":
                         target = float(sample["loss"][epoch]) - float(sample["loss"][epoch + horizon])
-                    else:
+                    elif target_key == "mask_iou_improvement":
                         current_iou = sample["matched_mask_iou"][epoch]
                         future_iou = sample["matched_mask_iou"][epoch + horizon]
                         if current_iou is None or future_iou is None:
                             continue
                         target = float(future_iou) - float(current_iou)
+                    else:
+                        target = float(sample["fn"][epoch]) - float(sample["fn"][epoch + horizon])
                     if math.isfinite(signal) and math.isfinite(target):
                         signal_values.append(signal)
                         target_values.append(target)
@@ -292,50 +344,161 @@ def _build_correlation_analysis(
     return result
 
 
-def _hard_candidate_analysis(per_sample: Mapping[str, Mapping[str, list[Any]]], policy: StatePolicy) -> dict[str, Any]:
-    """Measure natural later improvement after a HARD_LEARNABLE observation."""
+def _hard_candidate_analysis(
+    per_sample: Mapping[str, Mapping[str, list[Any]]],
+    policy: StatePolicy,
+    *,
+    excluded_sample_ids: set[str] | None = None,
+) -> dict[str, Any]:
+    """Measure natural later improvement after HARD_LEARNABLE observations.
+
+    Controlled-corruption samples are excluded from the natural-recovery
+    estimate so the result cannot be mistaken for a clean learnability rate.
+    """
+    excluded_sample_ids = excluded_sample_ids or set()
     events: list[dict[str, Any]] = []
-    final_hard = [sample_id for sample_id, sample in per_sample.items() if sample["dynamics_state"][-1] == SampleState.HARD_LEARNABLE.value]
+    first_entry_events: list[dict[str, Any]] = []
+    final_hard = [
+        sample_id
+        for sample_id, sample in per_sample.items()
+        if sample_id not in excluded_sample_ids
+        and sample["dynamics_state"][-1] == SampleState.HARD_LEARNABLE.value
+    ]
     for sample_id, sample in per_sample.items():
+        if sample_id in excluded_sample_ids:
+            continue
         states = sample["dynamics_state"]
         for epoch, state in enumerate(states[:-1]):
             if state != SampleState.HARD_LEARNABLE.value:
                 continue
-            future_losses = sample["loss"][epoch + 1 :]
-            future_ious = [value for value in sample["matched_mask_iou"][epoch + 1 :] if value is not None]
             current_loss = float(sample["loss"][epoch])
             current_iou = sample["matched_mask_iou"][epoch]
-            events.append(
-                {
-                    "sample_id": sample_id,
-                    "epoch": epoch,
-                    "next_loss_improvement": float(sample["loss"][epoch + 1]) < current_loss - policy.improvement_epsilon,
-                    "any_future_loss_improvement": any(
-                        value < current_loss - policy.improvement_epsilon for value in future_losses
-                    ),
-                    "next_mask_iou_improvement": current_iou is not None
-                    and sample["matched_mask_iou"][epoch + 1] is not None
-                    and float(sample["matched_mask_iou"][epoch + 1]) > float(current_iou) + policy.improvement_epsilon,
-                    "any_future_mask_iou_improvement": any(
-                        current_iou is not None
-                        and float(value) > float(current_iou) + policy.improvement_epsilon
-                        for value in future_ious
-                    ),
-                }
+            event: dict[str, Any] = {"sample_id": sample_id, "epoch": epoch}
+            for horizon in (1, 2, 3):
+                future_epoch = epoch + horizon
+                available = future_epoch < len(states)
+                event[f"available_horizon_{horizon}"] = available
+                if not available:
+                    for key in ("loss_improvement", "mask_iou_improvement", "fn_reduction", "left_instant_hard"):
+                        event[f"{key}_h{horizon}"] = None
+                    continue
+                event[f"loss_improvement_h{horizon}"] = (
+                    float(sample["loss"][future_epoch]) < current_loss - policy.improvement_epsilon
+                )
+                future_iou = sample["matched_mask_iou"][future_epoch]
+                event[f"mask_iou_improvement_h{horizon}"] = (
+                    current_iou is not None
+                    and future_iou is not None
+                    and float(future_iou) > float(current_iou) + policy.improvement_epsilon
+                )
+                event[f"fn_reduction_h{horizon}"] = (
+                    float(sample["fn"][epoch]) - float(sample["fn"][future_epoch]) > policy.improvement_epsilon
+                )
+                event[f"left_instant_hard_h{horizon}"] = sample["instant_bucket"][future_epoch] != "HARD"
+            event["next_loss_improvement"] = event["loss_improvement_h1"]
+            event["any_future_loss_improvement"] = any(
+                event[f"loss_improvement_h{horizon}"] is True for horizon in (1, 2, 3)
+            ) or any(
+                float(value) < current_loss - policy.improvement_epsilon for value in sample["loss"][epoch + 4 :]
             )
+            event["next_mask_iou_improvement"] = event["mask_iou_improvement_h1"]
+            event["any_future_mask_iou_improvement"] = any(
+                event[f"mask_iou_improvement_h{horizon}"] is True for horizon in (1, 2, 3)
+            ) or any(
+                current_iou is not None
+                and value is not None
+                and float(value) > float(current_iou) + policy.improvement_epsilon
+                for value in sample["matched_mask_iou"][epoch + 4 :]
+            )
+            events.append(event)
+
+        first_epoch = next(
+            (epoch for epoch, state in enumerate(states[:-1]) if state == SampleState.HARD_LEARNABLE.value),
+            None,
+        )
+        if first_epoch is not None:
+            first_entry_events.append(next(event for event in events if event["sample_id"] == sample_id and event["epoch"] == first_epoch))
+
+    def horizon_summary(event_set: list[dict[str, Any]]) -> dict[str, Any]:
+        summary: dict[str, Any] = {}
+        for horizon in (1, 2, 3):
+            available = [event for event in event_set if event[f"available_horizon_{horizon}"]]
+            summary[f"horizon_{horizon}"] = {
+                "available_events": len(available),
+                "loss_improved": sum(event[f"loss_improvement_h{horizon}"] is True for event in available),
+                "mask_iou_improved": sum(event[f"mask_iou_improvement_h{horizon}"] is True for event in available),
+                "fn_reduced": sum(event[f"fn_reduction_h{horizon}"] is True for event in available),
+                "left_instant_hard": sum(event[f"left_instant_hard_h{horizon}"] is True for event in available),
+            }
+        return summary
+
     event_count = len(events)
     return {
         "interpretation": "HARD_LEARNABLE is reported as a high-loss candidate; no learnability claim is made.",
+        "excluded_sample_ids": sorted(excluded_sample_ids),
+        "excluded_controlled_corruption_event_count": sum(
+            sum(state == SampleState.HARD_LEARNABLE.value for state in sample["dynamics_state"][:-1])
+            for sample_id, sample in per_sample.items()
+            if sample_id in excluded_sample_ids
+        ),
         "final_epoch_hard_learnable_count": len(final_hard),
         "hard_events_excluding_last_epoch": event_count,
         "unique_samples_with_hard_event": len({event["sample_id"] for event in events}),
+        "first_entry_events": first_entry_events,
+        "first_entry_sample_count": len(first_entry_events),
         "events_with_next_loss_improvement": sum(event["next_loss_improvement"] for event in events),
         "events_with_any_future_loss_improvement": sum(event["any_future_loss_improvement"] for event in events),
         "events_with_next_mask_iou_improvement": sum(event["next_mask_iou_improvement"] for event in events),
         "events_with_any_future_mask_iou_improvement": sum(
             event["any_future_mask_iou_improvement"] for event in events
         ),
+        "natural_improvement_by_horizon": horizon_summary(events),
+        "first_entry_natural_improvement_by_horizon": horizon_summary(first_entry_events),
         "events": events,
+    }
+
+
+def _freeze_reference_subsets(
+    per_sample: Mapping[str, Mapping[str, list[Any]]],
+    manifest_train_records: list[Mapping[str, Any]],
+    manifest_valid_records: list[Mapping[str, Any]],
+    corruption_ids: set[str],
+) -> dict[str, Any]:
+    """Freeze intervention comparison subsets from E2 only, before intervention runs."""
+    natural_ids = sorted(sample_id for sample_id in per_sample if sample_id not in corruption_ids)
+    reference_hard: list[str] = []
+    reference_mastered: list[str] = []
+    clean_natural_hard: list[str] = []
+    for sample_id in natural_ids:
+        sample = per_sample[sample_id]
+        hard_loss_epochs = sum(bucket == "HARD" for bucket in sample["instant_bucket"])
+        hard_state_epochs = sum(state == SampleState.HARD_LEARNABLE.value for state in sample["dynamics_state"])
+        mastered_epochs = sum(state == SampleState.MASTERED.value for state in sample["dynamics_state"])
+        if hard_loss_epochs >= 3 or hard_state_epochs >= 3:
+            reference_hard.append(sample_id)
+            clean_natural_hard.append(sample_id)
+        if mastered_epochs >= 3:
+            reference_mastered.append(sample_id)
+    return {
+        "schema_version": 2,
+        "source": "E2 observe-only reference trajectory",
+        "rules": dict(REFERENCE_SUBSET_RULES),
+        "controlled_corruption_ids": sorted(corruption_ids),
+        "subsets": {
+            "REFERENCE_HARD": reference_hard,
+            "REFERENCE_MASTERED": reference_mastered,
+            "CLEAN_NATURAL_HARD": clean_natural_hard,
+            "CONTROLLED_CORRUPTION": sorted(corruption_ids),
+            "ALL_VALID": sorted(str(record["stable_sample_id"]) for record in manifest_valid_records),
+        },
+        "counts": {
+            "REFERENCE_HARD": len(reference_hard),
+            "REFERENCE_MASTERED": len(reference_mastered),
+            "CLEAN_NATURAL_HARD": len(clean_natural_hard),
+            "CONTROLLED_CORRUPTION": len(corruption_ids),
+            "ALL_VALID": len(manifest_valid_records),
+            "ALL_TRAIN": len(manifest_train_records),
+        },
     }
 
 
@@ -357,7 +520,9 @@ def _markdown_report(analysis: Mapping[str, Any]) -> str:
     stability = analysis["stability"]
     correlations = analysis["correlations"]
     hard = analysis["hard_learnable_natural_improvement"]
+    reference_subsets = analysis["reference_subsets"]
     corruption = analysis["controlled_corruption"]
+    manual_audit = analysis.get("manual_audit")
     lines = [
         "# MVTec RF4 Longitudinal Validation",
         "",
@@ -378,6 +543,7 @@ def _markdown_report(analysis: Mapping[str, Any]) -> str:
         f"- Frozen StatePolicy verified: **{analysis['contract']['frozen_state_policy_verified']}**",
         f"- Empty-GT observations counted as frozen-core conflicts: `{analysis['empty_gt_frozen_conflict_observations']}`; analysis conflict trajectory excludes this undefined recall case.",
         "- Augmentation, multi-scale, scale jitter and EMA remained disabled; no policy parameter was tuned.",
+        f"- Frozen reference subsets: `{analysis['reference_subsets_path']}`.",
         "",
         "## What was reconstructed",
         "",
@@ -417,14 +583,16 @@ def _markdown_report(analysis: Mapping[str, Any]) -> str:
             "",
             "## State stability",
             "",
-            "| Trajectory | Total transitions | Mean transitions/sample | Unchanged sample fraction | Mean unique labels/sample |",
-            "| --- | ---: | ---: | ---: | ---: |",
+            "| Trajectory | Total transitions | Mean | Median | P90 | Unchanged sample fraction | Mean unique labels/sample |",
+            "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
         ]
     )
     for label, key in (("Instant Loss buckets", "instant"), ("Training Dynamics states", "dynamics")):
         row = stability[key]
         lines.append(
             f"| {label} | {row['total_transitions']} | {_format_number(row['mean_transitions_per_sample'])} | "
+            f"{_format_number(row['transition_count_distribution']['median'])} | "
+            f"{_format_number(row['transition_count_distribution']['p90'])} | "
             f"{_format_number(row['unchanged_sample_fraction'])} | {_format_number(row['mean_unique_labels_per_sample'])} |"
         )
     lines.extend(
@@ -475,8 +643,56 @@ def _markdown_report(analysis: Mapping[str, Any]) -> str:
             f"- Earlier `HARD_LEARNABLE` events with a later epoch available: `{hard['hard_events_excluding_last_epoch']}` across `{hard['unique_samples_with_hard_event']}` samples.",
             f"- Events with next-epoch loss improvement: `{hard['events_with_next_loss_improvement']}`; with any later loss improvement: `{hard['events_with_any_future_loss_improvement']}`.",
             f"- Events with next-epoch mask-IoU improvement: `{hard['events_with_next_mask_iou_improvement']}`; with any later mask-IoU improvement: `{hard['events_with_any_future_mask_iou_improvement']}`.",
+            f"- First HARD_LEARNABLE entries with a future epoch: `{hard['first_entry_sample_count']}`; per-entry horizon summaries include loss, mask-IoU, FN reduction and leaving the instant HARD bucket.",
+            f"- Controlled-corruption samples are excluded from the natural-recovery estimate; excluded HARD events: `{hard['excluded_controlled_corruption_event_count']}`.",
             "",
             "`HARD_LEARNABLE` remains a high-loss candidate label in this report. These counts do not establish that the sample is learnable, and the final epoch is excluded from future-improvement counts because it has no later observation.",
+            "",
+            "### HARD_LEARNABLE first-entry outcomes",
+            "",
+            "| Horizon | Available entries | Loss improved | Mask IoU improved | FN reduced | Left instant HARD |",
+            "| ---: | ---: | ---: | ---: | ---: | ---: |",
+        ]
+    )
+    for horizon in (1, 2, 3):
+        row = hard["first_entry_natural_improvement_by_horizon"][f"horizon_{horizon}"]
+        lines.append(
+            f"| {horizon} | {row['available_events']} | {row['loss_improved']} | {row['mask_iou_improved']} | "
+            f"{row['fn_reduced']} | {row['left_instant_hard']} |"
+        )
+    lines.extend(
+        [
+            "",
+            "The per-event and per-sample distributions, including all transition counts and first-entry IDs, remain in the analysis JSON; no `HARD_LEARNABLE` label is interpreted as proof of learnability.",
+            "",
+            "## Frozen reference subsets",
+            "",
+            "These sets are derived only from E2 and must be reused unchanged by any later intervention run.",
+            "",
+            "| Subset | Count | Rule |",
+            "| --- | ---: | --- |",
+        ]
+    )
+    for subset_name, count in reference_subsets["counts"].items():
+        if subset_name == "ALL_TRAIN":
+            continue
+        lines.append(
+            f"| {subset_name} | {count} | {reference_subsets['rules'].get(subset_name, 'frozen E2 subset')} |"
+        )
+    if manual_audit is not None:
+        lines.extend(
+            [
+                "",
+                "## Manual audit",
+                "",
+                f"- Audited samples: `{manual_audit.get('sample_count')}`; pending labels: `{manual_audit.get('pending_count')}`.",
+                f"- Labels: `{manual_audit.get('label_counts')}`.",
+                f"- Packet CSV: `{manual_audit.get('csv')}`; decisions: `{manual_audit.get('decisions_json')}`.",
+                "- Labels are a visual/protocol review of probe/state interpretation, not a model mAP estimate. `wrong` specifically marks the observed empty-GT frozen-core conflict semantic on visually normal samples.",
+            ]
+        )
+    lines.extend(
+        [
             "",
             "## Controlled-corruption smoke",
             "",
@@ -497,7 +713,7 @@ def _markdown_report(analysis: Mapping[str, Any]) -> str:
             "",
             "## RF4 Gate conclusion",
             "",
-            f"**{analysis['gate_status']}**: the {analysis['epoch_count']}-epoch E2 evidence is complete, replayable, and covers the requested longitudinal signals without changing the frozen core strategy. This is a mechanism-observation Gate only; it does not validate E3/E4/E5 benefit, RF8 precision, or a stage-aware policy.",
+            f"**{analysis['gate_status']}**: the {analysis['epoch_count']}-epoch E2 evidence is complete and replayable, but the frozen core still records empty-GT `gt_recall=0` as probe conflict (`{analysis['empty_gt_frozen_conflict_observations']}` observations). This semantic correctness issue blocks the RF4 Gate; no E3/E4/E5 benefit, RF8 precision, or stage-aware policy claim is made.",
             "",
             f"Analysis JSON: `{analysis['analysis_json_path']}`",
             "",
@@ -771,6 +987,13 @@ def analyze(args: argparse.Namespace) -> dict[str, Any]:
     ]
 
     corruption_meta = {str(record["stable_sample_id"]): dict(record) for record in corruptions}
+    corruption_ids = set(corruption_meta)
+    reference_subsets = _freeze_reference_subsets(
+        per_sample,
+        manifest_train_records,
+        manifest_valid_records,
+        corruption_ids,
+    )
     corruption_samples: list[dict[str, Any]] = []
     corruption_trajectory: dict[str, Any] = {}
     for sample_id, metadata in sorted(corruption_meta.items()):
@@ -839,9 +1062,15 @@ def analyze(args: argparse.Namespace) -> dict[str, Any]:
             epoch_count=epoch_count,
         ),
     }
-    gate_status = "PASS_WITH_CAVEATS" if not mismatches else "FAIL_REPLAY_MISMATCH"
+    hard_analysis = _hard_candidate_analysis(per_sample, policy, excluded_sample_ids=corruption_ids)
+    if mismatches:
+        gate_status = "FAIL_REPLAY_MISMATCH"
+    elif empty_gt_frozen_conflict_observations:
+        gate_status = "FAIL_SEMANTIC_REVIEW_REQUIRED"
+    else:
+        gate_status = "PASS_WITH_CAVEATS"
     analysis: dict[str, Any] = {
-        "schema_version": 1,
+        "schema_version": 2,
         "gate_status": gate_status,
         "run_dir": str(run_dir),
         "epoch_count": epoch_count,
@@ -875,7 +1104,8 @@ def analyze(args: argparse.Namespace) -> dict[str, Any]:
             "dynamics": _stability({sample_id: sample["dynamics_state"] for sample_id, sample in per_sample.items()}),
         },
         "correlations": correlations,
-        "hard_learnable_natural_improvement": _hard_candidate_analysis(per_sample, policy),
+        "hard_learnable_natural_improvement": hard_analysis,
+        "reference_subsets": reference_subsets,
         "controlled_corruption": {
             "sample_count": len(corruption_samples),
             "samples": corruption_samples,
@@ -885,7 +1115,19 @@ def analyze(args: argparse.Namespace) -> dict[str, Any]:
     }
     output_json = args.output_json.resolve()
     analysis["analysis_json_path"] = str(output_json)
+    output_reference_subsets = (
+        args.output_reference_subsets.resolve()
+        if args.output_reference_subsets is not None
+        else output_json.parent / "mvtec_reference_subsets.json"
+    )
+    analysis["reference_subsets_path"] = str(output_reference_subsets)
+    if args.manual_audit_summary is not None:
+        manual_audit = _read_json(args.manual_audit_summary.resolve())
+        if int(manual_audit.get("sample_count", 0)) < 50 or int(manual_audit.get("pending_count", 1)) != 0:
+            raise ValueError("manual audit summary must contain at least 50 completed, non-pending samples")
+        analysis["manual_audit"] = manual_audit
     _write_json(output_json, analysis)
+    _write_json(output_reference_subsets, reference_subsets)
     output_report = args.output_report.resolve()
     output_report.parent.mkdir(parents=True, exist_ok=True)
     output_report.write_text(_markdown_report(analysis), encoding="utf-8")
@@ -899,6 +1141,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--output-json", type=Path, required=True)
     parser.add_argument("--output-report", type=Path, required=True)
+    parser.add_argument("--output-reference-subsets", type=Path, default=None)
+    parser.add_argument("--manual-audit-summary", type=Path, default=None)
     return parser.parse_args()
 
 
