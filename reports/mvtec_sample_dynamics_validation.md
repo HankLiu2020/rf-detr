@@ -1,11 +1,13 @@
-# MVTec-AD Sample Dynamics Validation
+# MVTec-AD Sample Dynamics Validation (Initial Runtime Gate)
 
+> Historical scope: **initial 3-epoch runtime/observer gate**
+> Current status: **superseded for longitudinal conclusions by RF4/E5 reports**
 > Overall Gate: **E0/E2 COMPLETED — OBSERVER PASS WITH CUDA NON-DETERMINISM CAVEAT**
 > Scope: **NON-BENCHMARK / MECHANISM VALIDATION**
 > Source: `/home/inspur1/data/MVTec-AD`
 > Pilot dataset: `/home/liujiyuan/mvtec-sample-dynamics-pilot-v2`
 
-本轮已经从数据与设计阶段进入真实 Seg Small 执行阶段。Runtime Contract、E0 baseline 和 E2 observe-only 均在现有 `rf-detr-claude` Docker 镜像中完成；没有使用 Conda，也没有修改原始 MVTec 数据。
+本报告记录最初的 3-epoch Runtime Contract、E0 baseline 和 E2 observe-only 门；它们均在现有 `rf-detr-claude` Docker 镜像中完成。后续 15-epoch RF4/E0/E5 结果以 [RF4 Longitudinal Validation](mvtec_rf4_longitudinal_validation.md) 和 [E5 Combined Validation](mvtec_e5_combined_validation.md) 为准。整个流程没有使用 Conda，也没有修改原始 MVTec 数据。
 
 ## Gate 状态
 
@@ -19,7 +21,8 @@
 | RF-DETR Runtime Contract | PASS | 1 normal + 1 pristine abnormal + 1 controlled corruption；forward → criterion → backward 完成 |
 | E0 baseline | PASS | 3 epochs、128 samples/epoch、final Lightning step 95 |
 | E2 observe-only | PASS WITH CAVEAT | observer 生命周期接通；不改 sampler/order/optimizer step；跨独立 CUDA 进程的 loss/metric 非 bitwise identical |
-| E3/E4/E5 | NOT RUN | 按执行门禁暂不启动 |
+| E3/E4 | NOT RUN | 仍按执行门禁等待 E0/E3/E4/E5 同合同矩阵 |
+| E5 combined | COMPLETED SEPARATELY | 15 epochs；单 seed 机制执行 PASS WITH CAVEATS，算法收益未验证；见当前报告 |
 
 ## 固定 Pilot v2
 
@@ -116,7 +119,7 @@ E2 的最终观察状态为 `HARD_LEARNABLE=30`、`LEARNING=72`、`MASTERED=24`�
 2. Observer 基础设施在真实训练入口中接通：E2 多出了 sample-level loss、Probe、trajectory/state 和导出文件，但没有改变 sample order、optimizer step 数或 sampler/loss/augmentation policy。
 3. E0/E2 使用独立 CUDA 训练进程，因此训练曲线不是 bitwise identical；Runtime Contract 的同进程 baseline control 证明 GPU backward 本身有可观测非确定性。E2 仅能记为 **PASS WITH CAVEAT**，不能据此宣称算法收益或严格无扰动。
 4. E2 比 E0 约多 9.5% wall time，peak VRAM 基本相同；该数字只适用于本次小 Pilot，不是长期 overhead 结论。
-5. E3 loss weighting、E4 dynamic sampler、E5 combined 以及真正的 mAP/F1/Recall/SUSPECT precision 算法验证尚未运行。
+5. 本历史报告完成时 E3/E4 尚未运行；后续已完成 15-epoch E5 combined 的单 seed 机制执行，但尚未证明算法收益，也没有完成 E3/E4 对照及多 seed 复制。因此 migration contract 仍不应冻结，SUSPECT/corruption precision 也不能作为 RF8 结论。
 
 ## 可复核命令与环境说明
 

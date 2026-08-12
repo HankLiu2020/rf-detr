@@ -154,13 +154,20 @@ class SampleStateStore:
         """Return whether a probe result has a stable detection or mask conflict."""
         if probe is None:
             return False
+        gt_count = int(probe.get("gt_count", 0))
+        matched_count = int(probe.get("matched_count", 0))
         matched_mask_iou = probe.get("matched_mask_iou")
         return bool(
             int(probe.get("fn", 0)) > 0
             or int(probe.get("class_error", 0)) > 0
-            or float(probe.get("gt_recall", 1.0)) < 1.0
+            # Recall is undefined for an empty-GT image.  The probe keeps the
+            # historical serialized value (0.0) for compatibility, but that
+            # placeholder must not become a conflict signal.
+            or (gt_count > 0 and float(probe.get("gt_recall", 1.0)) < 1.0)
             or (
-                matched_mask_iou is not None
+                gt_count > 0
+                and matched_count > 0
+                and matched_mask_iou is not None
                 and float(matched_mask_iou) < self.policy.probe_mask_iou_threshold
             )
         )

@@ -15,6 +15,7 @@ import math
 import random
 import time
 import warnings
+from pathlib import Path
 from typing import Any, Callable, cast
 
 import torch
@@ -40,6 +41,7 @@ from rfdetr.sample_dynamics import (
     SampleObservationBuffer,
     SampleStateStore,
     SampleWeightPolicy,
+    cap_effective_contribution,
     is_global_zero,
     run_deterministic_probe,
     synchronize_epoch_state,
@@ -428,6 +430,11 @@ class RFDETRModelModule(LightningModule):
             if train_config.sample_dynamics_enabled and train_config.sample_dynamics_mode in {"loss_weight", "combined"}
             else None
         )
+        self._sample_dynamics_applied_weight_sum: dict[str, float] = {}
+        self._sample_dynamics_effective_contribution_sum: dict[str, float] = {}
+        self._sample_dynamics_weight_count: dict[str, int] = {}
+        self._sample_dynamics_cap_hit_count: dict[str, int] = {}
+        self._sample_dynamics_resource_history: list[dict[str, Any]] = []
         # torch.compile is opt-in: set model_config.compile=True to enable.
         # Only enabled on CUDA; MPS and CPU do not benefit from compilation.
         # Use the fork-safe DEVICE constant instead of torch.cuda.is_available(),
@@ -553,6 +560,10 @@ class RFDETRModelModule(LightningModule):
         self._sample_order_digest = hashlib.sha256()
         self._sample_order_count = 0
         self._epoch_started_at = time.perf_counter()
+        self._sample_dynamics_applied_weight_sum.clear()
+        self._sample_dynamics_effective_contribution_sum.clear()
+        self._sample_dynamics_weight_count.clear()
+        self._sample_dynamics_cap_hit_count.clear()
         if self.device.type == "cuda":
             torch.cuda.reset_peak_memory_stats(self.device)
         try:
@@ -615,6 +626,11 @@ class RFDETRModelModule(LightningModule):
                         device=samples.tensors.device,
                         exposure_multipliers=exposure_multipliers,
                         effective_cap=self.train_config.sample_dynamics_effective_cap,
+                    )
+                    self._record_sample_dynamics_batch_resources(
+                        [str(target["sample_id"]) for target in targets],
+                        sample_weights,
+                        exposure_multipliers,
                     )
                 criterion_result = self.criterion(
                     outputs,
@@ -715,6 +731,96 @@ class RFDETRModelModule(LightningModule):
         if not callable(exposure_multipliers):
             return None
         return cast(dict[str, float], exposure_multipliers())
+
+    def _record_sample_dynamics_batch_resources(
+        self,
+        sample_ids: list[str],
+        sample_weights: Tensor,
+        exposure_multipliers: dict[str, float] | None,
+    ) -> None:
+        """Accumulate actual combined-resource multipliers for the current epoch.
+
+        This is experiment-side provenance: it records the post-normalization
+        loss weights actually returned to the criterion, paired with the
+        sampler exposure observed for the same epoch. It does not affect the
+        optimization path.
+        """
+        if getattr(self.train_config, "sample_dynamics_mode", "observe") != "combined" or exposure_multipliers is None:
+            return
+        cap = float(self.train_config.sample_dynamics_effective_cap)
+        for sample_id, weight in zip(sample_ids, sample_weights.detach().cpu().tolist()):
+            exposure = max(0.0, float(exposure_multipliers.get(sample_id, 1.0)))
+            applied_weight = float(weight)
+            contribution = cap_effective_contribution(applied_weight, exposure, cap=cap)
+            self._sample_dynamics_applied_weight_sum[sample_id] = (
+                self._sample_dynamics_applied_weight_sum.get(sample_id, 0.0) + applied_weight
+            )
+            self._sample_dynamics_effective_contribution_sum[sample_id] = (
+                self._sample_dynamics_effective_contribution_sum.get(sample_id, 0.0) + contribution
+            )
+            self._sample_dynamics_weight_count[sample_id] = self._sample_dynamics_weight_count.get(sample_id, 0) + 1
+            if applied_weight * exposure >= cap - 1e-6:
+                self._sample_dynamics_cap_hit_count[sample_id] = (
+                    self._sample_dynamics_cap_hit_count.get(sample_id, 0) + 1
+                )
+
+    def _export_sample_dynamics_resources(self, epoch: int) -> None:
+        """Persist per-sample E5 resource evidence at an epoch boundary."""
+        if (
+            getattr(self.train_config, "sample_dynamics_mode", "observe") != "combined"
+            or getattr(self.train_config, "sample_dynamics_output_dir", None) is None
+            or not is_global_zero()
+        ):
+            return
+        datamodule = getattr(self.trainer, "datamodule", None)
+        sampler = getattr(datamodule, "_train_sampler", None)
+        exposure_report = getattr(sampler, "exposure_report", None)
+        exposure_multipliers = getattr(sampler, "exposure_multipliers", None)
+        sample_ids = tuple(getattr(sampler, "sample_ids", ()))
+        if not callable(exposure_report) or not callable(exposure_multipliers) or not sample_ids:
+            return
+        counts = cast(dict[str, int], exposure_report())
+        multipliers = cast(dict[str, float], exposure_multipliers())
+        policy_weights = self.sample_weight_policy.weights if self.sample_weight_policy is not None else {}
+        records: list[dict[str, Any]] = []
+        for sample_id in sorted(sample_ids):
+            count = self._sample_dynamics_weight_count.get(sample_id, 0)
+            applied_mean = (
+                self._sample_dynamics_applied_weight_sum.get(sample_id, 0.0) / count if count else None
+            )
+            contribution_mean = (
+                self._sample_dynamics_effective_contribution_sum.get(sample_id, 0.0) / count if count else None
+            )
+            exposure = float(multipliers.get(sample_id, 0.0))
+            records.append(
+                {
+                    "sample_id": sample_id,
+                    "state_policy_weight": float(policy_weights.get(sample_id, 1.0)),
+                    "applied_loss_weight_mean": applied_mean,
+                    "batch_appearance_count": count,
+                    "exposure_count": int(counts.get(sample_id, 0)),
+                    "exposure_multiplier": exposure,
+                    "effective_contribution_mean": contribution_mean,
+                    "uncapped_effective_contribution": None
+                    if applied_mean is None
+                    else applied_mean * exposure,
+                    "cap_hit_count": int(self._sample_dynamics_cap_hit_count.get(sample_id, 0)),
+                }
+            )
+        self._sample_dynamics_resource_history.append(
+            {
+                "epoch": int(epoch),
+                "policy_version": self.sample_weight_policy.version if self.sample_weight_policy else None,
+                "effective_cap": float(self.train_config.sample_dynamics_effective_cap),
+                "records": records,
+            }
+        )
+        output_dir = Path(self.train_config.sample_dynamics_output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / "resource_history.json").write_text(
+            json.dumps(self._sample_dynamics_resource_history, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
 
     def _compute_train_losses(
         self,
@@ -877,6 +983,17 @@ class RFDETRModelModule(LightningModule):
         The automatic-optimization path leaves scheduler stepping entirely to Lightning; only the manual keypoint loop
         steps schedulers itself.
         """
+        # Keep the hook usable in focused lifecycle tests that construct the
+        # LightningModule with ``__new__`` and install only the fields under
+        # test. Normal construction initializes these in ``__init__``.
+        if not hasattr(self, "_sample_order_history"):
+            self._sample_order_history = []
+        if not hasattr(self, "_sample_order_count"):
+            self._sample_order_count = 0
+        if not hasattr(self, "_sample_order_digest"):
+            self._sample_order_digest = hashlib.sha256()
+        if not hasattr(self, "_epoch_started_at"):
+            self._epoch_started_at = None
         self._sample_order_history.append(
             {
                 "epoch": int(self.current_epoch),
@@ -892,6 +1009,7 @@ class RFDETRModelModule(LightningModule):
         )
         if self.sample_state_store is not None and self.sample_observation_buffer is not None:
             local_records = self.sample_observation_buffer.drain()
+            self._export_sample_dynamics_resources(int(self.current_epoch))
             self.sample_weight_policy = synchronize_epoch_state(
                 self.sample_state_store,
                 self.sample_weight_policy,

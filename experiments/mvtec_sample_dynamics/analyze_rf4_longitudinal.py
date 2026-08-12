@@ -117,14 +117,18 @@ def _instant_bucket(percentile: float, policy: StatePolicy) -> str:
 
 
 def _frozen_probe_conflict(probe: Mapping[str, Any], policy: StatePolicy) -> bool:
-    """Mirror the frozen probe-conflict predicate used by ``SampleStateStore``."""
+    """Mirror the corrected probe-conflict predicate used by ``SampleStateStore``."""
+    gt_count = int(probe.get("gt_count", 0))
+    matched_count = int(probe.get("matched_count", 0))
     matched_mask_iou = probe.get("matched_mask_iou")
     return bool(
         int(probe.get("fn", 0)) > 0
         or int(probe.get("class_error", 0)) > 0
-        or float(probe.get("gt_recall", 1.0)) < 1.0
+        or (gt_count > 0 and float(probe.get("gt_recall", 1.0)) < 1.0)
         or (
-            matched_mask_iou is not None
+            gt_count > 0
+            and matched_count > 0
+            and matched_mask_iou is not None
             and float(matched_mask_iou) < policy.probe_mask_iou_threshold
         )
     )
@@ -143,11 +147,11 @@ def _analysis_matched_mask_iou(probe: Mapping[str, Any]) -> float | None:
 
 
 def _analysis_probe_conflict(probe: Mapping[str, Any], policy: StatePolicy) -> bool:
-    """Classify probe conflict for analysis without treating empty-GT recall as a miss.
+    """Classify probe conflict with the corrected empty-GT semantics.
 
-    The training state is still replayed with the exact frozen core predicate.
-    This separate diagnostic avoids counting a normal image with ``gt_count=0``
-    and ``gt_recall=0`` as a false positive conflict in the longitudinal report.
+    Empty-GT recall and mask-IoU placeholders are undefined rather than
+    conflicts. Real false positives still contribute difficulty; nonempty-GT
+    FN/class/mask behavior remains unchanged.
     """
     gt_count = int(probe.get("gt_count", 0))
     matched_mask_iou = _analysis_matched_mask_iou(probe)
@@ -528,7 +532,7 @@ def _markdown_report(analysis: Mapping[str, Any]) -> str:
         "",
         f"> Gate: **{analysis['gate_status']}**",
         "> Scope: **NON-BENCHMARK / RF4 MECHANISM VALIDATION**",
-        "> Sample Dynamics core and frozen StatePolicy were not changed for this run.",
+        "> The frozen StatePolicy and thresholds were unchanged; only the minimal empty-GT probe-conflict correctness fix was applied before this rerun.",
         "",
         "## Run contract",
         "",
@@ -541,7 +545,7 @@ def _markdown_report(analysis: Mapping[str, Any]) -> str:
         f"- State evidence SHA-256: `{analysis['state_sha256']}`",
         f"- Replay final state match: **{analysis['replay_final_state_match']}**",
         f"- Frozen StatePolicy verified: **{analysis['contract']['frozen_state_policy_verified']}**",
-        f"- Empty-GT observations counted as frozen-core conflicts: `{analysis['empty_gt_frozen_conflict_observations']}`; analysis conflict trajectory excludes this undefined recall case.",
+        f"- Empty-GT observations counted as probe conflicts after the correctness fix: `{analysis['empty_gt_frozen_conflict_observations']}`; undefined empty-GT recall/mask placeholders are ignored, while real FP remains an error signal.",
         "- Augmentation, multi-scale, scale jitter and EMA remained disabled; no policy parameter was tuned.",
         f"- Frozen reference subsets: `{analysis['reference_subsets_path']}`.",
         "",
@@ -600,7 +604,7 @@ def _markdown_report(analysis: Mapping[str, Any]) -> str:
             "",
             "The instant baseline is a three-bucket current-loss view (`EASY/MIDDLE/HARD`), while Dynamics is the frozen four-state view. Their churn is therefore compared as stability evidence, not as an accuracy ranking.",
             "",
-            "The frozen core currently reports `gt_recall=0` for empty-GT normal images; the analysis-side conflict trajectory therefore excludes empty-GT recall from conflict, while the replayed Dynamics state still uses the exact frozen predicate. This semantic discrepancy is reported rather than hidden.",
+            "The corrected core and replay now share the same empty-GT rule: serialized `gt_recall=0` and no-match mask placeholders are undefined when `gt_count=0` and do not create probe conflict. A real FP on an empty-GT image still contributes difficulty; nonempty-GT FN/class/mask rules are unchanged.",
             "",
             "## Longitudinal diagnostic means",
             "",
@@ -713,7 +717,7 @@ def _markdown_report(analysis: Mapping[str, Any]) -> str:
             "",
             "## RF4 Gate conclusion",
             "",
-            f"**{analysis['gate_status']}**: the {analysis['epoch_count']}-epoch E2 evidence is complete and replayable, but the frozen core still records empty-GT `gt_recall=0` as probe conflict (`{analysis['empty_gt_frozen_conflict_observations']}` observations). This semantic correctness issue blocks the RF4 Gate; no E3/E4/E5 benefit, RF8 precision, or stage-aware policy claim is made.",
+            f"**{analysis['gate_status']}**: the {analysis['epoch_count']}-epoch E2 evidence is complete and replayable under the corrected empty-GT semantics. The RF4 evidence is suitable for the next E5 intervention gate, with the controlled-corruption five-sample result retained as smoke only; no RF8 precision/recall claim is made.",
             "",
             f"Analysis JSON: `{analysis['analysis_json_path']}`",
             "",

@@ -111,3 +111,28 @@ def test_segmentation_mask_error_contributes_to_probe_difficulty() -> None:
 
     assert bad_store.get("sample").difficulty > good_store.get("sample").difficulty  # type: ignore[union-attr]
     assert bad_store.get("sample").probe_conflict_count == 1  # type: ignore[union-attr]
+
+
+def test_empty_gt_probe_does_not_turn_undefined_metrics_into_conflict() -> None:
+    """Empty-GT recall/mask placeholders stay out of the persistent conflict signal."""
+    store = SampleStateStore()
+    empty_gt = {
+        "sample_id": "background",
+        "gt_count": 0,
+        "matched_count": 0,
+        "gt_recall": 0.0,
+        "fn": 0,
+        "fp": 0,
+        "class_error": 0,
+        "matched_mask_iou": 0.0,
+    }
+    false_positive = {**empty_gt, "fp": 1}
+
+    assert not store._probe_conflict(empty_gt)
+    assert not store._probe_conflict(false_positive)
+
+    store.update([_record("background", 0.1)], probe_records=[false_positive], epoch=0)
+    state = store.get("background")
+    assert state is not None
+    assert state.probe_conflict_count == 0
+    assert state.difficulty > 0.0

@@ -4,7 +4,7 @@
 # Copyright (c) 2025 Roboflow. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 [see LICENSE for details]
 # ------------------------------------------------------------------------
-"""Run a tiny E0 baseline or E2 observe-only MVTec mechanism Pilot."""
+"""Run fixed-contract E0, E2, or E5 MVTec mechanism Pilot experiments."""
 
 from __future__ import annotations
 
@@ -119,7 +119,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         raise FileExistsError(f"refusing to overwrite Pilot run output: {output}")
 
     _seed_everything(args.seed)
-    sample_dynamics_enabled = args.mode == "observe"
+    experiment_labels = {
+        "baseline": "E0 baseline",
+        "observe": "E2 observe-only",
+        "combined": "E5 combined",
+    }
+    experiment_label = experiment_labels[args.mode]
+    sample_dynamics_enabled = args.mode != "baseline"
+    sample_dynamics_mode = "combined" if args.mode == "combined" else "observe"
     model = RFDETRSegSmall(
         pretrain_weights=str(weights),
         num_classes=1,
@@ -151,15 +158,22 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "eval_interval": 1,
         "early_stopping": False,
         "sample_dynamics_enabled": sample_dynamics_enabled,
-        "sample_dynamics_mode": "observe",
+        "sample_dynamics_mode": sample_dynamics_mode,
         "sample_dynamics_output_dir": str(output / "sample_dynamics") if sample_dynamics_enabled else None,
         "sample_dynamics_probe_interval": 1 if sample_dynamics_enabled else 0,
         "sample_dynamics_probe_iou_threshold": 0.5,
         "sample_dynamics_probe_score_threshold": 0.05,
+        "sample_dynamics_weight_min": 0.7,
+        "sample_dynamics_weight_max": 1.3,
+        "sample_dynamics_effective_cap": 2.5,
+        "sample_dynamics_base_coverage": 0.60,
+        "sample_dynamics_hard_learnable_quota": 0.25,
+        "sample_dynamics_mastered_replay": 0.10,
+        "sample_dynamics_exploration": 0.05,
         "sample_dynamics_seed": args.seed,
         "notes": {
             "scope": "NON-BENCHMARK / MECHANISM VALIDATION",
-            "experiment": "E2 observe-only" if sample_dynamics_enabled else "E0 baseline",
+            "experiment": experiment_label,
             "dataset_manifest": str(dataset / "split_manifest.json"),
         },
     }
@@ -169,7 +183,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     output.mkdir(parents=True, exist_ok=True)
     fairness_snapshot = {
         "scope": "NON-BENCHMARK / MECHANISM VALIDATION",
-        "experiment": "E2 observe-only" if sample_dynamics_enabled else "E0 baseline",
+        "experiment": experiment_label,
         "seed": args.seed,
         "dataset_manifest_sha256": _sha256_file(dataset / "split_manifest.json"),
         "pretrain_weights_sha256": _sha256_file(weights),
@@ -228,7 +242,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 def parse_args() -> argparse.Namespace:
     """Parse the Pilot training CLI."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=("baseline", "observe"), required=True)
+    parser.add_argument("--mode", choices=("baseline", "observe", "combined"), required=True)
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--weights", type=Path, default=Path("/home/liujiyuan/rf-detr-models/rf-detr-seg-small.pt"))
     parser.add_argument("--output", type=Path, required=True)

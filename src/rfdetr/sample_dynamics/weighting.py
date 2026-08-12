@@ -103,6 +103,7 @@ class SampleWeightPolicy:
             return values
         values = values / (global_sum / global_count).clamp_min(1e-8)
         upper = torch.full_like(values, self.maximum)
+        lower = torch.full_like(values, self.minimum)
         if exposure_multipliers is not None and effective_cap is not None:
             if effective_cap <= 0.0:
                 raise ValueError("effective_cap must be > 0")
@@ -112,15 +113,23 @@ class SampleWeightPolicy:
                 device=device,
             )
             upper = torch.minimum(upper, float(effective_cap) / exposures.clamp_min(1e-8))
-            incompatible = values.new_tensor(float(bool(torch.any(upper < self.minimum))))
-            if _distributed_is_initialized():
-                distributed.all_reduce(incompatible, op=distributed.ReduceOp.MAX)
-            if bool(incompatible.item()):
-                raise ValueError("effective contribution cap is incompatible with the configured minimum weight")
+            # A replay bucket can expose one sample more often than the hard
+            # contribution cap permits at the configured minimum weight. The
+            # cap is the safety invariant, so that sample's effective lower
+            # bound is lowered to its cap-feasible upper bound for this batch.
+            # Feasible samples retain the configured minimum exactly.
+            lower = torch.minimum(lower, upper)
         global_upper_sum = _global_sum(upper.sum())
-        if float(global_upper_sum.item()) < float(global_count.item()) - 1e-6 or self.minimum > 1.0:
+        if self.minimum > 1.0:
             raise ValueError("sample weight bounds cannot preserve a global mean of one")
-        values = torch.maximum(torch.minimum(values, upper), torch.as_tensor(self.minimum, device=device))
+        cap_infeasible = float(global_upper_sum.item()) < float(global_count.item()) - 1e-6
+        # If realized replay exposure makes the cap-feasible upper bounds sum
+        # to less than the batch size, mean-one normalization is mathematically
+        # impossible. Preserve the safety cap and return the clipped weights;
+        # the resulting sub-unit mean is an observable resource side effect.
+        values = torch.maximum(torch.minimum(values, upper), lower)
+        if cap_infeasible:
+            return values
         # Clipping can move the mean away from one. Redistribute the residual
         # over globally non-saturated entries so rank composition cannot erase
         # the intended MASTERED/HARD_LEARNABLE ratio.
@@ -129,7 +138,7 @@ class SampleWeightPolicy:
             residual = global_count - current_sum
             if abs(float(residual.item())) < 1e-6:
                 break
-            if residual > 0:
+            if residual > 0 and not cap_infeasible:
                 eligible = values < upper - 1e-6
                 eligible_count = _global_sum(eligible.sum(dtype=values.dtype))
                 if float(eligible_count.item()) == 0.0:
@@ -137,14 +146,14 @@ class SampleWeightPolicy:
                 delta = residual / eligible_count
                 values = torch.where(eligible, torch.minimum(values + delta, upper), values)
             else:
-                eligible = values > self.minimum + 1e-6
+                eligible = values > lower + 1e-6
                 eligible_count = _global_sum(eligible.sum(dtype=values.dtype))
                 if float(eligible_count.item()) == 0.0:
                     break
                 delta = (-residual) / eligible_count
                 values = torch.where(
                     eligible,
-                    torch.maximum(values - delta, torch.as_tensor(self.minimum, device=device)),
+                    torch.maximum(values - delta, lower),
                     values,
                 )
         return values

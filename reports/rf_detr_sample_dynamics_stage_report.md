@@ -1,9 +1,9 @@
 # RF-DETR Sample Dynamics 阶段性实验汇报
 
 > 报告范围：RF-DETR Seg Small / MVTec Pilot v2 / Sample Dynamics 机制验证<br>
-> 证据基线：`agent/dynamic-scheduling-rfdetr` commit `e31906a0af880bb0067d5b2a7e272a0511c39ab5`<br>
-> 当前 Gate：**RF4 FAIL / BLOCKED — EMPTY_GT_PROBE_SEMANTICS**<br>
-> 结论等级：**工程正确性与观察机制已有证据；算法干预收益尚未验证**
+> 证据基线：`agent/dynamic-scheduling-rfdetr`（本轮提交后以新 commit 为准）<br>
+> 当前 Gate：**RF4 PASS WITH CAVEATS；E5 Combined 执行 PASS WITH CAVEATS**<br>
+> 结论等级：**观察与调度机制已有真实运行证据；单 seed 算法收益未证实**
 
 ## 技术摘要
 
@@ -12,7 +12,7 @@
 1. **困难样本识别**：在 loss reduction 前获得逐图 loss，按样本和 epoch 聚合历史、EMA、slope、percentile 与 Probe 指标，将样本分为 `MASTERED / LEARNING / HARD_LEARNABLE / SUSPECT`。
 2. **困难样本资源调度**：在下一轮训练中，依据上一轮状态调整单次出现时的 loss multiplier，以及样本在 epoch 中的 sampling exposure；E5 Combined 同时启用两者。
 
-这两条主线在代码上已经闭环。第一条主线已在真实 MVTec Seg Small E2 observe-only 上运行 15 epoch；第二条主线完成了单元、归一化、Sampler 和双 rank DDP Smoke 验证，但 E3/E4/E5 尚未运行真实干预实验。因此当前可以确认“能够观察和调度”，不能宣称“动态调度已经改善困难样本”。
+这两条主线在代码上已经闭环。第一条主线已在真实 MVTec Seg Small E2 observe-only 上运行 15 epoch；第二条主线已在同一冻结契约下完成 E5 Combined 15 epoch 真实运行，并记录了逐样本 loss/probe、采样曝光、loss 权重、effective contribution 与 cap 命中。因此当前可以确认“能够观察、分类并实际调度资源”；但单 seed 的 E5 最终 mask mAP 低于 E0，不能宣称动态调度已经带来算法收益。
 
 ## 两条主线构成一个跨 Epoch 控制回路
 
@@ -54,32 +54,33 @@ flowchart LR
 
 ![RF4 E2 四类样本状态随 Epoch 变化](assets/rf4_sample_state_trajectory.svg)
 
-图中 cohort 固定为 128 张训练图片，每个 epoch 四态数量之和均为 128。`HARD_LEARNABLE` 总体维持在 27–32 张；`MASTERED` 与 `LEARNING` 在 epoch 8 和 11 附近发生明显重排。这证明状态分类器能够连续产出结果，也表明当前 Dynamics 状态还不能被描述为稳定。
+图中 cohort 固定为 128 张训练图片，每个 epoch 四态数量之和均为 128。`HARD_LEARNABLE` 总体维持在 27–32 张；`MASTERED` 与 `LEARNING` 在 epoch 7 和 11 附近发生明显重排。这证明状态分类器能够连续产出结果，也表明当前 Dynamics 状态还不能被描述为稳定。
 
 | Epoch | LEARNING | MASTERED | HARD_LEARNABLE | SUSPECT | 状态切换数 |
 | ---: | ---: | ---: | ---: | ---: | ---: |
 | 0 | 96 | 0 | 32 | 0 | 0 |
-| 1 | 96 | 0 | 32 | 0 | 12 |
-| 2 | 86 | 10 | 29 | 3 | 17 |
-| 3 | 74 | 22 | 30 | 2 | 23 |
-| 4 | 69 | 27 | 31 | 1 | 20 |
-| 5 | 66 | 30 | 32 | 0 | 20 |
-| 6 | 65 | 31 | 31 | 1 | 14 |
-| 7 | 64 | 32 | 32 | 0 | 16 |
-| 8 | 96 | 0 | 30 | 2 | 36 |
-| 9 | 96 | 0 | 27 | 5 | 5 |
-| 10 | 96 | 0 | 27 | 5 | 2 |
-| 11 | 68 | 28 | 28 | 4 | 33 |
-| 12 | 77 | 19 | 29 | 3 | 16 |
-| 13 | 83 | 13 | 29 | 3 | 14 |
-| 14 | 88 | 8 | 31 | 1 | 15 |
+| 1 | 96 | 0 | 32 | 0 | 10 |
+| 2 | 68 | 28 | 32 | 0 | 32 |
+| 3 | 65 | 31 | 31 | 1 | 20 |
+| 4 | 64 | 32 | 30 | 2 | 18 |
+| 5 | 69 | 27 | 30 | 2 | 21 |
+| 6 | 71 | 25 | 30 | 2 | 18 |
+| 7 | 96 | 0 | 28 | 4 | 33 |
+| 8 | 96 | 0 | 29 | 3 | 11 |
+| 9 | 96 | 0 | 32 | 0 | 7 |
+| 10 | 96 | 0 | 30 | 2 | 4 |
+| 11 | 65 | 31 | 28 | 4 | 37 |
+| 12 | 77 | 19 | 31 | 1 | 24 |
+| 13 | 80 | 16 | 31 | 1 | 13 |
+| 14 | 87 | 9 | 31 | 1 | 15 |
 
 ### Instant Loss 与 Dynamics 的稳定性
 
 | 识别方法 | 总状态切换 | 每样本平均切换 | 中位数 | P90 | 完全不变样本比例 |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Instant Loss buckets | 236 | 1.8438 | 1.5 | 4.0 | 35.16% |
-| Training Dynamics states | 243 | 1.8984 | 2.0 | 4.0 | 29.69% |
+| Instant Loss buckets | 208 | 1.6250 | 1.0 | 4.0 | 35.16% |
+| Training Dynamics states | 263 | 2.0547 | 2.0 | 4.0 | 31.25% |
+
 
 Instant baseline 是三桶 `EASY / MIDDLE / HARD`，Dynamics 是四态分类，所以这里只能把 churn 作为稳定性证据，不能解释为分类准确率。当前结果没有显示 Dynamics 比 Instant Loss 更稳定。
 
@@ -89,25 +90,26 @@ Instant baseline 是三桶 `EASY / MIDDLE / HARD`，Dynamics 是四态分类，�
 
 | Signal | 预测目标 | Horizon | 有效窗口 | Mean Pearson | Mean Spearman |
 | --- | --- | ---: | ---: | ---: | ---: |
-| Instant-Loss percentile | Loss improvement | t+1 | 14 | 0.3542 | 0.4552 |
-| Instant-Loss percentile | Loss improvement | t+2 | 13 | 0.4695 | 0.5473 |
-| Dynamics difficulty | Loss improvement | t+1 | 14 | 0.3293 | 0.4344 |
-| Dynamics difficulty | Loss improvement | t+2 | 13 | 0.4318 | 0.5315 |
-| Instant-Loss percentile | Mask-IoU improvement | t+1 | 12 | 0.0933 | 0.0813 |
-| Instant-Loss percentile | Mask-IoU improvement | t+2 | 10 | 0.3392 | 0.2611 |
-| Dynamics difficulty | Mask-IoU improvement | t+1 | 12 | -0.0192 | -0.0801 |
-| Dynamics difficulty | Mask-IoU improvement | t+2 | 10 | 0.2337 | 0.0565 |
+| Instant-Loss percentile | Loss improvement | t+1 | 14 | 0.3973 | 0.4479 |
+| Instant-Loss percentile | Loss improvement | t+2 | 13 | 0.5245 | 0.5780 |
+| Dynamics difficulty | Loss improvement | t+1 | 14 | 0.3698 | 0.4345 |
+| Dynamics difficulty | Loss improvement | t+2 | 13 | 0.4735 | 0.5624 |
+| Instant-Loss percentile | Mask-IoU improvement | t+1 | 12 | 0.1143 | 0.1116 |
+| Instant-Loss percentile | Mask-IoU improvement | t+2 | 11 | -0.0158 | -0.0731 |
+| Dynamics difficulty | Mask-IoU improvement | t+1 | 12 | 0.2627 | 0.2386 |
+| Dynamics difficulty | Mask-IoU improvement | t+2 | 11 | -0.0426 | -0.0790 |
+
 
 两种信号对未来 loss 下降都有一定正相关，但当前 Dynamics 没有超过 Instant Loss；对 mask IoU 与 FN 改善的关系更弱。这里是描述性和预测性诊断，不是干预因果证据。
 
 ### `HARD_LEARNABLE` 目前只能解释为高 Loss 候选
 
-排除 5 个 controlled corruption 后，共记录 383 个具有后续 epoch 的自然 `HARD_LEARNABLE` 事件，覆盖 41 个样本：
+排除 controlled corruption 事件后，共记录 386 个具有后续 epoch 的自然 `HARD_LEARNABLE` 事件，覆盖 42 个样本：
 
-- 297/383 个事件下一 epoch loss 下降；366/383 个事件在任一后续 epoch 出现 loss 下降。
-- 22/383 个事件下一 epoch mask IoU 提升；32/383 个事件在任一后续 epoch 出现 mask IoU 提升。
-- 第一次进入 hard 后，在 t+1/t+2/t+3 发生 loss 改善的样本分别为 36/41、37/41、38/40。
-- 全体 epoch 14 有 31 个 `HARD_LEARNABLE`；排除 controlled corruption 后自然 hard 候选为 28 个。
+- 304/386 个事件下一 epoch loss 下降；377/386 个事件在任一后续 epoch 出现 loss 下降。
+- 19/386 个事件下一 epoch mask IoU 提升；28/386 个事件在任一后续 epoch 出现 mask IoU 提升。
+- 第一次进入 hard 后，在 t+1/t+2/t+3 发生 loss 改善的样本分别为 37/42、41/42、38/41。
+- epoch 14 有 31 个 `HARD_LEARNABLE`；排除 controlled corruption 后仍为 28 个自然 hard 候选。
 
 这些数据说明高 Loss 候选常伴随后续 loss 自然下降，但 mask IoU、FN 和离开 hard 状态的改善远弱于 loss 本身。因此当前名称中的 “learnable” 尚未被干预实验验证。
 
@@ -143,26 +145,26 @@ effective contribution
 
 | 实验 | 困难样本观察 | Loss Weight | Dynamic Sampling | 当前结果 |
 | --- | --- | --- | --- | --- |
-| E0 Baseline | 关闭 | 关闭 | 关闭 | 3-epoch pilot；E0-15 未跑 |
-| E1 Instant Loss | 当前 loss percentile | 关闭 | 关闭 | 从 E2 离线构造 |
-| E2 Observe-only | Loss + EMA + slope + Probe/state | 关闭 | 关闭 | 3 epoch 与 15 epoch 完成；RF4 blocked |
+| E0 Baseline | 关闭 | 关闭 | 关闭 | 15-epoch same-contract baseline 完成；final mask mAP50:95=0.1390 |
+| E1 Instant Loss | 当前 loss percentile | 关闭 | 关闭 | 从 E2 trajectory 离线构造；未单独训练 |
+| E2 Observe-only | Loss + EMA + slope + Probe/state | 关闭 | 关闭 | 15 epoch 完成；RF4 Gate PASS WITH CAVEATS |
 | E3 Loss Weight Only | 上一轮 state | 开启 | 关闭 | correctness pass；真实效果未跑 |
 | E4 Dynamic Sampler Only | 上一轮 state | 关闭 | 开启 | DDP Smoke pass；真实效果未跑 |
-| E5 Combined | 上一轮 state | 开启 | 开启 | combined path pass；真实效果未跑 |
+| E5 Combined | 上一轮 state | 开启 | 开启 | 15 epoch 完成；final mask mAP50:95=0.1079；单 seed 不构成收益结论 |
 
 E3 回答“单次梯度贡献提高是否有效”，E4 回答“下一轮曝光提高是否有效”，E5 回答“两者组合是否有额外收益或过度聚焦”。这种拆分保证后续收益可以归因，而不是只看 Combined 的最终指标。
 
-## 当前阻塞项会在 Combined 中被双重放大
+## RF4 修正与 E5 结果
 
-RF4 15-epoch E2 的 run/data integrity、hash、步数、有限值和 final-state replay 均通过，但冻结 core 将 empty-GT normal 图片的 undefined recall 记录成 `gt_recall=0`，形成 **930 个 empty-GT frozen-core conflict observation**。
+RF4 的 empty-GT 语义已完成最小修正：空 GT 的 undefined `gt_recall=0` 和无匹配 mask placeholder 不再生成 Probe conflict；真实 FP 仍然计入 difficulty，非空 GT 的 FN/class/mask 规则保持不变。修正后的 E2 longitudinal analysis 为 `PASS_WITH_CAVEATS`，`empty_gt_frozen_conflict_observations=0`，并通过 final-state replay。
 
-分析侧已经排除 undefined recall，但 replayed state 仍遵循冻结 predicate。50 样本人工审计中有 22 张视觉正常的 `train/good` 图片因此被标记为错误语义案例。若现在启动 E5，污染状态可能同时改变 loss multiplier 和 exposure multiplier，相当于把识别错误放大两次。
+在同一 Pilot v2 manifest、Seg Small checkpoint、resolution 384、batch 4、15 epochs、seed `20260810`、关闭 augmentation/multi-scale/EMA 的契约下，完成了 E0 baseline 与 E5 Combined。两者初始模型 hash、manifest hash、权重 hash 和 locked contract 均一致。E5 最终 box mAP50:95=`0.2335`、mask mAP50:95=`0.1079`、F1=`0.3235`；E0 对应为 `0.2542`、`0.1390`、`0.3922`。因此本轮 E5 相对 E0 的最终 mask mAP 差为 `-0.0311`，只能作为单 seed 描述性结果，不能作为算法收益结论。
 
-因此 RF4 Gate 的正确结论是：
+E5 resource ledger 证明调度路径确实改变了训练资源：`REFERENCE_HARD` 平均每样本每 epoch 曝光约 `1.5111` 次，`REFERENCE_MASTERED` 约 `0.8651` 次；按每次 appearance 累计的 effective contribution 分别约 `3.1650` 与 `1.2420`，cap 命中分别为 `398` 与 `48`。这证明“困难样本服务于采样、并与 loss weight 组合”已经真正执行，但不证明资源投向一定带来更好的验证指标。
 
-> **FAIL_SEMANTIC_REVIEW_REQUIRED；E3/E4/E5 继续阻塞。**
+E5 最终状态为 `HARD_LEARNABLE=26`、`LEARNING=93`、`MASTERED=8`、`SUSPECT=1`。`HARD_LEARNABLE` 在本报告中仍只解释为 high-loss candidate；E0/E5 hard recovery 对比统一使用两边最后共同真实 checkpoint（epoch 13），因为 E0 epoch 14 checkpoint 已清理。五个 controlled corruption 仍只作为 RF4 smoke reference；E2 逐样本 persistent-conflict trajectory 已保存，E5 汇总 TP/precision/recall 不提升为 RF8 结论。
 
-这不是动态调度方向失败，而是识别层的输入契约尚不允许安全地驱动第二条主线。
+完整 E5 证据见：[`mvtec_e5_combined_validation.md`](mvtec_e5_combined_validation.md)、[`mvtec_e5_combined_analysis.json`](mvtec_e5_combined_analysis.json)、[`mvtec_e5_combined_results.csv`](mvtec_e5_combined_results.csv)。
 
 ## 阶段性验收结论
 
@@ -170,12 +172,12 @@ RF4 15-epoch E2 的 run/data integrity、hash、步数、有限值和 final-stat
 | --- | --- | --- | --- |
 | 逐样本 Loss 与历史轨迹 | PASS | 能在 Seg Small 真实训练中逐图观察 loss | 该 loss 已是最佳困难度定义 |
 | EMA / slope / percentile | PASS WITH CAVEATS | 能形成 15 轮 longitudinal trajectory | EMA 已经优于 Instant Loss |
-| 四态分类 | BLOCKED | 能持续输出四态标签 | `HARD_LEARNABLE` 已证明 learnable |
+| 四态分类 | PASS WITH CAVEATS | 能持续输出四态标签并形成冻结 reference subset | `HARD_LEARNABLE` 已证明 learnable |
 | Loss Weight | CORRECTNESS PASS | 权重路径、归一化和梯度语义可执行 | E3 已改善指标或困难样本 |
 | Dynamic Sampler | DDP/SMOKE PASS | 全局 plan、rank slice 和 replay quota 可执行 | E4 已改善指标或困难样本 |
-| Combined | PATH PASS | 两类资源可以组合且有 cap | E5 已获得算法收益 |
+| Combined | EXECUTION PASS WITH CAVEATS | 两类资源确实组合、cap 与 resource ledger 可审计 | E5 已获得算法收益 |
 
-阶段性总判断：**困难样本“观察—分类—下一轮加权—下一轮重采样”的工程闭环已经搭建；第一条主线有真实纵向证据，第二条主线只有 correctness 证据。当前还没有 Sample Dynamics 算法收益结论。**
+阶段性总判断：**困难样本“观察—分类—下一轮加权—下一轮重采样”的工程闭环已经搭建；两条主线都有真实运行证据，但 E5 单 seed 未显示相对 E0 的指标收益，因此 Sample Dynamics 算法收益仍未验证。**
 
 ## 下一轮实验严格围绕两条主线推进
 
