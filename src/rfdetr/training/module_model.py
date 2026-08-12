@@ -745,11 +745,11 @@ class RFDETRModelModule(LightningModule):
         sampler exposure observed for the same epoch. It does not affect the
         optimization path.
         """
-        if getattr(self.train_config, "sample_dynamics_mode", "observe") != "combined" or exposure_multipliers is None:
+        if getattr(self.train_config, "sample_dynamics_mode", "observe") not in {"loss_weight", "combined"}:
             return
         cap = float(self.train_config.sample_dynamics_effective_cap)
         for sample_id, weight in zip(sample_ids, sample_weights.detach().cpu().tolist()):
-            exposure = max(0.0, float(exposure_multipliers.get(sample_id, 1.0)))
+            exposure = max(0.0, float(exposure_multipliers.get(sample_id, 1.0))) if exposure_multipliers else 1.0
             applied_weight = float(weight)
             contribution = cap_effective_contribution(applied_weight, exposure, cap=cap)
             self._sample_dynamics_applied_weight_sum[sample_id] = (
@@ -765,9 +765,10 @@ class RFDETRModelModule(LightningModule):
                 )
 
     def _export_sample_dynamics_resources(self, epoch: int) -> None:
-        """Persist per-sample E5 resource evidence at an epoch boundary."""
+        """Persist per-sample E3/E4/E5 resource evidence at an epoch boundary."""
+        mode = getattr(self.train_config, "sample_dynamics_mode", "observe")
         if (
-            getattr(self.train_config, "sample_dynamics_mode", "observe") != "combined"
+            mode not in {"loss_weight", "sampler", "combined"}
             or getattr(self.train_config, "sample_dynamics_output_dir", None) is None
             or not is_global_zero()
         ):
@@ -777,10 +778,24 @@ class RFDETRModelModule(LightningModule):
         exposure_report = getattr(sampler, "exposure_report", None)
         exposure_multipliers = getattr(sampler, "exposure_multipliers", None)
         sample_ids = tuple(getattr(sampler, "sample_ids", ()))
-        if not callable(exposure_report) or not callable(exposure_multipliers) or not sample_ids:
+        has_sampler = callable(exposure_report) and callable(exposure_multipliers) and bool(sample_ids)
+        if mode in {"sampler", "combined"} and not has_sampler:
             return
-        counts = cast(dict[str, int], exposure_report())
-        multipliers = cast(dict[str, float], exposure_multipliers())
+        if not sample_ids:
+            dataset = getattr(datamodule, "_dataset_train", None)
+            sample_ids = tuple(str(value) for value in getattr(dataset, "sample_ids", ()))
+        if not sample_ids:
+            return
+        if has_sampler:
+            counts = cast(dict[str, int], exposure_report())
+            multipliers = cast(dict[str, float], exposure_multipliers())
+        else:
+            counts = {sample_id: int(self._sample_dynamics_weight_count.get(sample_id, 0)) for sample_id in sample_ids}
+            total_appearances = sum(counts.values())
+            expected = total_appearances / len(sample_ids) if sample_ids else 0.0
+            multipliers = {
+                sample_id: count / expected if expected > 0.0 else 0.0 for sample_id, count in counts.items()
+            }
         policy_weights = self.sample_weight_policy.weights if self.sample_weight_policy is not None else {}
         records: list[dict[str, Any]] = []
         for sample_id in sorted(sample_ids):
@@ -797,7 +812,8 @@ class RFDETRModelModule(LightningModule):
                     "sample_id": sample_id,
                     "state_policy_weight": float(policy_weights.get(sample_id, 1.0)),
                     "applied_loss_weight_mean": applied_mean,
-                    "batch_appearance_count": count,
+                    "weight_observation_count": count,
+                    "batch_appearance_count": int(counts.get(sample_id, 0)),
                     "exposure_count": int(counts.get(sample_id, 0)),
                     "exposure_multiplier": exposure,
                     "effective_contribution_mean": contribution_mean,
@@ -810,6 +826,7 @@ class RFDETRModelModule(LightningModule):
         self._sample_dynamics_resource_history.append(
             {
                 "epoch": int(epoch),
+                "mode": mode,
                 "policy_version": self.sample_weight_policy.version if self.sample_weight_policy else None,
                 "effective_cap": float(self.train_config.sample_dynamics_effective_cap),
                 "records": records,

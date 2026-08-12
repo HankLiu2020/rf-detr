@@ -2,6 +2,6 @@ experiment,status,loss_change,sampler_change,metrics,notes
 E0-baseline,real-pilot-completed,none,none,segm_mAP_50_95=0.1390378773; F1=0.3921568692,15-epoch MVTec mechanism baseline; same-contract E0 endpoint; no benchmark/effect claim
 E1-instant-loss,not-run,none,instant percentile,mAP/F1 pending,baseline for current-loss ranking
 E2-observe-only,real-pilot-completed-with-caveat,none,none,15-epoch RF4 PASS_WITH_CAVEATS; trajectories and frozen subsets saved,corrected empty-GT semantics; no intervention/effect claim
-E3-loss-weight-only,correctness-verified,previous policy,none,414 targeted tests passed,no effect claim; image and instance mass normalization verified
-E4-sampler-only,correctness-verified,none,bucket quotas,2GPU smoke passed,no effect claim; rank0 state and sampler plan broadcast verified
+E3-loss-weight-only,real-pilot-completed-seed1,previous policy,none,segm_mAP_50_95=0.1479075253; box_mAP_50_95=0.2447564900; F1=0.3666666746,15-epoch same-contract run; hard/mastered applied loss weight=1.1222/0.9276; mixed single-seed signal; no effect claim
+E4-sampler-only,real-pilot-completed-seed1,none,bucket quotas,segm_mAP_50_95=0.1020387709; box_mAP_50_95=0.2719261646; F1=0.3209876418,15-epoch same-contract run; hard/mastered appearances=1.4990/0.8341; mixed single-seed signal; no effect claim
 E5-loss-plus-sampler,real-pilot-completed-with-caveat,capped previous policy,capped bucket exposure,segm_mAP_50_95=0.1079448760; F1=0.3235294223,15-epoch same-contract E5 completed; resource ledger audited; single-seed negative descriptive result; no effect claim

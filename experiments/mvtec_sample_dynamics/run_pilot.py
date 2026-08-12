@@ -4,7 +4,7 @@
 # Copyright (c) 2025 Roboflow. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 [see LICENSE for details]
 # ------------------------------------------------------------------------
-"""Run fixed-contract E0, E2, or E5 MVTec mechanism Pilot experiments."""
+"""Run fixed-contract E0-E5 MVTec mechanism Pilot experiments."""
 
 from __future__ import annotations
 
@@ -122,11 +122,19 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     experiment_labels = {
         "baseline": "E0 baseline",
         "observe": "E2 observe-only",
+        "loss_weight": "E3 loss-weight-only",
+        "sampler": "E4 dynamic-sampler-only",
         "combined": "E5 combined",
     }
     experiment_label = experiment_labels[args.mode]
     sample_dynamics_enabled = args.mode != "baseline"
-    sample_dynamics_mode = "combined" if args.mode == "combined" else "observe"
+    sample_dynamics_mode = {
+        "baseline": "observe",
+        "observe": "observe",
+        "loss_weight": "loss_weight",
+        "sampler": "sampler",
+        "combined": "combined",
+    }[args.mode]
     model = RFDETRSegSmall(
         pretrain_weights=str(weights),
         num_classes=1,
@@ -242,7 +250,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 def parse_args() -> argparse.Namespace:
     """Parse the Pilot training CLI."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=("baseline", "observe", "combined"), required=True)
+    parser.add_argument(
+        "--mode",
+        choices=("baseline", "observe", "loss_weight", "sampler", "combined"),
+        required=True,
+    )
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--weights", type=Path, default=Path("/home/liujiyuan/rf-detr-models/rf-detr-seg-small.pt"))
     parser.add_argument("--output", type=Path, required=True)

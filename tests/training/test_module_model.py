@@ -221,6 +221,7 @@ def _make_batch(batch_size=2, channels=3, h=16, w=16):
             "boxes": torch.tensor([[0.5, 0.5, 0.1, 0.1]]),
             "labels": torch.tensor([1]),
             "image_id": torch.tensor(i),
+            "sample_id": f"test:{i}",
             "orig_size": torch.tensor([h, w]),
         }
         for i in range(batch_size)
@@ -953,9 +954,12 @@ class TestTrainingStep:
             {
                 "labels": torch.ones(box_count, dtype=torch.int64),
                 "loss_numerator": torch.tensor(loss_numerator),
+                "sample_id": f"microbatch:{sample_index}",
                 "orig_size": torch.tensor([16, 16]),
             }
-            for box_count, loss_numerator in zip(box_counts, loss_numerators, strict=True)
+            for sample_index, (box_count, loss_numerator) in enumerate(
+                zip(box_counts, loss_numerators, strict=True)
+            )
         ]
         samples, _ = _make_batch(batch_size=2)
 

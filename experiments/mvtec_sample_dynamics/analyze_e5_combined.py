@@ -183,6 +183,7 @@ def resource_summary(resource_history: list[dict[str, Any]], subsets: dict[str, 
             "weight_sum": 0.0,
             "weight_count": 0.0,
             "effective_sum": 0.0,
+            "effective_count": 0.0,
             "cap_hits": 0.0,
         }
     for payload in resource_history:
@@ -199,6 +200,16 @@ def resource_summary(resource_history: list[dict[str, Any]], subsets: dict[str, 
             effective = [record["effective_contribution_mean"] for record in seen if record.get("effective_contribution_mean") is not None]
             total_appearances = sum(appearance_counts)
             total_exposure_count = sum(int(record.get("exposure_count", 0)) for record in selected)
+            weighted_appearances = sum(
+                int(record.get("batch_appearance_count", 0))
+                for record in seen
+                if record.get("applied_loss_weight_mean") is not None
+            )
+            effective_appearances = sum(
+                int(record.get("batch_appearance_count", 0))
+                for record in seen
+                if record.get("effective_contribution_mean") is not None
+            )
             weighted_loss_sum = sum(
                 float(record["applied_loss_weight_mean"]) * int(record.get("batch_appearance_count", 0))
                 for record in seen
@@ -231,8 +242,9 @@ def resource_summary(resource_history: list[dict[str, Any]], subsets: dict[str, 
             current["policy_weight_sum"] += sum(policy_weights)
             current["policy_weight_count"] += len(policy_weights)
             current["weight_sum"] += weighted_loss_sum
-            current["weight_count"] += total_appearances
+            current["weight_count"] += weighted_appearances
             current["effective_sum"] += total_effective_contribution
+            current["effective_count"] += effective_appearances
             current["cap_hits"] += sum(int(record.get("cap_hit_count", 0)) for record in selected)
     final: dict[str, Any] = {}
     for subset_name, current in cumulative.items():
@@ -244,7 +256,11 @@ def resource_summary(resource_history: list[dict[str, Any]], subsets: dict[str, 
             "exposure_count_per_sample_per_epoch": current["exposure"] / samples / len(resource_history) if samples else None,
             "mean_state_policy_weight": current["policy_weight_sum"] / current["policy_weight_count"] if current["policy_weight_count"] else None,
             "mean_applied_loss_weight_seen": current["weight_sum"] / current["weight_count"] if current["weight_count"] else None,
-            "effective_contribution_per_sample_per_epoch": current["effective_sum"] / samples / len(resource_history) if samples else None,
+            "effective_contribution_per_sample_per_epoch": (
+                current["effective_sum"] / samples / len(resource_history)
+                if samples and current["effective_count"]
+                else None
+            ),
             "cap_hit_count": int(current["cap_hits"]),
         }
     return epoch_rows, final

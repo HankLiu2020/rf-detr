@@ -1,13 +1,13 @@
 OVERALL:
   rf4_gate: PASS_WITH_CAVEATS
   e0_15: COMPLETED
-  e3: NOT_STARTED_PENDING_REPLICATION_MATRIX
-  e4: NOT_STARTED_PENDING_REPLICATION_MATRIX
+  e3: COMPLETED_SEED1_MECHANISM_PASS_MIXED_SIGNAL
+  e4: COMPLETED_SEED1_MECHANISM_PASS_MIXED_SIGNAL
   e5: COMPLETED_PASS_WITH_CAVEATS
   completed_seeds: [20260810]
   correctness_failures: []
-  algorithm_signal: SINGLE_SEED_NEGATIVE_DESCRIPTIVE_NOT_VALIDATED
-  next_gate: RUN_SEED1_E3_E4_AND_REPLICATE_E0_E5
+  algorithm_signal: MIXED_SINGLE_SEED_NOT_VALIDATED
+  next_gate: RUN_COMPLETE_E0_E3_E4_E5_FOR_SEEDS_20260811_AND_20260812
 
 # Overnight Sample Dynamics Status
 
@@ -18,7 +18,7 @@ OVERALL:
 - Evidence checkpoint before final commit: `c28e066eeaf5635cde074ca89eb6600caa90be44`
 - Remote branch: `HankLiu2020/rf-detr:agent/dynamic-scheduling-rfdetr`
 - Scope: `NON-BENCHMARK / MECHANISM VALIDATION`
-- Current rule: RF4 must pass before intervention; RF4 now passes with caveats. E3/E4 remain pending the complete same-contract replication matrix.
+- Current rule: RF4 must pass before intervention; RF4 passes with caveats. The full Seed1 E0/E3/E4/E5 matrix is now complete and awaits two full replication seeds.
 
 ## Completed before overnight execution
 
@@ -34,7 +34,9 @@ OVERALL:
 - RF4 15-epoch E2 corrected: **completed** at `/home/liujiyuan/mvtec-sample-dynamics-runs/e2-rf4-15-corrected`; analyzer status `PASS_WITH_CAVEATS`.
 - E0-15 baseline: **completed** at `/home/liujiyuan/mvtec-sample-dynamics-runs/e0-15`.
 - E5-15 combined: **completed** at `/home/liujiyuan/mvtec-sample-dynamics-runs/e5-15`.
-- E3-15 and E4-15: **not started**; pending the same-contract replication matrix.
+- E3-15 loss-weight-only: **completed** at `/home/liujiyuan/mvtec-sample-dynamics-runs/e3-15`.
+- E4-15 dynamic-sampler-only: **completed** at `/home/liujiyuan/mvtec-sample-dynamics-runs/e4-15`.
+- `reports/mvtec_seed1_ablation_validation.md`: generated; correctness and realized-resource gates pass, while algorithm signal remains mixed and single-seed.
 - `reports/mvtec_e5_combined_validation.md`: generated; E5 mechanism execution passes with caveats, algorithm benefit not validated.
 - `mvtec_reference_subsets.json`: frozen from E2 before any intervention.
 - `mvtec_rf4_run_integrity.json/md`: present; Integrity Gate `PASS`.
@@ -47,10 +49,10 @@ OVERALL:
 - `/var/run/docker.sock` is currently `root:docker`, mode `660`.
 - The Codex worker process still has only its original supplementary groups, but `sg docker -c` provides the authorized `docker` group for the run.
 - Existing `rfdetr-dynamic-scheduling` container is up with image `train-env-rfdetr-claude:20260806`.
-- RF4 15-epoch E2 evidence is complete; E0 and E5 intervention endpoints are complete, while E3 and E4 remain pending.
+- RF4 15-epoch E2 evidence and the Seed1 E0/E3/E4/E5 matrix are complete.
 
 ## Current result and next action
 
-- E0 final mask mAP50:95: `0.1390`; E5 final mask mAP50:95: `0.1079`; this is a single-seed descriptive comparison, not a causal benefit claim.
-- E5 resource ledger confirms hard exposure and effective contribution were increased, with cap hits recorded.
-- Do not tune StatePolicy from this result. Next run the complete Seed 1 E0/E3/E4/E5 matrix under the frozen contract; E3 and E4 remain separate before any combined conclusion.
+- Final mask mAP50:95 is E0=`0.1390`, E3=`0.1479`, E4=`0.1020`, E5=`0.1079`; box/F1 move in different directions, so the signal is mixed rather than a benefit claim.
+- E3 gave `REFERENCE_HARD` actual applied loss weight `1.1222` versus mastered `0.9276`, with equal exposure; E4 gave hard exposure `1.4990` versus mastered `0.8341`, with no loss weighting. Both isolated mechanisms therefore changed the intended resource.
+- Do not tune StatePolicy from this result. Next run the complete E0/E3/E4/E5 matrix for seeds `20260811` and `20260812`, then report mean ± std without winner selection.
