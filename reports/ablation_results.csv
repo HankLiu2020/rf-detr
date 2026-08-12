@@ -1,7 +1,7 @@
 experiment,status,loss_change,sampler_change,metrics,notes
-E0-baseline,real-pilot-completed,none,none,segm_mAP_50_95=0.1390378773; F1=0.3921568692,15-epoch MVTec mechanism baseline; same-contract E0 endpoint; no benchmark/effect claim
+E0-baseline,three-seed-baseline-completed,none,none,segm_mAP_50_95=0.1347±0.0065; F1=0.3919±0.0144,3/3 15-epoch MVTec mechanism baselines; paired reference; no benchmark claim
 E1-instant-loss,not-run,none,instant percentile,mAP/F1 pending,baseline for current-loss ranking
 E2-observe-only,real-pilot-completed-with-caveat,none,none,15-epoch RF4 PASS_WITH_CAVEATS; trajectories and frozen subsets saved,corrected empty-GT semantics; no intervention/effect claim
-E3-loss-weight-only,real-pilot-completed-seed1,previous policy,none,segm_mAP_50_95=0.1479075253; box_mAP_50_95=0.2447564900; F1=0.3666666746,15-epoch same-contract run; hard/mastered applied loss weight=1.1222/0.9276; mixed single-seed signal; no effect claim
-E4-sampler-only,real-pilot-completed-seed1,none,bucket quotas,segm_mAP_50_95=0.1020387709; box_mAP_50_95=0.2719261646; F1=0.3209876418,15-epoch same-contract run; hard/mastered appearances=1.4990/0.8341; mixed single-seed signal; no effect claim
-E5-loss-plus-sampler,real-pilot-completed-with-caveat,capped previous policy,capped bucket exposure,segm_mAP_50_95=0.1079448760; F1=0.3235294223,15-epoch same-contract E5 completed; resource ledger audited; single-seed negative descriptive result; no effect claim
+E3-loss-weight-only,three-seed-mechanism-pass-no-benefit,previous policy,none,segm_mAP_50_95=0.1333±0.0131; paired_delta=-0.0015±0.0092,3/3 same-contract runs; hard/mastered applied-weight ratio=1.2074±0.0043 at equal exposure; direction unstable; no benefit claim
+E4-sampler-only,three-seed-mechanism-pass-global-regression,none,bucket quotas,segm_mAP_50_95=0.1012±0.0050; paired_delta=-0.0336±0.0030,3/3 same-contract runs; hard/mastered appearance ratio=1.7385±0.0605; mask mAP and F1 lower in 3/3; policy rejected
+E5-loss-plus-sampler,three-seed-targeted-recovery-global-regression,capped previous policy,capped bucket exposure,segm_mAP_50_95=0.0995±0.0078; paired_delta=-0.0352±0.0088,3/3 same-contract runs; effective-contribution ratio=2.4360±0.1255; hard loss recovery improves 3/3 but global mask/F1 regress 3/3; no deployment

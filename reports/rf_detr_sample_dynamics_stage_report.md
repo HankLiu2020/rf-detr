@@ -2,8 +2,8 @@
 
 > 报告范围：RF-DETR Seg Small / MVTec Pilot v2 / Sample Dynamics 机制验证<br>
 > 证据基线：`agent/dynamic-scheduling-rfdetr`（本轮提交后以新 commit 为准）<br>
-> 当前 Gate：**RF4 PASS WITH CAVEATS；Seed1 E0/E3/E4/E5 correctness 与 resource mechanism PASS**<br>
-> 结论等级：**观察与调度机制已有真实运行证据；单 seed 算法收益未证实**
+> 当前 Gate：**RF4 PASS WITH CAVEATS；三 seed E0/E3/E4/E5 correctness 与 resource mechanism PASS；algorithm-benefit FAIL**<br>
+> 结论等级：**观察与调度机制已有三 seed 真实运行证据；当前策略的算法收益 Gate 未通过**
 
 ## 技术摘要
 
@@ -12,7 +12,7 @@
 1. **困难样本识别**：在 loss reduction 前获得逐图 loss，按样本和 epoch 聚合历史、EMA、slope、percentile 与 Probe 指标，将样本分为 `MASTERED / LEARNING / HARD_LEARNABLE / SUSPECT`。
 2. **困难样本资源调度**：在下一轮训练中，依据上一轮状态调整单次出现时的 loss multiplier，以及样本在 epoch 中的 sampling exposure；E5 Combined 同时启用两者。
 
-这两条主线在代码和真实 Pilot 训练上都已闭环。第一条主线已在 MVTec Seg Small E2 observe-only 上运行 15 epoch；第二条主线已在同一冻结契约下完成 E3 Loss Weight、E4 Dynamic Sampler 与 E5 Combined 各 15 epoch，并记录逐样本 loss/probe、实际采样曝光、实际 loss 权重、effective contribution 与 cap 命中。因此当前可以确认“能够观察、分类并实际调度资源”；但单 seed 的指标方向分化，不能宣称动态调度已经带来稳定算法收益。
+这两条主线在代码和真实 Pilot 训练上都已闭环。第一条主线已在 MVTec Seg Small E2 observe-only 上运行 15 epoch；第二条主线已在同一冻结契约下完成三个 seed 的 E0/E3/E4/E5 完整矩阵，共 12 条 15-epoch 训练，并记录逐样本 loss/probe、实际采样曝光、实际 loss 权重、effective contribution 与 cap 命中。因此当前可以确认“能够观察、分类并实际调度资源”。三 seed 还给出了更严格的负向结果：当前冻结策略能改善目标困难组的 loss，但整体 mask mAP/F1 下降，尚不能作为可部署算法。
 
 ## 两条主线构成一个跨 Epoch 控制回路
 
@@ -145,20 +145,20 @@ effective contribution
 
 | 实验 | 困难样本观察 | Loss Weight | Dynamic Sampling | 当前结果 |
 | --- | --- | --- | --- | --- |
-| E0 Baseline | 关闭 | 关闭 | 关闭 | 15-epoch same-contract baseline 完成；final mask mAP50:95=0.1390 |
+| E0 Baseline | 关闭 | 关闭 | 关闭 | 三 seed 完成；mask mAP50:95=`0.1347±0.0065` |
 | E1 Instant Loss | 当前 loss percentile | 关闭 | 关闭 | 从 E2 trajectory 离线构造；未单独训练 |
 | E2 Observe-only | Loss + EMA + slope + Probe/state | 关闭 | 关闭 | 15 epoch 完成；RF4 Gate PASS WITH CAVEATS |
-| E3 Loss Weight Only | 上一轮 state | 开启 | 关闭 | 15 epoch 完成；final mask mAP50:95=0.1479；单 seed 混合信号 |
-| E4 Dynamic Sampler Only | 上一轮 state | 关闭 | 开启 | 15 epoch 完成；final mask mAP50:95=0.1020；单 seed 混合信号 |
-| E5 Combined | 上一轮 state | 开启 | 开启 | 15 epoch 完成；final mask mAP50:95=0.1079；单 seed 不构成收益结论 |
+| E3 Loss Weight Only | 上一轮 state | 开启 | 关闭 | 三 seed；mask=`0.1333±0.0131`，paired Δ=`-0.0015±0.0092` |
+| E4 Dynamic Sampler Only | 上一轮 state | 关闭 | 开启 | 三 seed；mask=`0.1012±0.0050`，paired Δ=`-0.0336±0.0030` |
+| E5 Combined | 上一轮 state | 开启 | 开启 | 三 seed；mask=`0.0995±0.0078`，paired Δ=`-0.0352±0.0088` |
 
-E3 回答“单次梯度贡献提高是否有效”，E4 回答“下一轮曝光提高是否有效”，E5 回答“两者组合是否有额外收益或过度聚焦”。Seed1 已证明三个资源路径均实际生效：E3 hard/mastered 实际 applied loss weight=`1.1222/0.9276`、曝光均为 `1.0`；E4 hard/mastered appearance=`1.4990/0.8341`、没有 loss weight；E5 hard/mastered effective contribution=`3.1650/1.2420`。这种拆分保证资源变化可以归因，而不是只看 Combined 的最终指标。
+E3 回答“单次梯度贡献提高是否有效”，E4 回答“下一轮曝光提高是否有效”，E5 回答“两者组合是否有额外收益或过度聚焦”。三 seed 资源账本证明三个路径均稳定生效：E3 hard/mastered applied-weight ratio=`1.2074±0.0043`、曝光比严格为 `1.0`；E4 appearance ratio=`1.7385±0.0605`、没有 loss weight；E5 effective-contribution ratio=`2.4360±0.1255`。这种拆分保证资源变化可以归因，而不是只看 Combined 的最终指标。
 
-## RF4 修正与 E5 结果
+## RF4 修正与历史 Seed1 E5 结果
 
 RF4 的 empty-GT 语义已完成最小修正：空 GT 的 undefined `gt_recall=0` 和无匹配 mask placeholder 不再生成 Probe conflict；真实 FP 仍然计入 difficulty，非空 GT 的 FN/class/mask 规则保持不变。修正后的 E2 longitudinal analysis 为 `PASS_WITH_CAVEATS`，`empty_gt_frozen_conflict_observations=0`，并通过 final-state replay。
 
-在同一 Pilot v2 manifest、Seg Small checkpoint、resolution 384、batch 4、15 epochs、seed `20260810`、关闭 augmentation/multi-scale/EMA 的契约下，完成了 E0 baseline 与 E5 Combined。两者初始模型 hash、manifest hash、权重 hash 和 locked contract 均一致。E5 最终 box mAP50:95=`0.2335`、mask mAP50:95=`0.1079`、F1=`0.3235`；E0 对应为 `0.2542`、`0.1390`、`0.3922`。因此本轮 E5 相对 E0 的最终 mask mAP 差为 `-0.0311`，只能作为单 seed 描述性结果，不能作为算法收益结论。
+以下段落保留 Seed1 历史口径，用于解释三 seed 复制前如何形成假设，不与三 seed均值混用。在同一 Pilot v2 manifest、Seg Small checkpoint、resolution 384、batch 4、15 epochs、seed `20260810`、关闭 augmentation/multi-scale/EMA 的契约下，E5 最终 box mAP50:95=`0.2335`、mask mAP50:95=`0.1079`、F1=`0.3235`；E0 对应为 `0.2542`、`0.1390`、`0.3922`。本 seed 的 E5–E0 final mask 差为 `-0.0311`。
 
 E5 resource ledger 证明调度路径确实改变了训练资源：`REFERENCE_HARD` 平均每样本每 epoch 曝光约 `1.5111` 次，`REFERENCE_MASTERED` 约 `0.8651` 次；按每次 appearance 累计的 effective contribution 分别约 `3.1650` 与 `1.2420`，cap 命中分别为 `398` 与 `48`。这证明“困难样本服务于采样、并与 loss weight 组合”已经真正执行，但不证明资源投向一定带来更好的验证指标。
 
@@ -173,18 +173,18 @@ E5 最终状态为 `HARD_LEARNABLE=26`、`LEARNING=93`、`MASTERED=8`、`SUSPECT
 | 逐样本 Loss 与历史轨迹 | PASS | 能在 Seg Small 真实训练中逐图观察 loss | 该 loss 已是最佳困难度定义 |
 | EMA / slope / percentile | PASS WITH CAVEATS | 能形成 15 轮 longitudinal trajectory | EMA 已经优于 Instant Loss |
 | 四态分类 | PASS WITH CAVEATS | 能持续输出四态标签并形成冻结 reference subset | `HARD_LEARNABLE` 已证明 learnable |
-| Loss Weight | SEED1 MECHANISM PASS | 权重路径、归一化和实际 hard/mastered 权重差可审计 | E3 已稳定改善指标或困难样本 |
-| Dynamic Sampler | SEED1 MECHANISM PASS | 全局 plan、rank slice 和实际 hard/mastered 曝光差可审计 | E4 已稳定改善指标或困难样本 |
-| Combined | EXECUTION PASS WITH CAVEATS | 两类资源确实组合、cap 与 resource ledger 可审计 | E5 已获得算法收益 |
+| Loss Weight | THREE-SEED MECHANISM PASS | 权重路径、归一化和实际 hard/mastered 权重差可审计 | E3 已稳定改善指标或困难样本 |
+| Dynamic Sampler | THREE-SEED MECHANISM PASS / BENEFIT FAIL | 全局 plan、rank slice 和实际 hard/mastered 曝光差可审计 | 当前 E4 quota 已获得整体收益 |
+| Combined | THREE-SEED MECHANISM PASS / BENEFIT FAIL | 两类资源确实组合、cap 与 resource ledger 可审计；目标困难组 loss 改善 3/3 | E5 已获得整体算法收益 |
 
-阶段性总判断：**困难样本“观察—分类—下一轮加权—下一轮重采样”的工程闭环已经搭建，并完成 Seed1 全矩阵真实验证；E3 的 mask 指标略高但 box/F1 较低，E4 的 box 指标较高但 mask/F1 较低，E5 三项最终指标均低于 E0，因此只能判为 MIXED_SINGLE_SEED，Sample Dynamics 稳定算法收益仍未验证。**
+阶段性总判断：**困难样本“观察—分类—下一轮加权—下一轮重采样”的工程闭环已经搭建，并完成三 seed 全矩阵真实验证。E3 的配对 mask 变化为 `-0.0015±0.0092`，方向不稳；E4 为 `-0.0336±0.0030`、E5 为 `-0.0352±0.0088`，二者在 3/3 seeds 均低于 E0。E5 同时让冻结 hard subset 的 loss reduction 相对 E0 在 3/3 seeds 增加（`+28.73±11.31`），说明调度命中了目标，却过度集中资源并损害整体表现。当前结论是 `TARGETED_HARD_LOSS_RECOVERY_WITH_GLOBAL_REGRESSION_NO_DEPLOYMENT`。**
 
-## 下一轮实验严格围绕两条主线推进
+## 下一阶段严格围绕两条主线推进
 
-1. 保持当前 StatePolicy 与 E2 冻结子集不变，不为改善曲线调参。
-2. 在 seed=`20260811` 和 `20260812` 下分别完整运行 E0/E3/E4/E5，禁止只复现当前最有利指标。
-3. 每组继续记录实际 gradient weight、actual exposure、effective contribution 与 `2.5` cap 命中次数。
-4. 对同一 hard subset 比较 loss、mask IoU、FN、状态恢复率和 controlled-corruption 行为，最终输出三 seed mean ± std。
+1. 不冻结 RF9，也不把当前 E4/E5 参数带入生产；三 seed 已证实当前资源强度过高或选择目标不完整。
+2. 下一轮先把“高 loss 但可改善”和“高 loss 且 probe/标注冲突”分开，避免对 suspect/noisy 样本继续放大曝光。
+3. 设计更温和的 curriculum：预热期不干预、较低 hard quota、保底无放回覆盖、mastered replay，并把整体分布 coverage 作为硬 guardrail。
+4. 新策略必须在独立验证集或新数据 protocol 上预注册后复验，不能利用本 Pilot 三 seed 结果追逐参数；继续报告 paired E0、hard subset 与全局指标的共同结果。
 
 最终需要回答的问题不是“功能有没有打开”，而是：**加的资源是否投入给了正确的样本，以及这些样本是否比 E0 更快、更稳定地改善。**
 
@@ -198,5 +198,8 @@ E5 最终状态为 `HARD_LEARNABLE=26`、`LEARNING=93`、`MASTERED=8`、`SUSPECT
 - 冻结 reference subsets：[`mvtec_reference_subsets.json`](mvtec_reference_subsets.json)
 - E0–E5 实验矩阵：[`ablation_results.csv`](ablation_results.csv)
 - Seed1 完整消融报告：[`mvtec_seed1_ablation_validation.md`](mvtec_seed1_ablation_validation.md)
+- 三 seed 完整消融报告：[`mvtec_three_seed_ablation_validation.md`](mvtec_three_seed_ablation_validation.md)
+- 三 seed 机器可读分析：[`mvtec_three_seed_ablation_analysis.json`](mvtec_three_seed_ablation_analysis.json)
+- 三 seed 配对结果：[`mvtec_three_seed_ablation_results.csv`](mvtec_three_seed_ablation_results.csv)
 - Reference policy：[`../reference/reference_config.yaml`](../reference/reference_config.yaml)
 - State policy contract：[`../reference/state_policy_spec.md`](../reference/state_policy_spec.md)

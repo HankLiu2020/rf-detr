@@ -21,18 +21,32 @@ import json
 from pathlib import Path
 from typing import Any
 
-from analyze_e5_combined import (
-    actual_checkpoint_epochs,
-    mean,
-    merged_metrics,
-    num,
-    pct,
-    probe_metric,
-    read_json,
-    resource_summary,
-    subset_epoch_stats,
-    trajectory_by_epoch,
-)
+try:
+    from .analyze_e5_combined import (
+        actual_checkpoint_epochs,
+        mean,
+        merged_metrics,
+        num,
+        pct,
+        probe_metric,
+        read_json,
+        resource_summary,
+        subset_epoch_stats,
+        trajectory_by_epoch,
+    )
+except ImportError:  # Standalone execution from this directory.
+    from analyze_e5_combined import (
+        actual_checkpoint_epochs,
+        mean,
+        merged_metrics,
+        num,
+        pct,
+        probe_metric,
+        read_json,
+        resource_summary,
+        subset_epoch_stats,
+        trajectory_by_epoch,
+    )
 
 
 RUNS = ("E0", "E3", "E4", "E5")
