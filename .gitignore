@@ -158,6 +158,9 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
+# Local Policy V2 training artifacts (reports preserve compact evidence only).
+.policy-v2-runs/
+
 # Cython debug symbols
 cython_debug/
 

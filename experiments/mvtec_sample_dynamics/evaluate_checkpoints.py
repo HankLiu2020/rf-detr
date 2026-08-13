@@ -7,10 +7,9 @@
 #!/usr/bin/env python3
 """Evaluate saved RF-DETR checkpoints on the fixed MVTec train probe.
 
-This is an experiment-side, read-only evaluator.  It does not run an
-optimizer, update SampleStateStore, or change the training outputs.  The same
-deterministic train-probe loader is used for every checkpoint so E0 and E5 can
-be compared on per-image loss and probe metrics after training.
+This is an experiment-side, read-only evaluator.  It does not run an optimizer, update SampleStateStore, or change the
+training outputs.  The same deterministic train-probe loader is used for every checkpoint so E0 and E5 can be compared
+on per-image loss and probe metrics after training.
 """
 
 from __future__ import annotations
@@ -29,7 +28,6 @@ from rfdetr.config import RFDETRSegSmallConfig, TrainConfig
 from rfdetr.sample_dynamics import run_deterministic_probe
 from rfdetr.training.module_data import RFDETRDataModule
 from rfdetr.training.module_model import RFDETRModelModule
-
 
 _CHECKPOINT_RE = re.compile(r"^checkpoint_(\d+)\.ckpt$")
 
@@ -134,14 +132,46 @@ def _load_checkpoint(module: RFDETRModelModule, path: Path) -> dict[str, Any]:
     }
 
 
+LOSS_COMPONENT_PREFIXES = {
+    "classification": "loss_ce",
+    "bbox": "loss_bbox",
+    "giou": "loss_giou",
+    "mask_ce": "loss_mask_ce",
+    "mask_dice": "loss_mask_dice",
+}
+
+
+def _weighted_component_losses(packet: Any, weight_dict: dict[str, float]) -> dict[str, torch.Tensor]:
+    """Group weighted image-local criterion terms into task-level components."""
+    result = {
+        component: torch.zeros(
+            packet.batch_size, dtype=packet.global_num_boxes.dtype, device=packet.global_num_boxes.device
+        )
+        for component in LOSS_COMPONENT_PREFIXES
+    }
+    # Match the longest prefix first so ``loss_mask_ce`` is never counted as
+    # ordinary classification ``loss_ce``.
+    ordered = sorted(LOSS_COMPONENT_PREFIXES.items(), key=lambda item: len(item[1]), reverse=True)
+    for name, weight in weight_dict.items():
+        values = packet.per_image_normalized_losses.get(name)
+        if values is None:
+            continue
+        for component, prefix in ordered:
+            if name == prefix or name.startswith(f"{prefix}_"):
+                result[component] = result[component] + values.to(result[component]) * float(weight)
+                break
+    return result
+
+
 def _loss_trajectory(
     module: RFDETRModelModule,
     loader: Any,
     device: torch.device,
-) -> dict[str, float]:
-    """Compute weighted per-image normalized loss with the existing criterion packet."""
+) -> tuple[dict[str, float], dict[str, dict[str, float]]]:
+    """Compute total and decomposed weighted image-local loss per sample."""
     module.train()
     values: dict[str, float] = {}
+    components: dict[str, dict[str, float]] = {}
     with torch.no_grad():
         for samples, targets in loader:
             samples = samples.to(device)
@@ -155,9 +185,16 @@ def _loss_trajectory(
                 raise TypeError("criterion did not return a per-sample packet")
             _, packet = result
             losses = packet.weighted_per_image_normalized_loss(module.criterion.weight_dict).detach().cpu()
-            for sample_id, value in zip(packet.sample_ids, losses.tolist()):
+            grouped = {
+                name: tensor.detach().cpu().tolist()
+                for name, tensor in _weighted_component_losses(packet, module.criterion.weight_dict).items()
+            }
+            for index, (sample_id, value) in enumerate(zip(packet.sample_ids, losses.tolist())):
                 values[str(sample_id)] = float(value)
-    return dict(sorted(values.items()))
+                components[str(sample_id)] = {
+                    name: float(component_values[index]) for name, component_values in grouped.items()
+                }
+    return dict(sorted(values.items())), dict(sorted(components.items()))
 
 
 def _probe_trajectory(
@@ -201,7 +238,7 @@ def evaluate_run(
         path = Path(entry["path"])
         load_info = _load_checkpoint(module, path)
         _reset_evaluation_rng(trajectory_seed)
-        loss_values = _loss_trajectory(module, loss_loader, device)
+        loss_values, loss_components = _loss_trajectory(module, loss_loader, device)
         _reset_evaluation_rng(trajectory_seed)
         probe_values = _probe_trajectory(
             module,
@@ -218,6 +255,7 @@ def evaluate_run(
                 "checkpoint_note": entry.get("note"),
                 "load_info": load_info,
                 "loss": loss_values,
+                "loss_components": loss_components,
                 "probe": dict(sorted(probe_values.items())),
             }
         )

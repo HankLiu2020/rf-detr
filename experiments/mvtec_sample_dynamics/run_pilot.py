@@ -21,10 +21,10 @@ from typing import Any
 
 os.environ.setdefault("RFDETR_SKIP_DINOV2_PREWARM", "1")
 
-import torch  # noqa: E402
-import numpy as np  # noqa: E402
+import numpy as np
+import torch
 
-from rfdetr import RFDETRSegSmall  # noqa: E402
+from rfdetr import RFDETRSegSmall
 
 
 def _seed_everything(seed: int) -> None:
@@ -89,9 +89,7 @@ def _state_summary(state_path: Path, corruption_path: Path) -> dict[str, Any] | 
     corruption_records = json.loads(corruption_path.read_text(encoding="utf-8"))
     known_corruptions = {str(record["stable_sample_id"]) for record in corruption_records}
     predicted_suspect = {
-        str(sample_id)
-        for sample_id, record in states.items()
-        if str(record.get("state")) == "SUSPECT"
+        str(sample_id) for sample_id, record in states.items() if str(record.get("state")) == "SUSPECT"
     }
     true_positive = len(known_corruptions & predicted_suspect)
     precision = true_positive / len(predicted_suspect) if predicted_suspect else 0.0
@@ -126,7 +124,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "sampler": "E4 dynamic-sampler-only",
         "combined": "E5 combined",
     }
-    experiment_label = experiment_labels[args.mode]
+    experiment_label = getattr(args, "experiment_label", experiment_labels[args.mode])
     sample_dynamics_enabled = args.mode != "baseline"
     sample_dynamics_mode = {
         "baseline": "observe",
@@ -183,6 +181,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "scope": "NON-BENCHMARK / MECHANISM VALIDATION",
             "experiment": experiment_label,
             "dataset_manifest": str(dataset / "split_manifest.json"),
+            **dict(getattr(args, "policy_v2_notes", {})),
         },
     }
     train_config = model.get_train_config(

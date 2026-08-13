@@ -1,0 +1,1113 @@
+{
+  "contract_equal": true,
+  "identity": {
+    "checkpoint": [
+      "6de3da31b2572cac214a1c76cce4a92a13966d56390ac2b3a3de9a8dc2b2bca3"
+    ],
+    "epochs": [
+      30
+    ],
+    "initial_model": [
+      "af6b20ee3c19dbfe2d538efacdff02641a3baa920ebaff86cacc3fef08cf798f"
+    ],
+    "manifest": [
+      "90673182af0c409e99778f30545f550e91b6845e48f6894a7ebe029c53172528"
+    ],
+    "seed": [
+      20260813
+    ]
+  },
+  "runs": {
+    "C0/D0": {
+      "best_epoch": 28,
+      "best_mask_mAP": 0.17580807209014893,
+      "delta_vs_c0": {
+        "F1": 0.0,
+        "box_mAP": 0.0,
+        "mask_mAP": 0.0
+      },
+      "elapsed_seconds": 998.193522120011,
+      "final": {
+        "F1": 0.42105263471603394,
+        "box_mAP": 0.297435462474823,
+        "mask_mAP": 0.15523946285247803
+      },
+      "final_epoch": 29,
+      "final_minus_best_mask": -0.0205686092376709,
+      "final_step": 959,
+      "resource": null,
+      "wall_clock_ratio_vs_c0": 1.0
+    },
+    "C3": {
+      "best_epoch": 15,
+      "best_mask_mAP": 0.16178259253501892,
+      "delta_vs_c0": {
+        "F1": -0.021052628755569458,
+        "box_mAP": -0.04956716299057007,
+        "mask_mAP": -0.018838346004486084
+      },
+      "elapsed_seconds": 1126.4101028689183,
+      "final": {
+        "F1": 0.4000000059604645,
+        "box_mAP": 0.24786829948425293,
+        "mask_mAP": 0.13640111684799194
+      },
+      "final_epoch": 29,
+      "final_minus_best_mask": -0.025381475687026978,
+      "final_step": 959,
+      "resource": {
+        "epochs": [
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 0,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 1,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 2,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 3,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 4,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 5,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 6,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 7,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 8,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 9,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 10,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 11,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 12,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 13,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 14,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 15,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 16,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 17,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 18,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 19,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 20,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 21,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 22,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 23,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 24,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 25,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 26,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 27,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 28,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 29,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          }
+        ],
+        "mean_coverage": 1.0,
+        "total_appearances": 3840,
+        "total_replay_appearances": 0,
+        "total_zero_exposure_sample_epochs": 0
+      },
+      "wall_clock_ratio_vs_c0": 1.128448620340267
+    },
+    "C4": {
+      "best_epoch": 27,
+      "best_mask_mAP": 0.13447552919387817,
+      "delta_vs_c0": {
+        "F1": 0.0,
+        "box_mAP": -0.02818545699119568,
+        "mask_mAP": -0.02881363034248352
+      },
+      "elapsed_seconds": 1124.8473928159801,
+      "final": {
+        "F1": 0.42105263471603394,
+        "box_mAP": 0.2692500054836273,
+        "mask_mAP": 0.1264258325099945
+      },
+      "final_epoch": 29,
+      "final_minus_best_mask": -0.008049696683883667,
+      "final_step": 959,
+      "resource": {
+        "epochs": [
+          {
+            "appearances": 128,
+            "coverage": 0.71875,
+            "epoch": 0,
+            "replay_appearances": 36,
+            "unique_seen": 92,
+            "zero_exposure": 36
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.734375,
+            "epoch": 1,
+            "replay_appearances": 34,
+            "unique_seen": 94,
+            "zero_exposure": 34
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 2,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6640625,
+            "epoch": 3,
+            "replay_appearances": 43,
+            "unique_seen": 85,
+            "zero_exposure": 43
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 4,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 5,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6875,
+            "epoch": 6,
+            "replay_appearances": 40,
+            "unique_seen": 88,
+            "zero_exposure": 40
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 7,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.671875,
+            "epoch": 8,
+            "replay_appearances": 42,
+            "unique_seen": 86,
+            "zero_exposure": 42
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 9,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 10,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.703125,
+            "epoch": 11,
+            "replay_appearances": 38,
+            "unique_seen": 90,
+            "zero_exposure": 38
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.671875,
+            "epoch": 12,
+            "replay_appearances": 42,
+            "unique_seen": 86,
+            "zero_exposure": 42
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.71875,
+            "epoch": 13,
+            "replay_appearances": 36,
+            "unique_seen": 92,
+            "zero_exposure": 36
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.71875,
+            "epoch": 14,
+            "replay_appearances": 36,
+            "unique_seen": 92,
+            "zero_exposure": 36
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.671875,
+            "epoch": 15,
+            "replay_appearances": 42,
+            "unique_seen": 86,
+            "zero_exposure": 42
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 16,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.703125,
+            "epoch": 17,
+            "replay_appearances": 38,
+            "unique_seen": 90,
+            "zero_exposure": 38
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6796875,
+            "epoch": 18,
+            "replay_appearances": 41,
+            "unique_seen": 87,
+            "zero_exposure": 41
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.71875,
+            "epoch": 19,
+            "replay_appearances": 36,
+            "unique_seen": 92,
+            "zero_exposure": 36
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.7421875,
+            "epoch": 20,
+            "replay_appearances": 33,
+            "unique_seen": 95,
+            "zero_exposure": 33
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6640625,
+            "epoch": 21,
+            "replay_appearances": 43,
+            "unique_seen": 85,
+            "zero_exposure": 43
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6640625,
+            "epoch": 22,
+            "replay_appearances": 43,
+            "unique_seen": 85,
+            "zero_exposure": 43
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.71875,
+            "epoch": 23,
+            "replay_appearances": 36,
+            "unique_seen": 92,
+            "zero_exposure": 36
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6796875,
+            "epoch": 24,
+            "replay_appearances": 41,
+            "unique_seen": 87,
+            "zero_exposure": 41
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6484375,
+            "epoch": 25,
+            "replay_appearances": 45,
+            "unique_seen": 83,
+            "zero_exposure": 45
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6875,
+            "epoch": 26,
+            "replay_appearances": 40,
+            "unique_seen": 88,
+            "zero_exposure": 40
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 27,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 28,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 29,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          }
+        ],
+        "mean_coverage": 0.6940104166666666,
+        "total_appearances": 3840,
+        "total_replay_appearances": 1175,
+        "total_zero_exposure_sample_epochs": 1175
+      },
+      "wall_clock_ratio_vs_c0": 1.126883082177267
+    },
+    "C5": {
+      "best_epoch": 27,
+      "best_mask_mAP": 0.14895303547382355,
+      "delta_vs_c0": {
+        "F1": -0.0136452317237854,
+        "box_mAP": -0.04915572702884674,
+        "mask_mAP": -0.022115126252174377
+      },
+      "elapsed_seconds": 1122.3657320869388,
+      "final": {
+        "F1": 0.40740740299224854,
+        "box_mAP": 0.24827973544597626,
+        "mask_mAP": 0.13312433660030365
+      },
+      "final_epoch": 29,
+      "final_minus_best_mask": -0.015828698873519897,
+      "final_step": 959,
+      "resource": {
+        "epochs": [
+          {
+            "appearances": 128,
+            "coverage": 0.71875,
+            "epoch": 0,
+            "replay_appearances": 36,
+            "unique_seen": 92,
+            "zero_exposure": 36
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.734375,
+            "epoch": 1,
+            "replay_appearances": 34,
+            "unique_seen": 94,
+            "zero_exposure": 34
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 2,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6640625,
+            "epoch": 3,
+            "replay_appearances": 43,
+            "unique_seen": 85,
+            "zero_exposure": 43
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6640625,
+            "epoch": 4,
+            "replay_appearances": 43,
+            "unique_seen": 85,
+            "zero_exposure": 43
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 5,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.640625,
+            "epoch": 6,
+            "replay_appearances": 46,
+            "unique_seen": 82,
+            "zero_exposure": 46
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.71875,
+            "epoch": 7,
+            "replay_appearances": 36,
+            "unique_seen": 92,
+            "zero_exposure": 36
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.703125,
+            "epoch": 8,
+            "replay_appearances": 38,
+            "unique_seen": 90,
+            "zero_exposure": 38
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 9,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.703125,
+            "epoch": 10,
+            "replay_appearances": 38,
+            "unique_seen": 90,
+            "zero_exposure": 38
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.71875,
+            "epoch": 11,
+            "replay_appearances": 36,
+            "unique_seen": 92,
+            "zero_exposure": 36
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6875,
+            "epoch": 12,
+            "replay_appearances": 40,
+            "unique_seen": 88,
+            "zero_exposure": 40
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 13,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.703125,
+            "epoch": 14,
+            "replay_appearances": 38,
+            "unique_seen": 90,
+            "zero_exposure": 38
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 15,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6953125,
+            "epoch": 16,
+            "replay_appearances": 39,
+            "unique_seen": 89,
+            "zero_exposure": 39
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.65625,
+            "epoch": 17,
+            "replay_appearances": 44,
+            "unique_seen": 84,
+            "zero_exposure": 44
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6484375,
+            "epoch": 18,
+            "replay_appearances": 45,
+            "unique_seen": 83,
+            "zero_exposure": 45
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.7109375,
+            "epoch": 19,
+            "replay_appearances": 37,
+            "unique_seen": 91,
+            "zero_exposure": 37
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.75,
+            "epoch": 20,
+            "replay_appearances": 32,
+            "unique_seen": 96,
+            "zero_exposure": 32
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.671875,
+            "epoch": 21,
+            "replay_appearances": 42,
+            "unique_seen": 86,
+            "zero_exposure": 42
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6484375,
+            "epoch": 22,
+            "replay_appearances": 45,
+            "unique_seen": 83,
+            "zero_exposure": 45
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.7109375,
+            "epoch": 23,
+            "replay_appearances": 37,
+            "unique_seen": 91,
+            "zero_exposure": 37
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6796875,
+            "epoch": 24,
+            "replay_appearances": 41,
+            "unique_seen": 87,
+            "zero_exposure": 41
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.6875,
+            "epoch": 25,
+            "replay_appearances": 40,
+            "unique_seen": 88,
+            "zero_exposure": 40
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.734375,
+            "epoch": 26,
+            "replay_appearances": 34,
+            "unique_seen": 94,
+            "zero_exposure": 34
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.7265625,
+            "epoch": 27,
+            "replay_appearances": 35,
+            "unique_seen": 93,
+            "zero_exposure": 35
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.734375,
+            "epoch": 28,
+            "replay_appearances": 34,
+            "unique_seen": 94,
+            "zero_exposure": 34
+          },
+          {
+            "appearances": 128,
+            "coverage": 0.71875,
+            "epoch": 29,
+            "replay_appearances": 36,
+            "unique_seen": 92,
+            "zero_exposure": 36
+          }
+        ],
+        "mean_coverage": 0.696875,
+        "total_appearances": 3840,
+        "total_replay_appearances": 1164,
+        "total_zero_exposure_sample_epochs": 1164
+      },
+      "wall_clock_ratio_vs_c0": 1.1243969302697987
+    },
+    "D1": {
+      "best_epoch": 29,
+      "best_mask_mAP": 0.18271319568157196,
+      "delta_vs_c0": {
+        "F1": 0.045614033937454224,
+        "box_mAP": -0.008062124252319336,
+        "mask_mAP": 0.027473732829093933
+      },
+      "elapsed_seconds": 1066.8349868969526,
+      "final": {
+        "F1": 0.46666666865348816,
+        "box_mAP": 0.28937333822250366,
+        "mask_mAP": 0.18271319568157196
+      },
+      "final_epoch": 29,
+      "final_minus_best_mask": 0.0,
+      "final_step": 1009,
+      "resource": {
+        "epochs": [
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 0,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 1,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 2,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 3,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 128,
+            "coverage": 1.0,
+            "epoch": 4,
+            "replay_appearances": 0,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 5,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 6,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 7,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 8,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 9,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 10,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 11,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 12,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 13,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 14,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 15,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 16,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 17,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 18,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 19,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 20,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 21,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 22,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 23,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 24,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 25,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 26,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 27,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 28,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          },
+          {
+            "appearances": 136,
+            "coverage": 1.0,
+            "epoch": 29,
+            "replay_appearances": 8,
+            "unique_seen": 128,
+            "zero_exposure": 0
+          }
+        ],
+        "mean_coverage": 1.0,
+        "total_appearances": 4040,
+        "total_replay_appearances": 200,
+        "total_zero_exposure_sample_epochs": 0
+      },
+      "wall_clock_ratio_vs_c0": 1.0687656884720687
+    }
+  },
+  "scope": "POLICY V2 DISCOVERY SEED; NOT CONFIRMATORY",
+  "seed": 20260813,
+  "visual": "assets/policy_v2_discovery_mask_map.png"
+}

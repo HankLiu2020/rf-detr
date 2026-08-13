@@ -1,0 +1,138 @@
+{
+  "common_contract": {
+    "augmentation": "disabled",
+    "batch_size": 4,
+    "checkpoint_sha256": "6de3da31b2572cac214a1c76cce4a92a13966d56390ac2b3a3de9a8dc2b2bca3",
+    "dataset": "/home/liujiyuan/mvtec-sample-dynamics-pilot-v2",
+    "epochs": 30,
+    "grad_accum_steps": 1,
+    "manifest_sha256": "90673182af0c409e99778f30545f550e91b6845e48f6894a7ebe029c53172528",
+    "multi_scale": false,
+    "pretrained_checkpoint": "/home/liujiyuan/rf-detr-models/rf-detr-seg-small.pt",
+    "resolution": 384,
+    "seed": 20260813,
+    "use_ema": false
+  },
+  "confirmatory_entry_gate": [
+    "overall mask mAP no material regression versus paired D0",
+    "F1 no material regression",
+    "hard mask-IoU or FN positive signal",
+    "hard loss improvement retained",
+    "mastered/normal subset no material regression",
+    "resource ledger matches intended allocation",
+    "compute-normalized comparison reported"
+  ],
+  "correctness_amendment": {
+    "reason": "Independent Verify found that the invalid first D1 attempt declared 34 batches but yielded 32 during warmup.",
+    "scope": "No policy intensity or selection threshold changed. Dataloaders reload each epoch so declared and yielded lengths both equal 32 during epochs 0-4 and 34 from epoch 5; an empty post-warmup frontier uses uniform exploration for the same 8 bonus slots.",
+    "invalid_run_disposition": "The interrupted first D1 attempt is excluded from all analysis and retained only as invalid audit evidence."
+  },
+  "confirmatory_seeds_reserved": [
+    20260814,
+    20260815,
+    20260816
+  ],
+  "convergence_controls": {
+    "C0": {
+      "aliases": [
+        "D0"
+      ],
+      "mode": "baseline"
+    },
+    "C3": {
+      "hypothesis": "tests whether V1 E3 needs a longer horizon",
+      "mode": "v1_loss_weight"
+    },
+    "C4": {
+      "hypothesis": "tests whether V1 E4 is slower rather than asymptotically worse",
+      "mode": "v1_sampler"
+    },
+    "C5": {
+      "hypothesis": "tests whether V1 E5 is slower rather than asymptotically worse",
+      "mode": "v1_combined"
+    },
+    "run_reason": "15-epoch diagnosis met the preregistered extension rule; all controls restart from the same pretrained checkpoint"
+  },
+  "discovery_seed": 20260813,
+  "hard_definition": {
+    "absolute_ema_loss_floor": 127.0782241821289,
+    "ema_percentile_min": 0.75,
+    "exclude": "SUSPECT OR persistent conflict with normalized slope >= -0.001",
+    "normalized_slope_max": -0.01,
+    "note": "top-quartile rank alone is insufficient; the improvement and absolute-loss gates allow the selected set to shrink",
+    "task_error": "FN > 0 OR matched mask IoU < 0.5",
+    "warmup_epoch_min": 4
+  },
+  "hypotheses": {
+    "D0": "A fresh baseline is required under the same 30-epoch horizon and discovery seed.",
+    "D1": "Warmup plus 100% base coverage and a 5% learnable-frontier bonus removes V1 distribution displacement while retaining mild targeted replay.",
+    "D2": "A 10% bonus tests whether D1 under-allocates replay without returning to V1's 25% displacement.",
+    "D3": "A 1.10 frontier-only loss multiplier tests gradient allocation without sampling shift or mastered downweighting.",
+    "D4": "A 1.15 frontier-only multiplier tests a second mild intensity after D3, still below V1's 1.30."
+  },
+  "policies": {
+    "D0": {
+      "mode": "baseline"
+    },
+    "D1": {
+      "alignment_reason": "128 samples and batch=4 require 6.4 nominal appearances to round up to 8",
+      "bonus_appearances": 8,
+      "mode": "coverage_bonus",
+      "nominal_hard_bonus": 0.05,
+      "ramp": {
+        "epochs_0_4": 0.0,
+        "epochs_5_plus": 0.0625
+      },
+      "realized_hard_bonus": 0.0625,
+      "warmup_epochs": 5
+    },
+    "D2": {
+      "hard_bonus": 0.1,
+      "mode": "coverage_bonus",
+      "ramp": {
+        "epochs_0_4": 0.0,
+        "epochs_10_plus": 0.1,
+        "epochs_5_9": 0.05
+      },
+      "warmup_epochs": 5
+    },
+    "D3": {
+      "hard_weight": 1.1,
+      "mode": "frontier_weight",
+      "other_weights": 1.0,
+      "warmup_epochs": 5
+    },
+    "D4": {
+      "hard_weight": 1.15,
+      "mode": "frontier_weight",
+      "other_weights": 1.0,
+      "warmup_epochs": 5
+    }
+  },
+  "policy_namespace": "policy-v2",
+  "prohibitions": [
+    "no changes after observing discovery validation metrics without a new recorded policy_id and hypothesis",
+    "no reuse of 20260810/11/12 for tuning",
+    "no confirmatory tuning",
+    "no V1 artifact overwrite"
+  ],
+  "run_order": [
+    "C0/D0",
+    "C3",
+    "C4",
+    "C5",
+    "D1",
+    "D2",
+    "D3",
+    "D4"
+  ],
+  "schema_version": 1,
+  "status": "FROZEN_BEFORE_DISCOVERY_RUNS",
+  "v1_evidence_commit": "4cc9fc5e0392d3be31235d9ce93632a7f34a35ba",
+  "v1_evidence_sha256": {
+    "mvtec_reference_subsets.json": "4a26ed23161ead3382463c7ce78b26cdd50f8cd7c93c886ca872af2bebab1a8f",
+    "mvtec_three_seed_ablation_analysis.json": "9e81ecf9c140d41bdcabf474e6b3c95173e61fb1c46082af4ca31727ab9c06d8",
+    "mvtec_three_seed_ablation_validation.md": "f5681819fc1e6a4bedc2e6d064e145bb6608f5163670845f1cb51f4ac7c612e4",
+    "rf_detr_sample_dynamics_stage_report.md": "9ec3ab79cd05f6177425f3bc3a3eb416b69cfbc0a08e6bea9823bdbf3d41f025"
+  }
+}

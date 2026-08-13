@@ -1,0 +1,214 @@
+{
+  "epochs": [
+    {
+      "epoch": 0,
+      "epoch_seconds": 31.921290857950225,
+      "peak_vram_bytes": 3156436480,
+      "sample_count": 128,
+      "sha256": "867ab3ade6e1a1ad4fd1396b163774c34bc09176f796b8c5bb1aee00c806217f"
+    },
+    {
+      "epoch": 1,
+      "epoch_seconds": 29.986573301954195,
+      "peak_vram_bytes": 3152367104,
+      "sample_count": 128,
+      "sha256": "25ab517b9ec7ef13869bd854f9b6cf3d69a8ad95dd54d49db3c31cfb90c287f3"
+    },
+    {
+      "epoch": 2,
+      "epoch_seconds": 29.54512614000123,
+      "peak_vram_bytes": 3158175232,
+      "sample_count": 128,
+      "sha256": "62edae56e2b599c6a5202b02e7a84f1f8877279349cd8f311ceef1d14a468cfa"
+    },
+    {
+      "epoch": 3,
+      "epoch_seconds": 29.73596770700533,
+      "peak_vram_bytes": 3156028416,
+      "sample_count": 128,
+      "sha256": "b89ab150a5d8f1516cc6775dafba1e1c00d6255a9839ddfb7cfbdfb5741e8ef2"
+    },
+    {
+      "epoch": 4,
+      "epoch_seconds": 30.648745742975734,
+      "peak_vram_bytes": 3158175232,
+      "sample_count": 128,
+      "sha256": "6f84484ab629f464b36e6784710fc10e9f286977c8513a7f7afb5bbf9707b969"
+    },
+    {
+      "epoch": 5,
+      "epoch_seconds": 29.752229231991805,
+      "peak_vram_bytes": 3156028416,
+      "sample_count": 136,
+      "sha256": "8204fa04a9dddb1f62081afa00f67bbe801ec475fd607317823a367f291409c8"
+    },
+    {
+      "epoch": 6,
+      "epoch_seconds": 28.24311347096227,
+      "peak_vram_bytes": 3154693632,
+      "sample_count": 136,
+      "sha256": "50b322cc377d0ba04c0fc2c5497b97948f823605daf40f96357cd8b256c4153b"
+    },
+    {
+      "epoch": 7,
+      "epoch_seconds": 30.026386465062387,
+      "peak_vram_bytes": 3156028416,
+      "sample_count": 136,
+      "sha256": "2fd29a606709c5aff0777a9475166551763cf92bae0091b7eb6d980a48a4d28d"
+    },
+    {
+      "epoch": 8,
+      "epoch_seconds": 29.57194599090144,
+      "peak_vram_bytes": 3156028416,
+      "sample_count": 136,
+      "sha256": "9c368732b5ce66e253cf0dea0921806e523cec3d799a39601d6e872fe3acdaca"
+    },
+    {
+      "epoch": 9,
+      "epoch_seconds": 29.85961516899988,
+      "peak_vram_bytes": 3156028416,
+      "sample_count": 136,
+      "sha256": "baf4803488c99bffaab489d468f3ee28cfcec9b1506f858ed2a8d04067bfe746"
+    },
+    {
+      "epoch": 10,
+      "epoch_seconds": 29.651009213994257,
+      "peak_vram_bytes": 3153858048,
+      "sample_count": 136,
+      "sha256": "64dcca46bd29fa7c3b60fd9e294f136f84e379473b002968a53f941e3d86d9fe"
+    },
+    {
+      "epoch": 11,
+      "epoch_seconds": 29.705190538079478,
+      "peak_vram_bytes": 3158175232,
+      "sample_count": 136,
+      "sha256": "f24e6fdcec4dff30a77ef476a802bc17ed436a2d7cc3157bf2cc82e5bad6e0c6"
+    },
+    {
+      "epoch": 12,
+      "epoch_seconds": 29.540194736910053,
+      "peak_vram_bytes": 3156028416,
+      "sample_count": 136,
+      "sha256": "9599025e4285c22c3347b2a08ccb002796683c0306c7b774b4a88378a561e1e0"
+    },
+    {
+      "epoch": 13,
+      "epoch_seconds": 29.05966906005051,
+      "peak_vram_bytes": 3153909760,
+      "sample_count": 136,
+      "sha256": "0a8aedaa19924256b3ac25312f731ee00d4870dd3e9de9fcc51beb5a5185636f"
+    },
+    {
+      "epoch": 14,
+      "epoch_seconds": 29.872637939057313,
+      "peak_vram_bytes": 3153051136,
+      "sample_count": 136,
+      "sha256": "ba4a4ccbef1718adc01cde13c04814513a93a4610c5747ee3a866d4c17cca31b"
+    },
+    {
+      "epoch": 15,
+      "epoch_seconds": 29.166832556948066,
+      "peak_vram_bytes": 3156028416,
+      "sample_count": 136,
+      "sha256": "40088237cb1bad569157f4e94cdd86b6fbb4ef5f6ea8a86db740775bd61b2d92"
+    },
+    {
+      "epoch": 16,
+      "epoch_seconds": 29.880612908978947,
+      "peak_vram_bytes": 3153858048,
+      "sample_count": 136,
+      "sha256": "0fbb546decd14d52f56c9004251353c7df970925777c167dba0501f5d0587579"
+    },
+    {
+      "epoch": 17,
+      "epoch_seconds": 29.127538606058806,
+      "peak_vram_bytes": 3153858048,
+      "sample_count": 136,
+      "sha256": "684c46706ec19e9eeb1e9e4d1670ce1a653f8cd902a1b6c4aadfa74bbb03821e"
+    },
+    {
+      "epoch": 18,
+      "epoch_seconds": 29.068042917060666,
+      "peak_vram_bytes": 3153909760,
+      "sample_count": 136,
+      "sha256": "e85ec3bdb7e8570e516363be5f94333b35a7dc2fb8eff3b9606c3f3be93332ae"
+    },
+    {
+      "epoch": 19,
+      "epoch_seconds": 29.212953059002757,
+      "peak_vram_bytes": 3154214400,
+      "sample_count": 136,
+      "sha256": "becd61cb6b9fd9026845235410d86adf7fcd53f090f7daeac4854133d801fe21"
+    },
+    {
+      "epoch": 20,
+      "epoch_seconds": 31.094949093996547,
+      "peak_vram_bytes": 3156028416,
+      "sample_count": 136,
+      "sha256": "1b203f85102912828cc47d68b9d33ffb0d3d392d29d5416a03f13c557f3069f9"
+    },
+    {
+      "epoch": 21,
+      "epoch_seconds": 31.083002706989646,
+      "peak_vram_bytes": 3156028416,
+      "sample_count": 136,
+      "sha256": "0ae519aa7dd722b058a5b86c26724bf6e839fdb5e498a53e0b8d9aa1d0cbc4e9"
+    },
+    {
+      "epoch": 22,
+      "epoch_seconds": 30.969040628056973,
+      "peak_vram_bytes": 3153858048,
+      "sample_count": 136,
+      "sha256": "371d218be962bcd129171e19373f3028e12d1717fbe8f11180ff0244ef7f3383"
+    },
+    {
+      "epoch": 23,
+      "epoch_seconds": 29.298570654005744,
+      "peak_vram_bytes": 3156028416,
+      "sample_count": 136,
+      "sha256": "bfbd91eb7c581bc0b78c2c52ad23ca19b2eeff3e2b8d702fd1a2f6986a02e13c"
+    },
+    {
+      "epoch": 24,
+      "epoch_seconds": 29.237986860913225,
+      "peak_vram_bytes": 3156028416,
+      "sample_count": 136,
+      "sha256": "21c6a3f210f8bb0b71404c512606b9cf5e757510af9f685e827728956945b3b8"
+    },
+    {
+      "epoch": 25,
+      "epoch_seconds": 30.306463323999196,
+      "peak_vram_bytes": 3156028416,
+      "sample_count": 136,
+      "sha256": "bec199bae85ee9da80ae61f7db2082779972f7fa3a475a40fa5ad5943165db55"
+    },
+    {
+      "epoch": 26,
+      "epoch_seconds": 31.42871569399722,
+      "peak_vram_bytes": 3156028416,
+      "sample_count": 136,
+      "sha256": "c11a6e96614b5477579567758622ee2f1363001cf10546c1ab040c93fd2b889f"
+    },
+    {
+      "epoch": 27,
+      "epoch_seconds": 30.941060113022104,
+      "peak_vram_bytes": 3158175232,
+      "sample_count": 136,
+      "sha256": "76ed29b9a540e4f93e824559ce774552087abedb840ebf16777b696a14e34897"
+    },
+    {
+      "epoch": 28,
+      "epoch_seconds": 29.279327098978683,
+      "peak_vram_bytes": 3153909760,
+      "sample_count": 136,
+      "sha256": "370adbc919059560aebb1afc646042d37bcd833c49b25250a6c4426d13a83c3b"
+    },
+    {
+      "epoch": 29,
+      "epoch_seconds": 31.35655140806921,
+      "peak_vram_bytes": 3152563712,
+      "sample_count": 136,
+      "sha256": "63eb3109b0711a5cb0cbe443af8c1692f440e5562d9f05f15490fdb5b17d85d2"
+    }
+  ]
+}

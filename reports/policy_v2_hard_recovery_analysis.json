@@ -1,0 +1,64 @@
+{
+  "scope": "POLICY V2 DISCOVERY SEED; NOT CONFIRMATORY",
+  "seed": 20260813,
+  "source_sha256": "17f8bef35af03a4531e8f9afb65b272a260ddd260863608e46c35dac9f92fbad",
+  "subsets": {
+    "CONTROLLED_CORRUPTION": {
+      "D1": {
+        "fn_reduction": 0.4,
+        "loss_improvement": 154.79477853784337,
+        "mask_iou_improvement": 0.2651453375816345,
+        "sample_count": 5
+      },
+      "D1_minus_E0": {
+        "fn_reduction": 0.0,
+        "loss_improvement": 31.122272020671517,
+        "mask_iou_improvement": 0.04465357661247252
+      },
+      "E0": {
+        "fn_reduction": 0.4,
+        "loss_improvement": 123.67250651717185,
+        "mask_iou_improvement": 0.22049176096916198,
+        "sample_count": 5
+      }
+    },
+    "REFERENCE_HARD": {
+      "D1": {
+        "fn_reduction": 0.9696969696969697,
+        "loss_improvement": 314.1538543701172,
+        "mask_iou_improvement": 0.7999894944104281,
+        "sample_count": 33
+      },
+      "D1_minus_E0": {
+        "fn_reduction": 0.12121212121212122,
+        "loss_improvement": 17.63663343949753,
+        "mask_iou_improvement": 0.09850146102182789
+      },
+      "E0": {
+        "fn_reduction": 0.8484848484848485,
+        "loss_improvement": 296.51722093061966,
+        "mask_iou_improvement": 0.7014880333886002,
+        "sample_count": 33
+      }
+    },
+    "REFERENCE_MASTERED": {
+      "D1": {
+        "fn_reduction": 0,
+        "loss_improvement": -0.004556175818813012,
+        "mask_iou_improvement": 0.0,
+        "sample_count": 43
+      },
+      "D1_minus_E0": {
+        "fn_reduction": 0,
+        "loss_improvement": -0.011244316241530659,
+        "mask_iou_improvement": 0.0
+      },
+      "E0": {
+        "fn_reduction": 0,
+        "loss_improvement": 0.006688140422717647,
+        "mask_iou_improvement": 0.0,
+        "sample_count": 43
+      }
+    }
+  }
+}
